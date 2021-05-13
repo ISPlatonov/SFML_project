@@ -1,11 +1,9 @@
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
+#include <map>
+#include <string>
 #include "Actor.hpp"
-
-#define PIXEL_SIZE size_t(10)
-#define WINDOW_SIZE_X size_t(128)
-#define WINDOW_SIZE_Y size_t(64)
-#define WORK_SPACE sf::Rect(16, 8, 96, 48)
+#include "Constants.hpp"
 
 int main()
 {
@@ -13,14 +11,20 @@ int main()
     sf::RenderWindow window(sf::VideoMode(WINDOW_SIZE_X * PIXEL_SIZE, WINDOW_SIZE_Y * PIXEL_SIZE), "SFML window");
     
     // Load a sprite to display
-    sf::Texture texture;
-    if (!texture.loadFromFile("textures/Guy_16x32_right.png"))
+    std::map<std::string, sf::Texture> Guy_textures;
+    Guy_textures["left"] = sf::Texture();
+    Guy_textures["right"] = sf::Texture();
+    //texture_Guy_16x32_right;
+    if (!Guy_textures["left"].loadFromFile("textures/Guy_16x32_left.png"))
         return EXIT_FAILURE;
-    sf::Sprite sprite(texture);
+    if (!Guy_textures["right"].loadFromFile("textures/Guy_16x32_right.png"))
+        return EXIT_FAILURE;
+    /*sf::Sprite sprite(texture);
     sprite.scale(PIXEL_SIZE, PIXEL_SIZE);
     sprite.setPosition(0, (WINDOW_SIZE_Y - sprite.getLocalBounds().height) * PIXEL_SIZE);
-
-    Actor user(sprite);
+    */
+    sf::Vector2f start_point(0, 0);
+    Actor user(Guy_textures, start_point);
 
     /*
     // Create a graphical text to display

@@ -4,7 +4,7 @@ CFLAGS=-c
 all: main
 
 main: main.o Actor.o
-	$(CC) main.o -o main Actor.o -lsfml-graphics -lsfml-window -lsfml-system
+	$(CC) main.o -o main Actor.o -L/SFML-2.5.1/include -lsfml-graphics -lsfml-window -lsfml-system
 
 main.o: main.cpp
 	$(CC) $(CFLAGS) main.cpp

@@ -1,15 +1,19 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-#include <iostream>
 #include <chrono>
+#include <map>
+#include <string>
+#include "Constants.hpp"
 
-#define STEP_SIZE_MULTIPLIER float(0.000001)
+#define STEP_SIZE_MULTIPLIER float(0.0000005)
 
 class Actor
 {
 public:
-    Actor(sf::Sprite sprite);
+    //Actor(sf::Texture texture_left, sf::Texture texture_right);
+
+    Actor(std::map<std::string, sf::Texture> textures, sf::Vector2f position);
 
     void PressedA();
 
@@ -24,10 +28,15 @@ public:
 
     void step();
 
+    //void setPosition(float x, float y);
+
+    void setPosition(sf::Vector2f p);
+
     const sf::Sprite getSprite();
 
 private:    
     bool left, right;
     sf::Sprite sprite;
+    std::map<std::string, sf::Texture> textures;
     intmax_t last_action_timepoint;
 };
