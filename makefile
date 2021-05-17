@@ -2,9 +2,16 @@ CC=g++
 CFLAGS=-c
 OFLAGS=-o
 LDFLAGS=-LSFML-2.5.1/lib
-LIBFLAGES=-lsfml-graphics-s -lsfml-window-s -lsfml-system-s -lopengl32 -lwinmm -lgdi32 -DSFML_STATIC
 INCLUDE=-ISFML-2.5.1/include
-#BUILDDIR=build
+# it's needed to be fixed
+LIBFLAGES=-lsfml-graphics-s -lsfml-window-s -lsfml-system-s -lopengl32 -lwinmm -lgdi32 -DSFML_STATIC
+RM=rm
+
+# if OS = Windows
+ifdef OS
+	RM=del
+	LIBFLAGES=-lsfml-graphics-s -lsfml-window-s -lsfml-system-s -lopengl32 -lwinmm -lgdi32 -DSFML_STATIC
+endif
 
 all: main
 
@@ -18,4 +25,4 @@ Actor.o: Actor.cpp
 	$(CC) $(CFLAGS) Actor.cpp $(INCLUDE) $(LIBFLAGES)
 
 clean:
-	rm -rm *.o main
+	$(RM) *.o main
