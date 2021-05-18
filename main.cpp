@@ -9,6 +9,7 @@ int main()
 {
     // Create the main window
     sf::RenderWindow window(sf::VideoMode(WINDOW_SIZE_X * PIXEL_SIZE, WINDOW_SIZE_Y * PIXEL_SIZE), "SFML window");
+    window.setFramerateLimit(FRAMERATE_LIMIT);
     
     // Load a sprite to display
     std::map<std::string, sf::Texture> Guy_textures;

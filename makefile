@@ -10,7 +10,7 @@ RM=rm
 # if OS = Windows
 ifdef OS
 	RM=del
-	LIBFLAGES=-lsfml-graphics-s -lsfml-window-s -lsfml-system-s -lopengl32 -lwinmm -lgdi32 -DSFML_STATIC
+	LIBFLAGES=-lsfml-graphics-s -lsfml-window-s -lsfml-system-s -lopengl32 -lwinmm -lgdi32 -mwindows -DSFML_STATIC
 endif
 
 all: main
