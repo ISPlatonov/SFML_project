@@ -1,4 +1,4 @@
-CC=g++
+CC=g++ -static
 CFLAGS=-c
 OFLAGS=-o
 LDFLAGS=-LSFML/Linux/lib
