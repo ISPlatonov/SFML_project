@@ -6,7 +6,7 @@
 #include <string>
 #include "Constants.hpp"
 
-#define STEP_SIZE_MULTIPLIER float(0.0000005)
+#define STEP_SIZE_MULTIPLIER float(0.00000005)
 
 class Actor
 {
