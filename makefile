@@ -27,4 +27,4 @@ Actor.o: Actor.cpp
 	$(CC) $(CFLAGS) Actor.cpp $(INCLUDE) $(LIBFLAGES)
 
 clean:
-	$(RM) *.o main
+	$(RM) *.o main main.exe
