@@ -22,7 +22,7 @@ set(SFML_STATIC_LIBRARIES TRUE)
 #set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules" ${CMAKE_MODULE_PATH})
 find_package(SFML 2 REQUIRED COMPONENTS graphics window audio network system)
 target_link_libraries(SFML_project sfml-graphics sfml-window sfml-audio sfml-network sfml-system)
-target_link_libraries(SFML_project -static)
+#target_link_libraries(SFML_project -static)
 
 add_custom_command(TARGET SFML_project POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
