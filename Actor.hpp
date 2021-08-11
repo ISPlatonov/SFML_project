@@ -6,7 +6,7 @@
 #include <string>
 #include "Constants.hpp"
 
-#define STEP_SIZE_MULTIPLIER float(0.00000005)
+#define STEP_SIZE_MULTIPLIER float(0.00000005) // ~2^-24
 
 class Actor
 {
@@ -16,16 +16,12 @@ public:
     Actor(std::map<std::string, sf::Texture> textures, sf::Vector2f position);
 
     void PressedA();
-
     void PressedD();
-
     void ReleasedA();
-
     void ReleasedD();
 
     template <typename T>
     void step(T step_size);
-
     void step();
 
     //void setPosition(float x, float y);

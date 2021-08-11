@@ -71,12 +71,12 @@ void Actor::step(T step_size)
     if (left && !right)
     {
         sprite.setTexture(textures["left"]);
-        sprite.move(-float(step_size) * float(PIXEL_SIZE) * float(dt) * STEP_SIZE_MULTIPLIER, 0);
+        sprite.move(-int(step_size * PIXEL_SIZE * dt) * STEP_SIZE_MULTIPLIER, 0);
     }
     else if (!left && right)
     {
         sprite.setTexture(textures["right"]);
-        sprite.move(float(step_size) * float(PIXEL_SIZE) * float(dt) * STEP_SIZE_MULTIPLIER, 0);
+        sprite.move(int(step_size * PIXEL_SIZE * dt) * STEP_SIZE_MULTIPLIER, 0);
     }
     last_action_timepoint = t;
 };
