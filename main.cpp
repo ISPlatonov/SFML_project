@@ -4,6 +4,10 @@
 #include <string>
 #include "Actor.hpp"
 #include "Constants.hpp"
+#include "WorldMap.hpp"
+//#include "LinearAlgebra.hpp"
+#include "Controls.hpp"
+
 
 int main()
 {
@@ -24,8 +28,28 @@ int main()
     sprite.scale(PIXEL_SIZE, PIXEL_SIZE);
     sprite.setPosition(0, (WINDOW_SIZE_Y - sprite.getLocalBounds().height) * PIXEL_SIZE);
     */
-    sf::Vector2f start_point(0, 0);
+    sf::Vector2f start_point = sf::Vector2f(8, 4) * static_cast<float>(PIXEL_SIZE);
     Actor user(Guy_textures, start_point);
+
+    window.setView(user.view);
+
+    // define the level with an array of tile indices
+    const int level[] =
+    {
+        0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0,
+        1, 1, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3,
+        0, 1, 0, 0, 2, 0, 3, 3, 3, 0, 1, 1, 1, 0, 0, 0,
+        0, 1, 1, 0, 3, 3, 3, 0, 0, 0, 1, 1, 1, 2, 0, 0,
+        0, 0, 1, 0, 3, 0, 2, 2, 0, 0, 1, 1, 1, 1, 2, 0,
+        2, 0, 1, 0, 3, 0, 2, 2, 2, 0, 1, 1, 1, 1, 1, 1,
+        0, 0, 1, 0, 3, 2, 2, 2, 0, 0, 0, 0, 1, 1, 1, 1,
+    };
+
+    // create the tilemap from the level definition
+    TileMap map;
+    if (!map.load("textures/tileset.png", sf::Vector2u(32, 32), level, 16, 8))
+        return EXIT_FAILURE;
 
     /*
     // Create a graphical text to display
@@ -42,6 +66,8 @@ int main()
     // Play the music
     music.play();
     */
+    
+    Controls::setLastActionTimepoint();
     // Start the game loop
     while (window.isOpen())
     {
@@ -52,38 +78,26 @@ int main()
             // Close window: exit
             if (event.type == sf::Event::Closed)
                 window.close();
-            if (event.type == sf::Event::KeyPressed)
-                switch (event.key.code)
-                {
-                    case (sf::Keyboard::A):
-                        user.PressedA();
-                        break;
-                    case (sf::Keyboard::D):
-                        user.PressedD();
-                        break;
-                    default:
-                        break;
-                }
-            if (event.type == sf::Event::KeyReleased)
-                switch (event.key.code)
-                {
-                    case (sf::Keyboard::A):
-                        user.ReleasedA();
-                        break;
-                    case (sf::Keyboard::D):
-                        user.ReleasedD();
-                        break;
-                    default:
-                        break;
-                }
+            
+            // boba
+            Controls::addEvent(event);
         }
-        user.step();
+        auto direction = Controls::getDirection();
+        if (direction != sf::Vector2f())
+        {
+            auto dt = Controls::getDeltaTime();
+            user.move(direction, dt);
+        }
+        Controls::setLastActionTimepoint();
         // Clear screen
         window.clear();
         // Draw the sprite
+        window.draw(map);
         window.draw(user.getSprite());
         // Draw the string
         //window.draw(text);
+
+        window.setView(user.view);
         // Update the window
         window.display();
     }
