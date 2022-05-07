@@ -36,6 +36,8 @@ public:
 
     void setPosition(sf::Vector2f p);
 
+    void check_direction(sf::Vector2f);
+
     const sf::Sprite getSprite();
 
     sf::View view;
@@ -44,5 +46,6 @@ private:
     //bool left, right, up, down;
     sf::Sprite sprite;
     std::map<std::string, sf::Texture> textures;
+    std::string direction_x;
     //intmax_t last_action_timepoint;
 };
