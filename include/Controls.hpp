@@ -4,7 +4,6 @@
 #include <SFML/Window.hpp>
 #include "LinearAlgebra.hpp"
 #include <chrono>
-//#include "Constants.hpp"
 
 
 class Controls

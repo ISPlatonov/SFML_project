@@ -2,12 +2,12 @@
 
 
 sf::Vector2f Controls::direction;
-//sf::Vector2f key_to_direction(sf::Keyboard::Key key);
 bool Controls::left = 0,
      Controls::right = 0,
      Controls::up = 0,
      Controls::down = 0;
 intmax_t Controls::last_action_timepoint;
+
 
 void Controls::addEvent(sf::Event event)
 {
@@ -29,7 +29,7 @@ void Controls::addEvent(sf::Event event)
             default:
                 break;
         }
-    if (event.type == sf::Event::KeyReleased)
+    else if (event.type == sf::Event::KeyReleased)
         switch (event.key.code)
         {
             case (sf::Keyboard::A):
@@ -47,16 +47,13 @@ void Controls::addEvent(sf::Event event)
             default:
                 break;
         }
-    //last_action_timepoint = std::chrono::steady_clock::now().time_since_epoch().count();
 }
+
 
 sf::Vector2f Controls::getDirection()
 {
-    // X
     float x, y;
-    //if ((left && right) || (!left && !right))
-    //    x = 0;
-    //else
+
     x = right * 1.f - left * 1.f;
     y = down * 1.f - up * 1.f;
 
@@ -67,10 +64,12 @@ sf::Vector2f Controls::getDirection()
     return vector;
 }
 
+
 void Controls::setLastActionTimepoint(intmax_t t)
 {
     last_action_timepoint = t;
 }
+
 
 intmax_t Controls::getDeltaTime()
 {

@@ -11,6 +11,7 @@ void linalg::normalize(sf::Vector2f& v)
     v.y *= m;
 }
 
+
 float linalg::magnitude(const sf::Vector2f& v)
 {
     auto x = static_cast<float>(v.x);

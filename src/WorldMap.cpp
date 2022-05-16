@@ -1,28 +1,3 @@
-/*
-// reading a text file
-#include <iostream>
-#include <fstream>
-#include <string>
-using namespace std;
-
-int main () {
-    string line;
-    ifstream myfile("textures/terrain/levels/Level_1.txt");
-    if (myfile.is_open())
-    {
-        while ( getline (myfile,line) )
-        {
-            cout << line << '\n';
-        }
-        myfile.close();
-    }
-
-    else cout << "Unable to open file"; 
-
-    return 0;
-}
-*/
-
 #include "WorldMap.hpp"
 
 
@@ -68,6 +43,7 @@ bool TileMap::load(const std::string& tileset, sf::Vector2u tileSize, const int*
 
     return true;
 }
+
 
 void TileMap::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
