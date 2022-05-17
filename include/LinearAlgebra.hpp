@@ -6,7 +6,7 @@
 
 namespace linalg
 {
-    void normalize(sf::Vector2f& v);
+    sf::Vector2f normalize(sf::Vector2f v);
 
     /*Vector2<T>& rotateBy(float degrees, const Vector2<T>& center=Vector2<T>())
     {

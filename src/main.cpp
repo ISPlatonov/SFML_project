@@ -2,7 +2,8 @@
 #include <SFML/Graphics.hpp>
 #include <map>
 #include <string>
-#include "Actor.hpp"
+#include <cstdlib>
+#include "Mob.hpp"
 #include "Constants.hpp"
 #include "WorldMap.hpp"
 //#include "LinearAlgebra.hpp"
@@ -14,24 +15,8 @@ int main()
     // Create the main window
     sf::RenderWindow window(sf::VideoMode(WINDOW_SIZE_X * PIXEL_SIZE, WINDOW_SIZE_Y * PIXEL_SIZE), "SFML window");
     window.setFramerateLimit(FRAMERATE_LIMIT);
-    
-    // Load a sprite to display
-    std::map<std::string, sf::Texture> Guy_textures;
-    Guy_textures["left"] = sf::Texture();
-    Guy_textures["right"] = sf::Texture();
-    //texture_Guy_16x32_right;
-    if (!Guy_textures["left"].loadFromFile("textures/Guy_16x32_left.png"))
-        return EXIT_FAILURE;
-    if (!Guy_textures["right"].loadFromFile("textures/Guy_16x32_right.png"))
-        return EXIT_FAILURE;
-    /*sf::Sprite sprite(texture);
-    sprite.scale(PIXEL_SIZE, PIXEL_SIZE);
-    sprite.setPosition(0, (WINDOW_SIZE_Y - sprite.getLocalBounds().height) * PIXEL_SIZE);
-    */
-    sf::Vector2f start_point = sf::Vector2f(8, 4) * static_cast<float>(PIXEL_SIZE);
-    Actor user(Guy_textures, start_point);
 
-    window.setView(user.view);
+    window.setView(Mob::user.getView());
 
     // define the level with an array of tile indices
     const int level[] =
@@ -74,7 +59,10 @@ int main()
     // Play the music
     music.play();
     */
-    
+
+    for (size_t i = 0; i < 15; ++i)
+        Mob::mob_list.push_back(Bot(load_textures("textures/actors/Guy_16x32"), sf::Vector2f(std::rand() % WINDOW_SIZE_X, std::rand() % WINDOW_SIZE_Y) * static_cast<float>(PIXEL_SIZE)));
+
     Controls::setLastActionTimepoint();
     // Start the game loop
     while (window.isOpen())
@@ -91,21 +79,24 @@ int main()
             Controls::addEvent(event);
         }
         auto direction = Controls::getDirection();
-        if (direction != sf::Vector2f())
-        {
-            auto dt = Controls::getDeltaTime();
-            user.move(direction, dt);
-        }
+        
+        auto dt = Controls::getDeltaTime();
+        Mob::user.move_dt(direction, dt);
+        for (size_t i = 0; i < Mob::mob_list.size(); ++i)
+            Mob::mob_list[i].make_step(dt);
+        
         Controls::setLastActionTimepoint();
         // Clear screen
         window.clear();
         // Draw the sprite
         window.draw(map);
-        window.draw(user.getSprite());
+        for (auto bot : Mob::mob_list)
+            window.draw(bot.getSprite());
+        window.draw(Mob::user.getSprite());
         // Draw the string
         //window.draw(text);
 
-        window.setView(user.view);
+        window.setView(Mob::user.getView());
         // Update the window
         window.display();
     }
