@@ -126,7 +126,7 @@ int main()
             sf::Uint32 ping = time_now - sent_time;
             text.setString(std::to_string(ping));
             if (player_pool.count(msg_local_ip))
-                if (ping > 10000000000)
+                if (ping > 5000)
                 {
                     player_pool.erase(msg_local_ip);
                     ip_pool.erase(msg_local_ip);
@@ -134,7 +134,7 @@ int main()
                 else
                     player_pool[msg_local_ip].updatePosition(new_position);
             else
-                if (ping > 10000000000)
+                if (ping > 5000)
                     continue;
                 else
                 {
