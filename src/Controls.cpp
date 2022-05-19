@@ -6,7 +6,7 @@ bool Controls::left = 0,
      Controls::right = 0,
      Controls::up = 0,
      Controls::down = 0;
-intmax_t Controls::last_action_timepoint;
+sf::Uint32 Controls::last_action_timepoint;
 
 
 void Controls::addEvent(sf::Event event)
@@ -65,16 +65,16 @@ sf::Vector2f Controls::getDirection()
 }
 
 
-void Controls::setLastActionTimepoint(intmax_t t)
+void Controls::setLastActionTimepoint(sf::Uint32 t)
 {
     last_action_timepoint = t;
 }
 
 
-intmax_t Controls::getDeltaTime()
+sf::Uint32 Controls::getDeltaTime()
 {
-    intmax_t t = std::chrono::steady_clock::now().time_since_epoch().count();
-    intmax_t dt = t - last_action_timepoint;
+    sf::Uint32 t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+    sf::Uint32 dt = t - last_action_timepoint;
     //setLastActionTimepoint(t);
 
     return dt;

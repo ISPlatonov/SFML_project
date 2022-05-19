@@ -8,6 +8,11 @@
 #include "WorldMap.hpp"
 //#include "LinearAlgebra.hpp"
 #include "Controls.hpp"
+#include "Multiplayer.hpp"
+
+#include <chrono>
+#include <vector>
+#include <set>
 
 
 int main()
@@ -60,13 +65,105 @@ int main()
     music.play();
     */
 
+
+    sf::UdpSocket socket;
+    sf::UdpSocket socket_send;
+    unsigned short port = 55000;
+    unsigned short port_send = 54000;
+    auto broadcast_ip = sf::IpAddress::Broadcast;
+    //auto my_ip = sf::IpAddress::getPublicAddress();
+    auto my_local_ip = sf::IpAddress::getLocalAddress();
+    sf::IpAddress address_send(broadcast_ip);
+    socket.setBlocking(false);
+    sf::IpAddress address_receive(my_local_ip);
+    // bind the socket to a port
+    if (socket.bind(port) != sf::Socket::Done)
+        return EXIT_FAILURE;
+    if (socket_send.bind(port_send) != sf::Socket::Done)
+        return EXIT_FAILURE;
+
     for (size_t i = 0; i < 15; ++i)
-        Mob::mob_list.push_back(Bot(load_textures("textures/actors/Guy_16x32"), sf::Vector2f(std::rand() % WINDOW_SIZE_X, std::rand() % WINDOW_SIZE_Y) * static_cast<float>(PIXEL_SIZE)));
+        Mob::mob_list.push_back(Actor::Bot(load_textures("textures/actors/Guy_16x32"), sf::Vector2f(std::rand() % WINDOW_SIZE_X, std::rand() % WINDOW_SIZE_Y) * static_cast<float>(PIXEL_SIZE)));
 
     Controls::setLastActionTimepoint();
     // Start the game loop
+
+    sf::Font font;
+    if (!font.loadFromFile("textures/89speedaffair.ttf"))
+        return EXIT_FAILURE;
+    sf::Text text(my_local_ip.toString(), font, 30);
+    text.setPosition(100, 100);
+    text.setStyle(sf::Text::Bold);
+    text.setFillColor(sf::Color::White);
+
+    auto textures = load_textures("textures/actors/Guy_16x32");
+
+    sf::Packet data;
+    sf::Vector2f multiplayer_position;
+    // int ip, Actor::Player player
+    std::map<int, Actor::Player> player_pool;
+    std::set<int> ip_pool;
+
     while (window.isOpen())
     {
+        // needs another thread
+        //Mob::multiplayers_list.clear();
+        for (size_t i = 0; i < player_pool.size() + 10; ++i)
+        {
+            //data.clear();
+            int msg_local_ip, msg_ip;
+            sf::Uint32 sent_time;
+            sf::Vector2f new_position;
+            auto status = socket.receive(data, address_receive, port_send);
+            if (status != sf::Socket::Status::Done)
+                continue;
+            data >> new_position.x >> new_position.y >> msg_local_ip >> sent_time;
+            //text.setString(std::to_string(data.getDataSize()));
+            if (/*msg_ip == my_ip.toInteger() &&*/ msg_local_ip == my_local_ip.toInteger())
+                continue;
+
+            sf::Uint32 time_now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+            sf::Uint32 ping = time_now - sent_time;
+            text.setString(std::to_string(ping));
+            if (player_pool.count(msg_local_ip))
+                if (ping > 10000000000)
+                {
+                    player_pool.erase(msg_local_ip);
+                    ip_pool.erase(msg_local_ip);
+                }
+                else
+                    player_pool[msg_local_ip].updatePosition(new_position);
+            else
+                if (ping > 10000000000)
+                    continue;
+                else
+                {
+                    player_pool[msg_local_ip] = Actor::Player(Mob::Guy_textures, new_position, msg_local_ip, sent_time);
+                    ip_pool.insert(msg_local_ip);
+                }
+
+            /*if (std::chrono::steady_clock::now().time_since_epoch().count() - sent_time > 1000000000)
+                if (player_pool.count(msg_local_ip))
+                    player_pool.erase(msg_local_ip);
+                else
+                    continue;
+            */
+            //Mob::multiplayers_list.push_back(Actor::Actor(textures, multiplayer_position));
+        }
+        //for (size_t i = 0; i < Mob::multiplayers_list.size(); ++i)
+        //    Mob::multiplayers_list[i].setPosition(multiplayer_position);
+        
+        
+        data.clear();
+        if (!(data << Mob::user))
+            return EXIT_FAILURE;
+        socket_send.send(data, address_send, port);
+
+        //text.setString(std::to_string(multiplayer_position.x) + ' ' + std::to_string(multiplayer_position.y));
+        //text.setString(/*my_ip.toString() + ", " +*/ my_local_ip.toString());
+        
+
+
         // Process events
         sf::Event event;
         while (window.pollEvent(event))
@@ -90,11 +187,13 @@ int main()
         window.clear();
         // Draw the sprite
         window.draw(map);
-        for (auto bot : Mob::mob_list)
+        for (const auto& bot : Mob::mob_list)
             window.draw(bot.getSprite());
+        for (const auto& ip : ip_pool)
+            window.draw(player_pool[ip].getSprite());
         window.draw(Mob::user.getSprite());
         // Draw the string
-        //window.draw(text);
+        window.draw(text);
 
         window.setView(Mob::user.getView());
         // Update the window

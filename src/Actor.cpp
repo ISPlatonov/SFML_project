@@ -1,80 +1,156 @@
 #include "Actor.hpp"
 
 
-Actor::Actor(std::map<std::string, sf::Texture> textures, sf::Vector2f position)
+namespace Actor
 {
-    this->textures = textures;
-    sprite.setPosition(position);
-    this->direction_x = "right";
-    sprite.setTexture(Actor::textures[this->direction_x]);
-    sprite.setScale(PIXEL_SIZE, PIXEL_SIZE);
-    /*
-    left = 0, 
-    right = 0, 
-    up = 0, 
-    down = 0;
-    last_action_timepoint = 0;
-    */
-}
+    Actor::Actor()
+    {
+
+    }
 
 
-const sf::Sprite Actor::getSprite()
-{
-    return sprite;
-}
+    Actor::Actor(std::map<std::string, sf::Texture> textures, sf::Vector2f position)
+    {
+        this->textures = textures;
+        sprite.setPosition(position);
+        this->direction_x = "right";
+        sprite.setTexture(Actor::textures[this->direction_x]);
+        sprite.setScale(PIXEL_SIZE, PIXEL_SIZE);
+        /*
+        left = 0, 
+        right = 0, 
+        up = 0, 
+        down = 0;
+        last_action_timepoint = 0;
+        */
+    }
 
 
-void Actor::check_direction(sf::Vector2f direction)
-{
-    if (direction.x > 0 && direction_x != "right")
-        direction_x = "right";
-    else if (direction.x < 0 && direction_x != "left")
-        direction_x = "left";
-    else
-        return;
-    sprite.setTexture(Actor::textures[direction_x]);
-}
+    const sf::Sprite& Actor::getSprite() const
+    {
+        return sprite;
+    }
 
 
-void Actor::move_dt(sf::Vector2f direction, intmax_t dt)
-{
-    check_direction(direction); 
-    auto v = linalg::normalize(direction) * static_cast<float>(dt) * STEP_SIZE_MULTIPLIER * static_cast<float>(PIXEL_SIZE);
-    sprite.move(v);
-}
+    void Actor::check_direction(sf::Vector2f direction)
+    {
+        if (direction.x > 0 && direction_x != "right")
+            direction_x = "right";
+        else if (direction.x < 0 && direction_x != "left")
+            direction_x = "left";
+        else
+            return;
+        sprite.setTexture(Actor::textures[direction_x]);
+    }
 
 
-void Actor::draw(sf::RenderTarget& target, sf::RenderStates states) const
-{
-    states.transform *= getTransform();
-    target.draw(sprite, states);
-}
+    void Actor::move_dt(sf::Vector2f direction, sf::Uint32 dt)
+    {
+        check_direction(direction); 
+        auto v = linalg::normalize(direction) * static_cast<float>(dt) * STEP_SIZE_MULTIPLIER * static_cast<float>(PIXEL_SIZE);
+        sprite.move(v);
+    }
 
 
-void User::move_dt(sf::Vector2f direction, intmax_t dt)
-{
-    check_direction(direction); 
-    auto v = linalg::normalize(direction) * static_cast<float>(dt) * STEP_SIZE_MULTIPLIER * static_cast<float>(PIXEL_SIZE);
-    sprite.move(v);
-    view.move(v);
-}
+    void Actor::draw(sf::RenderTarget& target, sf::RenderStates states) const
+    {
+        states.transform *= getTransform();
+        target.draw(sprite, states);
+    }
 
 
-User::User(std::map<std::string, sf::Texture> textures, sf::Vector2f position) : Actor{textures, position}
-{
-    // make it static...
-    view = sf::View(position + (getSprite().getLocalBounds().getSize() / 2.f), static_cast<sf::Vector2f>(WINDOW_SIZE * static_cast<unsigned int>(PIXEL_SIZE)));
-}
+    void User::move_dt(sf::Vector2f direction, sf::Uint32 dt)
+    {
+        check_direction(direction); 
+        auto v = linalg::normalize(direction) * static_cast<float>(dt) * STEP_SIZE_MULTIPLIER * static_cast<float>(PIXEL_SIZE);
+        sprite.move(v);
+        view.move(v);
+    }
 
 
-const sf::View& User::getView()
-{
-    return view;
-}
+    User::User(std::map<std::string, sf::Texture> textures, sf::Vector2f position) : Actor{textures, position}
+    {
+        // make it static...
+        view = sf::View(position + (getSprite().getLocalBounds().getSize() / 2.f), static_cast<sf::Vector2f>(WINDOW_SIZE * static_cast<unsigned int>(PIXEL_SIZE)));
+        ip = sf::IpAddress::getLocalAddress().toInteger();
+    }
 
 
-void Bot::make_step(intmax_t dt)
-{
-    prev_move_direction = linalg::normalize(sf::Vector2f(std::rand() % 11 - 11 / 2, std::rand() % 11 - 11 / 2)) * .05f + prev_move_direction * .95f;
-    move_dt(prev_move_direction, dt);
+    const sf::View& User::getView() const
+    {
+        return view;
+    }
+
+
+    void Bot::make_step(sf::Uint32 dt)
+    {
+        prev_move_direction = linalg::normalize(linalg::normalize(sf::Vector2f(std::rand() % 11 - 11 / 2, std::rand() % 11 - 11 / 2)) * .2f + prev_move_direction * .8f);
+        move_dt(prev_move_direction, dt);
+    }
+
+
+    Player::Player(std::map<std::string, sf::Texture> textures, sf::Vector2f position, int int_ip, sf::Uint32 creation_time) : Actor{textures, position}
+    {
+        ip = int_ip;
+        last_update_time = creation_time;
+    }
+
+
+    const int& Player::getIp() const
+    {
+        return ip;
+    }
+
+
+    const sf::Uint32& Player::getLastUpdateTime() const
+    {
+        return last_update_time;
+    }
+
+
+    const int& User::getIp() const
+    {
+        return ip;
+    }
+
+
+    void Player::updatePosition(sf::Vector2f position)
+    {
+        auto prev_position = getSprite().getPosition();
+        auto move_vector = position - prev_position;
+        move(move_vector);
+    }
+
+
+    Player::Player(const Player& player) : Actor{player}
+    {
+        // Player(std::map<std::string, sf::Texture> textures, sf::Vector2f position, int int_ip, sf::Uint32 creation_time);
+        ip = player.getIp();
+        last_update_time = player.getLastUpdateTime();
+    }
+
+
+    Actor::Actor(const Actor& actor) : Actor{actor.getTextures(), actor.getSprite().getPosition()}
+    {
+        
+    }
+
+
+    Player::Player() : Actor{}
+    {
+
+    }
+
+
+    const std::map<std::string, sf::Texture>& Actor::getTextures() const
+    {
+        return textures;
+    }
+
+
+    void Player::move(const sf::Vector2f& vector)
+    {
+        check_direction(vector); 
+        sprite.move(vector);
+    }
 }

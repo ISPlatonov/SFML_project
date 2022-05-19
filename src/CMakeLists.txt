@@ -1,5 +1,5 @@
 include_directories(${SFML_project_SOURCE_DIR}/include)
-set(SOURCE_FILES main.cpp Actor.cpp WorldMap.cpp Controls.cpp LinearAlgebra.cpp)
+set(SOURCE_FILES main.cpp Actor.cpp WorldMap.cpp Controls.cpp LinearAlgebra.cpp Multiplayer.cpp)
 
 if(WIN32)
     add_executable(SFML_project WIN32 ${SOURCE_FILES})
@@ -8,6 +8,8 @@ else()
 endif()
 
 set(SFML_STATIC_LIBRARIES TRUE)
+set(CMAKE_CXX_STANDARD_LIBRARIES "-static-libgcc -static-libstdc++ -lwsock32 -lws2_32 ${CMAKE_CXX_STANDARD_LIBRARIES}")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-Bstatic,--whole-archive -lwinpthread -Wl,--no-whole-archive")
 target_include_directories(SFML_project PUBLIC include)
 
 #set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules" ${CMAKE_MODULE_PATH})
