@@ -21,7 +21,10 @@ int main()
     sf::RenderWindow window(sf::VideoMode(WINDOW_SIZE_X * PIXEL_SIZE, WINDOW_SIZE_Y * PIXEL_SIZE), "SFML window");
     window.setFramerateLimit(FRAMERATE_LIMIT);
 
-    window.setView(Mob::user.getView());
+    auto textures = load_textures("textures/actors/Guy_16x32");
+    Actor::User user(load_textures("textures/actors/Guy_16x32"), sf::Vector2f(0, 0) * static_cast<float>(PIXEL_SIZE));
+
+    window.setView(user.getView());
 
     // define the level with an array of tile indices
     const int level[] =
@@ -82,8 +85,8 @@ int main()
     if (socket_send.bind(port_send) != sf::Socket::Done)
         return EXIT_FAILURE;
 
-    for (size_t i = 0; i < 15; ++i)
-        Mob::mob_list.push_back(Actor::Bot(load_textures("textures/actors/Guy_16x32"), sf::Vector2f(std::rand() % WINDOW_SIZE_X, std::rand() % WINDOW_SIZE_Y) * static_cast<float>(PIXEL_SIZE)));
+    //for (size_t i = 0; i < 15; ++i)
+    //    Mob::mob_list.push_back(Actor::Bot(load_textures("textures/actors/Guy_16x32"), sf::Vector2f(std::rand() % WINDOW_SIZE_X, std::rand() % WINDOW_SIZE_Y) * static_cast<float>(PIXEL_SIZE)));
 
     Controls::setLastActionTimepoint();
     // Start the game loop
@@ -95,8 +98,6 @@ int main()
     text.setPosition(100, 100);
     text.setStyle(sf::Text::Bold);
     text.setFillColor(sf::Color::White);
-
-    auto textures = load_textures("textures/actors/Guy_16x32");
 
     sf::Packet data;
     sf::Vector2f multiplayer_position;
@@ -138,7 +139,7 @@ int main()
                     continue;
                 else
                 {
-                    player_pool[msg_local_ip] = Actor::Player(Mob::Guy_textures, new_position, msg_local_ip, sent_time);
+                    player_pool[msg_local_ip] = Actor::Player(textures, new_position, msg_local_ip, sent_time);
                     ip_pool.insert(msg_local_ip);
                 }
 
@@ -155,7 +156,7 @@ int main()
         
         
         data.clear();
-        if (!(data << Mob::user))
+        if (!(data << user))
             return EXIT_FAILURE;
         socket_send.send(data, address_send, port);
 
@@ -178,24 +179,24 @@ int main()
         auto direction = Controls::getDirection();
         
         auto dt = Controls::getDeltaTime();
-        Mob::user.move_dt(direction, dt);
-        for (size_t i = 0; i < Mob::mob_list.size(); ++i)
-            Mob::mob_list[i].make_step(dt);
+        user.move_dt(direction, dt);
+        //for (size_t i = 0; i < Mob::mob_list.size(); ++i)
+        //    Mob::mob_list[i].make_step(dt);
         
         Controls::setLastActionTimepoint();
         // Clear screen
         window.clear();
         // Draw the sprite
         window.draw(map);
-        for (const auto& bot : Mob::mob_list)
-            window.draw(bot.getSprite());
-        for (const auto& ip : ip_pool)
-            window.draw(player_pool[ip].getSprite());
-        window.draw(Mob::user.getSprite());
+        //for (const auto& bot : Mob::mob_list)
+        //    window.draw(bot.getSprite());
+        //for (const auto& ip : ip_pool)
+        //    window.draw(player_pool[ip].getSprite());
+        window.draw(user.getSprite());
         // Draw the string
         window.draw(text);
 
-        window.setView(Mob::user.getView());
+        window.setView(user.getView());
         // Update the window
         window.display();
     }
