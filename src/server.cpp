@@ -17,18 +17,21 @@ public:
     PlayerData()
     {
         position = sf::Vector2f();
+        ip = sf::IpAddress::None.toInteger();
         local_ip = sf::IpAddress::None.toInteger();
         sent_time = 0;
     }
     PlayerData(const PlayerData& player)
     {
         this->position = player.getPosition();
+        this->ip = player.getIp();
         this->local_ip = player.getLocalIp();
         this->sent_time = player.getTime();
     }
-    PlayerData(sf::Vector2f position, int local_ip, sf::Uint32 time)
+    PlayerData(sf::Vector2f position, int ip, int local_ip, sf::Uint32 time)
     {
         this->position = position;
+        this->ip = ip;
         this->local_ip = local_ip;
         this->sent_time = time;
     }
@@ -40,6 +43,10 @@ public:
     {
         return position;
     }
+    const int getIp() const
+    {
+        return ip;
+    }
     const int getLocalIp() const
     {
         return local_ip;
@@ -48,10 +55,11 @@ public:
     {
         return sent_time;
     }
+
 private:
-    // data >> new_position.x >> new_position.y >> msg_local_ip >> sent_time;
+    // data >> new_position.x >> new_position.y >> msg_ip >> msg_local_ip >> sent_time;
     sf::Vector2f position;
-    int local_ip;
+    int ip, local_ip;
     sf::Uint32 sent_time;
 };
 
@@ -79,8 +87,8 @@ int main()
     sf::Packet data;
     sf::Vector2f multiplayer_position;
     // int ip, Actor::Player player
-    std::map<int, PlayerData> player_pool;
-    std::set<int> ip_pool;
+    std::map<std::string, PlayerData> player_pool;
+    std::set<std::string> ip_pool;
 
     while (true)
     {
@@ -99,30 +107,32 @@ int main()
             if (/*msg_ip == my_ip.toInteger() &&*/ msg_local_ip == my_local_ip.toInteger())
                 continue;
 
+            auto id = sf::IpAddress(msg_ip).toString() + sf::IpAddress(msg_local_ip).toString();
+
             sf::Uint32 time_now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
             sf::Uint32 ping = time_now - sent_time;
-            if (player_pool.count(msg_local_ip))
+            if (player_pool.count(id))
                 if (ping > 5000000)
                 {
-                    player_pool.erase(msg_local_ip);
-                    ip_pool.erase(msg_local_ip);
+                    player_pool.erase(id);
+                    ip_pool.erase(id);
                 }
                 else
-                    player_pool[msg_local_ip].updatePosition(new_position);
+                    player_pool[id].updatePosition(new_position);
             else
                 if (ping > 5000000)
                     continue;
                 else
                 {
-                    player_pool[msg_local_ip] = PlayerData(new_position, msg_local_ip, sent_time);
-                    ip_pool.insert(msg_local_ip);
+                    player_pool[id] = PlayerData(new_position, msg_ip, msg_local_ip, sent_time);
+                    ip_pool.insert(id);
                 }
         }
 
         for (auto ip : ip_pool)
         {
             data.clear();
-            data << player_pool[ip].getPosition().x << player_pool[ip].getPosition().y << player_pool[ip].getLocalIp() << player_pool[ip].getTime();
+            data << player_pool[ip].getPosition().x << player_pool[ip].getPosition().y << player_pool[ip].getIp() << player_pool[ip].getLocalIp() << player_pool[ip].getTime();
             socket_send.send(data, address_send, port);
         }      
         

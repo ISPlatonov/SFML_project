@@ -73,8 +73,8 @@ int main()
     sf::UdpSocket socket_send;
     unsigned short port = 55000;
     unsigned short port_send = 54000;
-    auto broadcast_ip = sf::IpAddress::Broadcast;
-    //auto my_ip = sf::IpAddress::getPublicAddress();
+    auto broadcast_ip = "77.73.71.158";
+    auto my_ip = sf::IpAddress::getPublicAddress();
     auto my_local_ip = sf::IpAddress::getLocalAddress();
     sf::IpAddress address_send(broadcast_ip);
     socket.setBlocking(false);
@@ -102,8 +102,8 @@ int main()
     sf::Packet data;
     sf::Vector2f multiplayer_position;
     // int ip, Actor::Player player
-    std::map<int, Actor::Player> player_pool;
-    std::set<int> ip_pool;
+    std::map<std::string, Actor::Player> player_pool;
+    std::set<std::string> ip_pool;
 
     while (window.isOpen())
     {
@@ -118,30 +118,32 @@ int main()
             auto status = socket.receive(data, address_receive, port_send);
             if (status != sf::Socket::Status::Done)
                 continue;
-            data >> new_position.x >> new_position.y >> msg_local_ip >> sent_time;
+            data >> new_position.x >> new_position.y >> msg_ip >> msg_local_ip >> sent_time;
             text.setString("got packet");
             //text.setString(std::to_string(data.getDataSize()));
-            if (/*msg_ip == my_ip.toInteger() &&*/ msg_local_ip == my_local_ip.toInteger())
+            if (msg_ip == my_ip.toInteger() && msg_local_ip == my_local_ip.toInteger())
                 continue;
+            
+            auto id = sf::IpAddress(msg_ip).toString() + sf::IpAddress(msg_local_ip).toString();
 
             sf::Uint32 time_now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
             sf::Uint32 ping = time_now - sent_time;
             text.setString(std::to_string(time_now) + '\n' + std::to_string(ping));
-            if (player_pool.count(msg_local_ip))
+            if (player_pool.count(id))
                 if (ping > 5000000)
                 {
-                    player_pool.erase(msg_local_ip);
-                    ip_pool.erase(msg_local_ip);
+                    player_pool.erase(id);
+                    ip_pool.erase(id);
                 }
                 else
-                    player_pool[msg_local_ip].updatePosition(new_position);
+                    player_pool[id].updatePosition(new_position);
             else
                 if (ping > 5000000)
                     continue;
                 else
                 {
-                    player_pool[msg_local_ip] = Actor::Player(textures, new_position, msg_local_ip, sent_time);
-                    ip_pool.insert(msg_local_ip);
+                    player_pool[id] = Actor::Player(textures, new_position, msg_ip, msg_local_ip, sent_time);
+                    ip_pool.insert(id);
                 }
 
             /*if (std::chrono::high_resolution_clock::now().time_since_epoch().count() - sent_time > 1000000000)
@@ -191,8 +193,8 @@ int main()
         window.draw(map);
         for (const auto& bot : Mob::mob_list)
             window.draw(bot.getSprite());
-        for (const auto& ip : ip_pool)
-            window.draw(player_pool[ip].getSprite());
+        for (const auto& id : ip_pool)
+            window.draw(player_pool[id].getSprite());
         window.draw(user.getSprite());
         // Draw the string
         window.draw(text);

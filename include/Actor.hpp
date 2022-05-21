@@ -52,11 +52,11 @@ namespace Actor
         void move_dt(sf::Vector2f direction, sf::Uint32 dt);
         const sf::View& getView() const;
         const int& getIp() const;
-        
+        const int& getLocalIp() const;        
         
     private:
         sf::View view;
-        int ip;
+        int int_ip, int_local_ip;
     };
 
 
@@ -64,16 +64,17 @@ namespace Actor
     {
     public:
         // data << x << y << my_ip.toInteger() << my_local_ip.toInteger() << std::chrono::high_resolution_clock::now().time_since_epoch().count()
-        Player(std::map<std::string, sf::Texture> textures, sf::Vector2f position, int int_ip, sf::Uint32 creation_time);
+        Player(std::map<std::string, sf::Texture> textures, sf::Vector2f position, int ip, int local_ip, sf::Uint32 creation_time);
         Player(const Player&);
         Player();
         const int& getIp() const;
+        const int& getLocalIp() const;
         const sf::Uint32& getLastUpdateTime() const;
         void updatePosition(sf::Vector2f position);
         void move(const sf::Vector2f& vector);
 
     private:
         sf::Uint32 last_update_time;
-        int ip;
+        int int_ip, int_local_ip;
     };
 }

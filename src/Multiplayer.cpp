@@ -13,6 +13,6 @@ namespace sf
     {
         auto position = user.getSprite().getPosition();
         sf::Uint32 time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-        return packet << position.x << position.y << user.getIp() << time;
+        return packet << position.x << position.y << user.getIp() << user.getLocalIp() << time;
     }
 }
