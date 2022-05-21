@@ -85,8 +85,8 @@ int main()
     if (socket_send.bind(port_send) != sf::Socket::Done)
         return EXIT_FAILURE;
 
-    //for (size_t i = 0; i < 15; ++i)
-    //    Mob::mob_list.push_back(Actor::Bot(load_textures("textures/actors/Guy_16x32"), sf::Vector2f(std::rand() % WINDOW_SIZE_X, std::rand() % WINDOW_SIZE_Y) * static_cast<float>(PIXEL_SIZE)));
+    for (size_t i = 0; i < 15; ++i)
+        Mob::mob_list.push_back(Actor::Bot(load_textures("textures/actors/Guy_16x32"), sf::Vector2f(std::rand() % WINDOW_SIZE_X, std::rand() % WINDOW_SIZE_Y) * static_cast<float>(PIXEL_SIZE)));
 
     Controls::setLastActionTimepoint();
     // Start the game loop
@@ -123,11 +123,11 @@ int main()
             if (/*msg_ip == my_ip.toInteger() &&*/ msg_local_ip == my_local_ip.toInteger())
                 continue;
 
-            sf::Uint32 time_now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+            sf::Uint32 time_now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
             sf::Uint32 ping = time_now - sent_time;
-            text.setString(std::to_string(ping));
+            text.setString(std::to_string(time_now) + '\n' + std::to_string(ping));
             if (player_pool.count(msg_local_ip))
-                if (ping > 5000)
+                if (ping > 5000000)
                 {
                     player_pool.erase(msg_local_ip);
                     ip_pool.erase(msg_local_ip);
@@ -135,7 +135,7 @@ int main()
                 else
                     player_pool[msg_local_ip].updatePosition(new_position);
             else
-                if (ping > 5000)
+                if (ping > 5000000)
                     continue;
                 else
                 {
@@ -143,7 +143,7 @@ int main()
                     ip_pool.insert(msg_local_ip);
                 }
 
-            /*if (std::chrono::steady_clock::now().time_since_epoch().count() - sent_time > 1000000000)
+            /*if (std::chrono::high_resolution_clock::now().time_since_epoch().count() - sent_time > 1000000000)
                 if (player_pool.count(msg_local_ip))
                     player_pool.erase(msg_local_ip);
                 else
@@ -151,8 +151,8 @@ int main()
             */
             //Mob::multiplayers_list.push_back(Actor::Actor(textures, multiplayer_position));
         }
-        //for (size_t i = 0; i < Mob::multiplayers_list.size(); ++i)
-        //    Mob::multiplayers_list[i].setPosition(multiplayer_position);
+        for (size_t i = 0; i < Mob::multiplayers_list.size(); ++i)
+            Mob::multiplayers_list[i].setPosition(multiplayer_position);
         
         
         data.clear();
@@ -180,18 +180,18 @@ int main()
         
         auto dt = Controls::getDeltaTime();
         user.move_dt(direction, dt);
-        //for (size_t i = 0; i < Mob::mob_list.size(); ++i)
-        //    Mob::mob_list[i].make_step(dt);
+        for (size_t i = 0; i < Mob::mob_list.size(); ++i)
+            Mob::mob_list[i].make_step(dt);
         
         Controls::setLastActionTimepoint();
         // Clear screen
         window.clear();
         // Draw the sprite
         window.draw(map);
-        //for (const auto& bot : Mob::mob_list)
-        //    window.draw(bot.getSprite());
-        //for (const auto& ip : ip_pool)
-        //    window.draw(player_pool[ip].getSprite());
+        for (const auto& bot : Mob::mob_list)
+            window.draw(bot.getSprite());
+        for (const auto& ip : ip_pool)
+            window.draw(player_pool[ip].getSprite());
         window.draw(user.getSprite());
         // Draw the string
         window.draw(text);

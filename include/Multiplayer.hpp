@@ -44,6 +44,6 @@ namespace Multiplayer
 
 namespace sf
 {
-    // data << x << y << my_ip.toInteger() << my_local_ip.toInteger() << std::chrono::steady_clock::now().time_since_epoch().count()
+    // data << x << y << my_ip.toInteger() << my_local_ip.toInteger() << std::chrono::high_resolution_clock::now().time_since_epoch().count()
     Packet& operator <<(Packet& packet, const Actor::User& user);
 }
