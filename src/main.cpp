@@ -119,6 +119,7 @@ int main()
             if (status != sf::Socket::Status::Done)
                 continue;
             data >> new_position.x >> new_position.y >> msg_local_ip >> sent_time;
+            text.setString("got packet");
             //text.setString(std::to_string(data.getDataSize()));
             if (/*msg_ip == my_ip.toInteger() &&*/ msg_local_ip == my_local_ip.toInteger())
                 continue;
