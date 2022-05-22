@@ -110,7 +110,7 @@ int main()
     {
         // needs another thread
         //Mob::multiplayers_list.clear();
-        for (size_t i = 0; i < player_pool.size() + 10; ++i)
+        for (size_t i = 0; i < player_pool.size() + 1000; ++i)
         {
             //data.clear();
             int msg_local_ip, msg_ip;

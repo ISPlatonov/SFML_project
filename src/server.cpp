@@ -94,8 +94,9 @@ int main()
     while (true)
     {
         // needs another thread
-        //Mob::multiplayers_list.clear();
-        for (size_t i = 0; i < ip_pool.size() + 10; ++i)
+        auto last_timepoint = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+
+        for (size_t i = 0; i < ip_pool.size() + 1000; ++i)
         {
             //data.clear();
             int msg_local_ip, msg_ip;
@@ -112,12 +113,15 @@ int main()
                 continue;
 
             auto id = sf::IpAddress(msg_ip).toString() + ' ' + sf::IpAddress(msg_local_ip).toString();
-	    std::cout << "got new ip: " << id << std::endl;
+	        std::cout << "got new ip: " << id << std::endl;
 
-            sf::Uint32 time_now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-            sf::Uint32 ping = time_now - sent_time;
+            sf::Uint32 time_now = static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count());
+            int ping = static_cast<int>(time_now) - static_cast<int>(sent_time);
 
-	    std::cout << "new msg" << std::endl << "ping: " << std::to_string(ping) << std::endl;
+	        std::cout << "new msg" << std::endl << "ping: " << std::to_string(ping) << std::endl
+                << "server time: " << std::to_string(time_now) << std::endl
+                << "msg time: " << std::to_string(sent_time) << std::endl
+                << "ping: " << std::to_string(ping) << std::endl;
 
             if (player_pool.count(id))
 	    {
@@ -149,6 +153,8 @@ int main()
         }      
         
         data.clear();
+
+        while (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count() - last_timepoint < 1);
     }
     return EXIT_SUCCESS;
 }
