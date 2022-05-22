@@ -131,7 +131,7 @@ int main()
             sf::Uint32 ping = time_now - sent_time;
             text.setString(std::to_string(time_now) + '\n' + std::to_string(ping));
             if (player_pool.count(id))
-                if (ping > 50000000000)
+                if (ping > MAX_PING)
                 {
                     player_pool.erase(id);
                     ip_pool.erase(id);
@@ -139,7 +139,7 @@ int main()
                 else
                     player_pool[id].updatePosition(new_position);
             else
-                if (ping > 50000000000)
+                if (ping > MAX_PING)
                     continue;
                 else
                 {

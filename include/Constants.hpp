@@ -16,3 +16,4 @@
 #define PORT_LISTEN size_t(55000)
 #define PORT_SEND size_t(55001)
 #define SERVER_IP std::string("77.73.71.158")
+#define MAX_PING size_t(5000000)

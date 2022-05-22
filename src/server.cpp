@@ -122,7 +122,7 @@ int main()
             if (player_pool.count(id))
 	    {
 		std::cout << "player in pool" << std::endl;
-                if (ping > 50000000000)
+                if (ping > MAX_PING)
                 {
                     player_pool.erase(id);
                     ip_pool.erase(id);
@@ -131,7 +131,7 @@ int main()
                     player_pool[id].updatePosition(new_position);
 	    }
             else
-                if (ping > 50000000000)
+                if (ping > MAX_PING)
                     continue;
                 else
                 {
