@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include <string>
 
 #define PIXEL_SIZE size_t(10)
 #define WINDOW_SIZE_X size_t(sf::VideoMode::getDesktopMode().width / PIXEL_SIZE)
@@ -11,3 +12,7 @@
 #define STEP_SIZE_MULTIPLIER float(.05)
 
 #define TILE_SIZE /*size_t(8)*/ PIXEL_SIZE
+
+#define PORT_LISTEN size_t(55000)
+#define PORT_SEND size_t(55001)
+#define SERVER_IP std::string("77.73.71.158")

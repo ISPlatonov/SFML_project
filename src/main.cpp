@@ -71,10 +71,10 @@ int main()
 
 
     sf::UdpSocket socket;
-    //sf::UdpSocket socket_send;
-    unsigned short port = 55000;
-    //unsigned short port_send = 54001;
-    auto broadcast_ip = "77.73.71.158";
+    sf::UdpSocket socket_send;
+    unsigned short port = PORT_LISTEN;
+    unsigned short port_send = PORT_SEND;
+    auto broadcast_ip = SERVER_IP;
     auto my_ip = sf::IpAddress::getPublicAddress(sf::seconds(5.f));
     auto my_local_ip = sf::IpAddress::getLocalAddress();
     sf::IpAddress address_send(broadcast_ip);
@@ -83,8 +83,8 @@ int main()
     // bind the socket to a port
     if (socket.bind(port) != sf::Socket::Done)
         return EXIT_FAILURE;
-    //if (socket_send.bind(port_send) != sf::Socket::Done)
-    //    return EXIT_FAILURE;
+    if (socket_send.bind(port_send) != sf::Socket::Done)
+        return EXIT_FAILURE;
 
     for (size_t i = 0; i < 15; ++i)
         Mob::mob_list.push_back(Actor::Bot(load_textures("textures/actors/Guy_16x32"), sf::Vector2f(std::rand() % WINDOW_SIZE_X, std::rand() % WINDOW_SIZE_Y) * static_cast<float>(PIXEL_SIZE)));
@@ -116,7 +116,7 @@ int main()
             int msg_local_ip, msg_ip;
             sf::Uint32 sent_time;
             sf::Vector2f new_position;
-            auto status = socket.receive(data, address_receive, port);
+            auto status = socket.receive(data, address_receive, port_send);
             if (status != sf::Socket::Status::Done)
                 continue;
             data >> new_position.x >> new_position.y >> msg_ip >> msg_local_ip >> sent_time;
@@ -162,7 +162,7 @@ int main()
         data.clear();
         if (!(data << user))
             return EXIT_FAILURE;
-        socket.send(data, address_send, port);
+        socket_send.send(data, address_send, port);
 
         //text.setString(std::to_string(multiplayer_position.x) + ' ' + std::to_string(multiplayer_position.y));
         //text.setString(/*my_ip.toString() + ", " +*/ my_local_ip.toString());

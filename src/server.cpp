@@ -5,6 +5,7 @@
 #include <cstdlib>
 //#include "LinearAlgebra.hpp"
 //#include "Multiplayer.hpp"
+#include <Constants.hpp>
 #include <chrono>
 #include <vector>
 #include <set>
@@ -68,9 +69,9 @@ int main()
 {
     std::cout << std::flush << std::endl;
     sf::UdpSocket socket;
-    //sf::UdpSocket socket_send;
-    unsigned short port = 55000;
-    //unsigned short port_send = 54000;
+    sf::UdpSocket socket_send;
+    unsigned short port = PORT_LISTEN;
+    unsigned short port_send = PORT_SEND;
     auto broadcast_ip = sf::IpAddress::Any;
     auto my_ip = sf::IpAddress::getPublicAddress();
     auto my_local_ip = sf::IpAddress::getLocalAddress();
@@ -80,8 +81,8 @@ int main()
     // bind the socket to a port
     if (socket.bind(port) != sf::Socket::Done)
         return EXIT_FAILURE;
-    //if (socket_send.bind(port_send) != sf::Socket::Done)
-    //    return EXIT_FAILURE;
+    if (socket_send.bind(port_send) != sf::Socket::Done)
+        return EXIT_FAILURE;
 
     // Start the game loop
     sf::Packet data;
@@ -100,7 +101,7 @@ int main()
             int msg_local_ip, msg_ip;
             sf::Uint32 sent_time;
             sf::Vector2f new_position;
-            auto status = socket.receive(data, address_receive, port);
+            auto status = socket.receive(data, address_receive, port_send);
             if (status != sf::Socket::Status::Done)
                 continue;
 	    
@@ -143,8 +144,8 @@ int main()
         {
             data.clear();
             data << player_pool[ip].getPosition().x << player_pool[ip].getPosition().y << player_pool[ip].getIp() << player_pool[ip].getLocalIp() << player_pool[ip].getTime();
-	    std::cout << "dest. address: " << sf::IpAddress(player_pool[ip].getIp()).toString() << ' ' << sf::IpAddress(player_pool[ip].getLocalIp()).toString() << std::endl;
-            socket.send(data, sf::IpAddress(player_pool[ip].getLocalIp()), port);
+	        //std::cout << "dest. address: " << sf::IpAddress(player_pool[ip].getIp()).toString() << ' ' << sf::IpAddress(player_pool[ip].getLocalIp()).toString() << std::endl;
+            socket_send.send(data, sf::IpAddress(player_pool[ip].getLocalIp()), port);
         }      
         
         data.clear();
