@@ -151,14 +151,26 @@ int main()
                 }
             }
 
-        for (auto ip : ip_pool)
+        for (auto id : ip_pool)
         {
             for (auto dest_ip : ip_pool)
             {
-                if (dest_ip == ip)
+                if (dest_ip == id)
                     continue;
                 data.clear();
-                data << player_pool[ip].getPosition().x << player_pool[ip].getPosition().y << player_pool[ip].getIp() << player_pool[ip].getLocalIp() << player_pool[ip].getTime();
+                auto x = player_pool[id].getPosition().x;
+                auto y = player_pool[id].getPosition().y;
+                auto ip = player_pool[id].getIp();
+                auto local_ip = player_pool[id].getLocalIp();
+                auto time = player_pool[id].getTime();
+                sf::Uint32 time_now = static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count());
+                int ping = static_cast<int>(time_now) - static_cast<int>(time);
+                if (ping > MAX_PING)
+                {
+                    player_pool.erase(id);
+                    ip_pool.erase(id);
+                }
+                data << x << y << ip << local_ip << time;
                 //std::cout << "dest. address: " << sf::IpAddress(player_pool[ip].getIp()).toString() << ' ' << sf::IpAddress(player_pool[ip].getLocalIp()).toString() << std::endl;
                 socket_send.send(data, sf::IpAddress(player_pool[dest_ip].getLocalIp()), port);
             }
