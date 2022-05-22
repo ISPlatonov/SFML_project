@@ -146,10 +146,15 @@ int main()
 
         for (auto ip : ip_pool)
         {
-            data.clear();
-            data << player_pool[ip].getPosition().x << player_pool[ip].getPosition().y << player_pool[ip].getIp() << player_pool[ip].getLocalIp() << player_pool[ip].getTime();
-	        //std::cout << "dest. address: " << sf::IpAddress(player_pool[ip].getIp()).toString() << ' ' << sf::IpAddress(player_pool[ip].getLocalIp()).toString() << std::endl;
-            socket_send.send(data, sf::IpAddress(player_pool[ip].getLocalIp()), port);
+            for (auto dest_ip : ip_pool)
+            {
+                if (dest_ip == ip)
+                    continue;
+                data.clear();
+                data << player_pool[ip].getPosition().x << player_pool[ip].getPosition().y << player_pool[ip].getIp() << player_pool[ip].getLocalIp() << player_pool[ip].getTime();
+                //std::cout << "dest. address: " << sf::IpAddress(player_pool[ip].getIp()).toString() << ' ' << sf::IpAddress(player_pool[ip].getLocalIp()).toString() << std::endl;
+                socket_send.send(data, sf::IpAddress(player_pool[dest_ip].getLocalIp()), port);
+            }
         }      
         
         data.clear();
