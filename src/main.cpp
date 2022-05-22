@@ -120,16 +120,14 @@ int main()
             if (status != sf::Socket::Status::Done)
                 continue;
             data >> new_position.x >> new_position.y >> msg_ip >> msg_local_ip >> sent_time;
-            text.setString("got packet");
-            //text.setString(std::to_string(data.getDataSize()));
             //if (msg_ip == my_ip.toInteger() && msg_local_ip == my_local_ip.toInteger())
             //    continue;
             
             auto id = sf::IpAddress(msg_ip).toString() + sf::IpAddress(msg_local_ip).toString();
 
             sf::Uint32 time_now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-            sf::Uint32 ping = time_now - sent_time;
-            text.setString(std::to_string(time_now) + '\n' + std::to_string(ping));
+            int ping = static_cast<int>(time_now) - static_cast<int>(sent_time);
+            text.setString(std::to_string(time_now) + '\n' + std::to_string(sent_time) + '\n' + std::to_string(ping));
             if (player_pool.count(id))
                 if (ping > MAX_PING)
                 {

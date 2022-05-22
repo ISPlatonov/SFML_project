@@ -40,19 +40,23 @@ public:
     {
         position = new_position;
     }
-    const sf::Vector2f getPosition() const
+    void updateTime(const sf::Uint32& new_time)
+    {
+        sent_time = new_time;
+    }
+    const sf::Vector2f& getPosition() const
     {
         return position;
     }
-    const int getIp() const
+    const int& getIp() const
     {
         return ip;
     }
-    const int getLocalIp() const
+    const int& getLocalIp() const
     {
         return local_ip;
     }
-    const sf::Uint32 getTime() const
+    const sf::Uint32& getTime() const
     {
         return sent_time;
     }
@@ -107,8 +111,8 @@ int main()
                 continue;
 	    
             data >> new_position.x >> new_position.y >> msg_ip >> msg_local_ip >> sent_time;
-	    if (msg_ip == broadcast_ip.toInteger() && msg_local_ip == broadcast_ip.toInteger())
-                continue;
+            if (msg_ip == broadcast_ip.toInteger() && msg_local_ip == broadcast_ip.toInteger())
+                    continue;
             if (msg_ip == my_ip.toInteger() && msg_local_ip == my_local_ip.toInteger())
                 continue;
 
@@ -124,16 +128,19 @@ int main()
                 << "ping: " << std::to_string(ping) << std::endl;
 
             if (player_pool.count(id))
-	    {
-		std::cout << "player in pool" << std::endl;
+            {
+                std::cout << "player in pool" << std::endl;
                 if (ping > MAX_PING)
                 {
                     player_pool.erase(id);
                     ip_pool.erase(id);
                 }
                 else
+                {
                     player_pool[id].updatePosition(new_position);
-	    }
+                    player_pool[id].updateTime(sent_time);
+                }
+            }
             else
                 if (ping > MAX_PING)
                     continue;
@@ -142,7 +149,7 @@ int main()
                     player_pool[id] = PlayerData(new_position, msg_ip, msg_local_ip, sent_time);
                     ip_pool.insert(id);
                 }
-        }
+            }
 
         for (auto ip : ip_pool)
         {
