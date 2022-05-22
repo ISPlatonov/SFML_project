@@ -1,5 +1,8 @@
 include_directories(${SFML_project_SOURCE_DIR}/include)
 
+set(SOURCE_FILES main.cpp Actor.cpp WorldMap.cpp Controls.cpp LinearAlgebra.cpp Multiplayer.cpp)
+set(SERVER_SOURCE_FILES server.cpp Multiplayer.cpp)
+
 if (BUILD_ONLY_SERVER)
     set(SERVER_SOURCE_FILES server.cpp)
     if(WIN32)
@@ -20,9 +23,6 @@ if (BUILD_ONLY_SERVER)
 
 
 else()
-    set(SOURCE_FILES main.cpp Actor.cpp WorldMap.cpp Controls.cpp LinearAlgebra.cpp Multiplayer.cpp)
-    set(SERVER_SOURCE_FILES server.cpp)
-
     if(WIN32)
         add_executable(SFML_project WIN32 ${SOURCE_FILES})
         add_executable(server WIN32 ${SERVER_SOURCE_FILES})

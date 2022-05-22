@@ -155,7 +155,17 @@ int main()
         }
         //for (size_t i = 0; i < Mob::multiplayers_list.size(); ++i)
         //    Mob::multiplayers_list[i].setPosition(multiplayer_position);
-        
+        for (auto id : ip_pool)
+        {
+            auto time = player_pool[id].getLastUpdateTime();
+            sf::Uint32 time_now = static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count());
+            int ping = static_cast<int>(time_now) - static_cast<int>(time);
+            if (ping > MAX_PING)
+            {
+                player_pool.erase(id);
+                ip_pool.erase(id);
+            }
+        }
         
         data.clear();
         if (!(data << user))

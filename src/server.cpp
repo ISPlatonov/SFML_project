@@ -4,69 +4,12 @@
 #include <string>
 #include <cstdlib>
 //#include "LinearAlgebra.hpp"
-//#include "Multiplayer.hpp"
+#include "Multiplayer.hpp"
 #include <Constants.hpp>
 #include <chrono>
 #include <vector>
 #include <set>
 #include <iostream>
-
-
-class PlayerData
-{
-public:
-    PlayerData()
-    {
-        position = sf::Vector2f();
-        ip = sf::IpAddress::None.toInteger();
-        local_ip = sf::IpAddress::None.toInteger();
-        sent_time = 0;
-    }
-    PlayerData(const PlayerData& player)
-    {
-        this->position = player.getPosition();
-        this->ip = player.getIp();
-        this->local_ip = player.getLocalIp();
-        this->sent_time = player.getTime();
-    }
-    PlayerData(sf::Vector2f position, int ip, int local_ip, sf::Uint32 time)
-    {
-        this->position = position;
-        this->ip = ip;
-        this->local_ip = local_ip;
-        this->sent_time = time;
-    }
-    void updatePosition(const sf::Vector2f& new_position)
-    {
-        position = new_position;
-    }
-    void updateTime(const sf::Uint32& new_time)
-    {
-        sent_time = new_time;
-    }
-    const sf::Vector2f& getPosition() const
-    {
-        return position;
-    }
-    const int& getIp() const
-    {
-        return ip;
-    }
-    const int& getLocalIp() const
-    {
-        return local_ip;
-    }
-    const sf::Uint32& getTime() const
-    {
-        return sent_time;
-    }
-
-private:
-    // data >> new_position.x >> new_position.y >> msg_ip >> msg_local_ip >> sent_time;
-    sf::Vector2f position;
-    int ip, local_ip;
-    sf::Uint32 sent_time;
-};
 
 
 int main()
@@ -92,7 +35,7 @@ int main()
     sf::Packet data;
     sf::Vector2f multiplayer_position;
     // int ip, Actor::Player player
-    std::map<std::string, PlayerData> player_pool;
+    std::map<std::string, Multiplayer::PlayerData> player_pool;
     std::set<std::string> ip_pool;
 
     while (true)
@@ -146,7 +89,7 @@ int main()
                     continue;
                 else
                 {
-                    player_pool[id] = PlayerData(new_position, msg_ip, msg_local_ip, sent_time);
+                    player_pool[id] = Multiplayer::PlayerData(new_position, msg_ip, msg_local_ip, sent_time);
                     ip_pool.insert(id);
                 }
             }
