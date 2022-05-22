@@ -72,7 +72,7 @@ namespace Actor
     {
         // make it static...
         view = sf::View(position + (getSprite().getLocalBounds().getSize() / 2.f), static_cast<sf::Vector2f>(WINDOW_SIZE * static_cast<unsigned int>(PIXEL_SIZE)));
-        int_ip = sf::IpAddress::getPublicAddress().toInteger();
+        int_ip = sf::IpAddress::getPublicAddress(sf::seconds(5.f)).toInteger();
         int_local_ip = sf::IpAddress::getLocalAddress().toInteger();
     }
 
@@ -140,6 +140,7 @@ namespace Actor
     {
         // Player(std::map<std::string, sf::Texture> textures, sf::Vector2f position, int int_ip, sf::Uint32 creation_time);
         int_ip = player.getIp();
+        int_local_ip = player.getLocalIp();
         last_update_time = player.getLastUpdateTime();
     }
 

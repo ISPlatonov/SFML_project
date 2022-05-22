@@ -1,5 +1,6 @@
 //#include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
+#include <SFML/System.hpp>
 #include <map>
 #include <string>
 #include <cstdlib>
@@ -74,7 +75,7 @@ int main()
     unsigned short port = 55000;
     unsigned short port_send = 54000;
     auto broadcast_ip = "77.73.71.158";
-    auto my_ip = sf::IpAddress::getPublicAddress();
+    auto my_ip = sf::IpAddress::getPublicAddress(sf::seconds(5.f));
     auto my_local_ip = sf::IpAddress::getLocalAddress();
     sf::IpAddress address_send(broadcast_ip);
     socket.setBlocking(false);
@@ -94,7 +95,7 @@ int main()
     sf::Font font;
     if (!font.loadFromFile("textures/89speedaffair.ttf"))
         return EXIT_FAILURE;
-    sf::Text text(my_local_ip.toString(), font, 30);
+    sf::Text text(my_ip.toString(), font, 30);
     text.setPosition(100, 100);
     text.setStyle(sf::Text::Bold);
     text.setFillColor(sf::Color::White);
@@ -154,8 +155,8 @@ int main()
             */
             //Mob::multiplayers_list.push_back(Actor::Actor(textures, multiplayer_position));
         }
-        for (size_t i = 0; i < Mob::multiplayers_list.size(); ++i)
-            Mob::multiplayers_list[i].setPosition(multiplayer_position);
+        //for (size_t i = 0; i < Mob::multiplayers_list.size(); ++i)
+        //    Mob::multiplayers_list[i].setPosition(multiplayer_position);
         
         
         data.clear();
