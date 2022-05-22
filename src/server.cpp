@@ -103,24 +103,34 @@ int main()
             auto status = socket.receive(data, address_receive, port_send);
             if (status != sf::Socket::Status::Done)
                 continue;
-            data >> new_position.x >> new_position.y >> msg_local_ip >> sent_time;
-            if (/*msg_ip == my_ip.toInteger() &&*/ msg_local_ip == my_local_ip.toInteger())
+	    
+            data >> new_position.x >> new_position.y >> msg_ip >> msg_local_ip >> sent_time;
+	    if (msg_ip == broadcast_ip.toInteger() && msg_local_ip == broadcast_ip.toInteger())
+                continue;
+            if (msg_ip == my_ip.toInteger() && msg_local_ip == my_local_ip.toInteger())
                 continue;
 
-            auto id = sf::IpAddress(msg_ip).toString() + sf::IpAddress(msg_local_ip).toString();
+            auto id = sf::IpAddress(msg_ip).toString() + ' ' + sf::IpAddress(msg_local_ip).toString();
+	    std::cout << "got new ip: " << id << std::endl;
 
             sf::Uint32 time_now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
             sf::Uint32 ping = time_now - sent_time;
+
+	    std::cout << "new msg" << std::endl << "ping: " << std::to_string(ping) << std::endl;
+
             if (player_pool.count(id))
-                if (ping > 5000000)
+	    {
+		std::cout << "player in pool" << std::endl;
+                if (ping > 50000000000)
                 {
                     player_pool.erase(id);
                     ip_pool.erase(id);
                 }
                 else
                     player_pool[id].updatePosition(new_position);
+	    }
             else
-                if (ping > 5000000)
+                if (ping > 50000000000)
                     continue;
                 else
                 {
@@ -133,7 +143,8 @@ int main()
         {
             data.clear();
             data << player_pool[ip].getPosition().x << player_pool[ip].getPosition().y << player_pool[ip].getIp() << player_pool[ip].getLocalIp() << player_pool[ip].getTime();
-            socket_send.send(data, address_send, port);
+	    std::cout << "dest. address: " << sf::IpAddress(player_pool[ip].getIp()).toString() << ' ' << sf::IpAddress(player_pool[ip].getLocalIp()).toString() << std::endl;
+            socket_send.send(data, sf::IpAddress(player_pool[ip].getIp()), port);
         }      
         
         data.clear();
