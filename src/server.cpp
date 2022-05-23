@@ -108,6 +108,8 @@ int main()
                 auto time = player_pool[id].getTime();
                 sf::Uint32 time_now = static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count());
                 int ping = static_cast<int>(time_now) - static_cast<int>(time);
+                if (!ip_pool.count(id))
+                    continue;
                 if (ping > MAX_PING)
                 {
                     player_pool.erase(id);
