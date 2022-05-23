@@ -168,4 +168,12 @@ namespace Actor
         check_direction(vector); 
         sprite.move(vector);
     }
+
+
+    sf::Packet& operator <<(sf::Packet& packet, const User& user)
+    {
+        auto position = user.getSprite().getPosition();
+        sf::Uint32 time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+        return packet << position.x << position.y << user.getIp() << user.getLocalIp() << time;
+    }
 }

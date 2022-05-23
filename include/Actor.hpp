@@ -53,7 +53,7 @@ namespace Actor
         const sf::View& getView() const;
         const int& getIp() const;
         const int& getLocalIp() const;        
-        
+
     private:
         sf::View view;
         int int_ip, int_local_ip;
@@ -77,4 +77,7 @@ namespace Actor
         sf::Uint32 last_update_time;
         int int_ip, int_local_ip;
     };
+
+
+    sf::Packet& operator <<(sf::Packet& packet, const User& user);
 }
