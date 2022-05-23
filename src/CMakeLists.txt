@@ -4,7 +4,6 @@ set(SOURCE_FILES main.cpp Actor.cpp WorldMap.cpp Controls.cpp LinearAlgebra.cpp 
 set(SERVER_SOURCE_FILES server.cpp Multiplayer.cpp)
 
 if (BUILD_ONLY_SERVER)
-    set(SERVER_SOURCE_FILES server.cpp)
     if(WIN32)
         add_executable(server WIN32 ${SERVER_SOURCE_FILES})
         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-Bstatic,--whole-archive -lwinpthread -Wl,--no-whole-archive")
