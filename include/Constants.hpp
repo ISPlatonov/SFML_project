@@ -11,7 +11,7 @@
 #define FRAMERATE_LIMIT size_t(60)
 #define STEP_SIZE_MULTIPLIER float(.05)
 
-#define TILE_SIZE /*size_t(8)*/ PIXEL_SIZE
+#define TILE_SIZE PIXEL_SIZE
 
 #define PORT_LISTEN size_t(55000)
 #define PORT_SEND size_t(55001)

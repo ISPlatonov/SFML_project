@@ -94,7 +94,8 @@ int main()
                 }
             }
 
-        for (auto id : ip_pool)
+        // NEED TO FIX!!!
+        /*for (auto id : ip_pool)
         {
             for (auto dest_ip : ip_pool)
             {
@@ -119,7 +120,37 @@ int main()
                 //std::cout << "dest. address: " << sf::IpAddress(player_pool[ip].getIp()).toString() << ' ' << sf::IpAddress(player_pool[ip].getLocalIp()).toString() << std::endl;
                 socket_send.send(data, sf::IpAddress(player_pool[dest_ip].getLocalIp()), port);
             }
-        }      
+        } */
+
+        for (auto iter = ip_pool.begin(); iter != ip_pool.end();)
+        {
+            auto x = player_pool[*iter].getPosition().x;
+            auto y = player_pool[*iter].getPosition().y;
+            auto ip = player_pool[*iter].getIp();
+            auto local_ip = player_pool[*iter].getLocalIp();
+            auto time = player_pool[*iter].getTime();
+            sf::Uint32 time_now = static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count());
+            int ping = static_cast<int>(time_now) - static_cast<int>(time);
+            //if (!ip_pool.count(*iter))
+            //    continue;
+            if (ping > MAX_PING)
+            {
+                player_pool.erase(*iter);
+                ip_pool.erase(*iter++);
+                continue;
+            }
+            for (auto dest_iter = ip_pool.begin(); iter != ip_pool.end();)
+            {
+                if (*dest_iter == *iter)
+                {
+                    ++iter;
+                    break;
+                }
+                data.clear();
+                data << x << y << ip << local_ip << time;
+                socket_send.send(data, sf::IpAddress(player_pool[*dest_iter].getLocalIp()), port);
+            }
+        }     
         
         data.clear();
 
