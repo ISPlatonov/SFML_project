@@ -43,9 +43,9 @@ int main()
         // needs another thread
         auto last_timepoint = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
 
-        for (size_t i = 0; i < ip_pool.size() + 1000; ++i)
+        for (size_t i = 0; i < ip_pool.size() + 10000; ++i)
         {
-            //data.clear();
+            data.clear();
             int msg_local_ip, msg_ip;
             sf::Uint32 sent_time;
             sf::Vector2f new_position;
@@ -92,7 +92,7 @@ int main()
                     player_pool[id] = Multiplayer::PlayerData(new_position, msg_ip, msg_local_ip, sent_time);
                     ip_pool.insert(id);
                 }
-            }
+        }
 
         // NEED TO FIX!!!
         /*for (auto id : ip_pool)
@@ -139,22 +139,23 @@ int main()
                 ip_pool.erase(*iter++);
                 continue;
             }
-            for (auto dest_iter = ip_pool.begin(); iter != ip_pool.end();)
+            for (auto dest_iter = ip_pool.begin(); dest_iter != ip_pool.end();)
             {
                 if (*dest_iter == *iter)
                 {
-                    ++iter;
-                    break;
+                    ++dest_iter;
+                    continue;
                 }
                 data.clear();
                 data << x << y << ip << local_ip << time;
-                socket_send.send(data, sf::IpAddress(player_pool[*dest_iter].getLocalIp()), port);
+                socket_send.send(data, sf::IpAddress(player_pool[*dest_iter++].getLocalIp()), port);
             }
+            ++iter;
         }     
         
         data.clear();
 
-        while (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count() - last_timepoint < 1);
+        //while (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count() - last_timepoint < 1);
     }
     return EXIT_SUCCESS;
 }

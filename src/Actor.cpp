@@ -176,4 +176,10 @@ namespace Actor
         sf::Uint32 time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
         return packet << position.x << position.y << user.getIp() << user.getLocalIp() << time;
     }
+
+
+    void Player::updateTime(const sf::Uint32& new_time)
+    {
+        last_update_time = new_time;
+    }
 }

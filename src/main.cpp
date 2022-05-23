@@ -135,7 +135,10 @@ int main()
                     ip_pool.erase(id);
                 }
                 else
+                {
                     player_pool[id].updatePosition(new_position);
+                    player_pool[id].updateTime(sent_time);
+                }
             else
                 if (ping > MAX_PING)
                     continue;
@@ -183,6 +186,12 @@ int main()
             {
                 player_pool.erase(*iter);
                 ip_pool.erase(*iter++);
+                continue;
+            }
+            else
+            {
+                ++iter;
+                continue;
             }
         }
         

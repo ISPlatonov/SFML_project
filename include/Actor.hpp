@@ -71,6 +71,7 @@ namespace Actor
         const int& getLocalIp() const;
         const sf::Uint32& getLastUpdateTime() const;
         void updatePosition(sf::Vector2f position);
+        void updateTime(const sf::Uint32& new_time);
         void move(const sf::Vector2f& vector);
 
     private:
