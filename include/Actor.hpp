@@ -7,6 +7,7 @@
 #include <string>
 #include "Constants.hpp"
 #include "LinearAlgebra.hpp"
+#include "Multiplayer.hpp"
 
 
 namespace Actor
@@ -16,10 +17,10 @@ namespace Actor
     public:
         Actor();
         Actor(const Actor&);
-        Actor(std::map<std::string, sf::Texture> textures, sf::Vector2f position);
-        void move_dt(sf::Vector2f direction, sf::Uint32 dt);
+        Actor(const std::map<std::string, sf::Texture>& textures, const sf::Vector2f& position);
+        void move_dt(const sf::Vector2f& direction, const sf::Uint32& dt);
         //void setPosition(sf::Vector2f p);
-        void check_direction(sf::Vector2f);
+        void check_direction(const sf::Vector2f&);
         const sf::Vector2f& getPosition() const;
         const sf::Sprite& getSprite() const;
         const std::map<std::string, sf::Texture>& getTextures() const;
@@ -38,7 +39,7 @@ namespace Actor
         using Actor::Actor;
 
     public:
-        void make_step(sf::Uint32 dt);
+        void make_step(const sf::Uint32& dt);
 
     private:
         sf::Vector2f prev_move_direction = linalg::normalize(sf::Vector2f(std::rand() % 10 - 10 / 2, std::rand() % 10 - 10 / 2));
@@ -48,8 +49,8 @@ namespace Actor
     class User : public Actor
     {
     public:
-        User(std::map<std::string, sf::Texture> textures, sf::Vector2f position);
-        void move_dt(sf::Vector2f direction, sf::Uint32 dt);
+        User(const std::map<std::string, sf::Texture>& textures, const sf::Vector2f& position);
+        void move_dt(const sf::Vector2f& direction, const sf::Uint32& dt);
         const sf::View& getView() const;
         const int& getIp() const;
         const int& getLocalIp() const;        
@@ -64,14 +65,15 @@ namespace Actor
     {
     public:
         // data << x << y << my_ip.toInteger() << my_local_ip.toInteger() << std::chrono::high_resolution_clock::now().time_since_epoch().count()
-        Player(std::map<std::string, sf::Texture> textures, sf::Vector2f position, int ip, int local_ip, sf::Uint32 creation_time);
+        Player(const std::map<std::string, sf::Texture>& textures, const sf::Vector2f& position, const int& ip, const int& local_ip, const sf::Uint32& creation_time);
         Player(const Player&);
+        Player(const Multiplayer::PlayerData&);
         Player();
         const int& getIp() const;
         const int& getLocalIp() const;
         const sf::Uint32& getLastUpdateTime() const;
-        void updatePosition(sf::Vector2f position);
-        void updateTime(const sf::Uint32& new_time);
+        void setPosition(const sf::Vector2f& position);
+        void setTime(const sf::Uint32& new_time);
         void move(const sf::Vector2f& vector);
 
     private:
@@ -80,5 +82,8 @@ namespace Actor
     };
 
 
+    std::map<std::string, sf::Texture> load_textures(std::string texture_dir_path);
+    
     sf::Packet& operator <<(sf::Packet& packet, const User& user);
+    Player& operator <<(Player& player, const Multiplayer::PlayerData& player_data);
 }

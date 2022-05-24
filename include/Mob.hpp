@@ -6,19 +6,6 @@
 #include "Actor.hpp"
 
 
-std::map<std::string, sf::Texture> load_textures(std::string texture_dir_path)
-{
-    // Load a sprite to display
-    std::map<std::string, sf::Texture> textures;
-    textures["left"] = sf::Texture();
-    textures["right"] = sf::Texture();
-    textures["left"].loadFromFile(texture_dir_path + "/left.png");
-    textures["right"].loadFromFile(texture_dir_path + "/right.png");
-
-    return textures;
-}
-
-
 namespace Mob
 {
     std::vector<Actor::Bot> mob_list;

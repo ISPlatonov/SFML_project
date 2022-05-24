@@ -9,20 +9,13 @@ namespace Actor
     }
 
 
-    Actor::Actor(std::map<std::string, sf::Texture> textures, sf::Vector2f position)
+    Actor::Actor(const std::map<std::string, sf::Texture>& textures, const sf::Vector2f& position)
     {
         this->textures = textures;
+        direction_x = "right";
         sprite.setPosition(position);
-        this->direction_x = "right";
-        sprite.setTexture(Actor::textures[this->direction_x]);
+        sprite.setTexture(this->textures[direction_x]);
         sprite.setScale(PIXEL_SIZE, PIXEL_SIZE);
-        /*
-        left = 0, 
-        right = 0, 
-        up = 0, 
-        down = 0;
-        last_action_timepoint = 0;
-        */
     }
 
 
@@ -32,7 +25,7 @@ namespace Actor
     }
 
 
-    void Actor::check_direction(sf::Vector2f direction)
+    void Actor::check_direction(const sf::Vector2f& direction)
     {
         if (direction.x > 0 && direction_x != "right")
             direction_x = "right";
@@ -40,11 +33,11 @@ namespace Actor
             direction_x = "left";
         else
             return;
-        sprite.setTexture(Actor::textures[direction_x]);
+        sprite.setTexture(textures[direction_x]);
     }
 
 
-    void Actor::move_dt(sf::Vector2f direction, sf::Uint32 dt)
+    void Actor::move_dt(const sf::Vector2f& direction, const sf::Uint32& dt)
     {
         check_direction(direction); 
         auto v = linalg::normalize(direction) * static_cast<float>(dt) * STEP_SIZE_MULTIPLIER * static_cast<float>(PIXEL_SIZE);
@@ -59,7 +52,7 @@ namespace Actor
     }
 
 
-    void User::move_dt(sf::Vector2f direction, sf::Uint32 dt)
+    void User::move_dt(const sf::Vector2f& direction, const sf::Uint32& dt)
     {
         check_direction(direction); 
         auto v = linalg::normalize(direction) * static_cast<float>(dt) * STEP_SIZE_MULTIPLIER * static_cast<float>(PIXEL_SIZE);
@@ -68,7 +61,7 @@ namespace Actor
     }
 
 
-    User::User(std::map<std::string, sf::Texture> textures, sf::Vector2f position) : Actor{textures, position}
+    User::User(const std::map<std::string, sf::Texture>& textures, const sf::Vector2f& position) : Actor(textures, position)
     {
         // make it static...
         view = sf::View(position + (getSprite().getLocalBounds().getSize() / 2.f), static_cast<sf::Vector2f>(WINDOW_SIZE * static_cast<unsigned int>(PIXEL_SIZE)));
@@ -83,14 +76,14 @@ namespace Actor
     }
 
 
-    void Bot::make_step(sf::Uint32 dt)
+    void Bot::make_step(const sf::Uint32& dt)
     {
         prev_move_direction = linalg::normalize(linalg::normalize(sf::Vector2f(std::rand() % 11 - 11 / 2, std::rand() % 11 - 11 / 2)) * .2f + prev_move_direction * .8f);
         move_dt(prev_move_direction, dt);
     }
 
 
-    Player::Player(std::map<std::string, sf::Texture> textures, sf::Vector2f position, int int_ip, int int_local_ip, sf::Uint32 creation_time) : Actor{textures, position}
+    Player::Player(const std::map<std::string, sf::Texture>& textures, const sf::Vector2f& position, const int& int_ip, const int& int_local_ip, const sf::Uint32& creation_time) : Actor(textures, position)
     {
         this->int_ip = int_ip;
         this->int_local_ip = int_local_ip;
@@ -128,7 +121,7 @@ namespace Actor
     }
 
 
-    void Player::updatePosition(sf::Vector2f position)
+    void Player::setPosition(const sf::Vector2f& position)
     {
         auto prev_position = getSprite().getPosition();
         auto move_vector = position - prev_position;
@@ -136,7 +129,7 @@ namespace Actor
     }
 
 
-    Player::Player(const Player& player) : Actor{player}
+    Player::Player(const Player& player) : Actor(player)
     {
         // Player(std::map<std::string, sf::Texture> textures, sf::Vector2f position, int int_ip, sf::Uint32 creation_time);
         int_ip = player.getIp();
@@ -145,13 +138,13 @@ namespace Actor
     }
 
 
-    Actor::Actor(const Actor& actor) : Actor{actor.getTextures(), actor.getSprite().getPosition()}
+    Actor::Actor(const Actor& actor) : Actor(actor.getTextures(), actor.getSprite().getPosition())
     {
         
     }
 
 
-    Player::Player() : Actor{}
+    Player::Player() : Actor()
     {
 
     }
@@ -178,8 +171,37 @@ namespace Actor
     }
 
 
-    void Player::updateTime(const sf::Uint32& new_time)
+    void Player::setTime(const sf::Uint32& new_time)
     {
         last_update_time = new_time;
+    }
+
+
+    std::map<std::string, sf::Texture> load_textures(std::string texture_dir_path)
+    {
+        // Load a sprite to display
+        std::map<std::string, sf::Texture> textures;
+        textures["left"] = sf::Texture();
+        textures["right"] = sf::Texture();
+        textures["left"].loadFromFile(texture_dir_path + "/left.png");
+        textures["right"].loadFromFile(texture_dir_path + "/right.png");
+
+        return textures;
+    }
+
+
+    // ip and local_ip won't be changed
+    Player& operator <<(Player& player, const Multiplayer::PlayerData& player_data)
+    {
+        player.setPosition(player_data.getPosition());
+        player.setTime(player_data.getTime());
+        return player;
+    }
+
+
+    // !!! rewrite PlayerData!!!
+    Player::Player(const Multiplayer::PlayerData& player_data) : Player(load_textures("textures/actors/Guy_16x32"), player_data.getPosition(), player_data.getIp(), player_data.getLocalIp(), player_data.getTime())
+    {
+
     }
 }

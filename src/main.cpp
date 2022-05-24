@@ -22,8 +22,8 @@ int main()
     sf::RenderWindow window(sf::VideoMode(WINDOW_SIZE_X * PIXEL_SIZE, WINDOW_SIZE_Y * PIXEL_SIZE), "SFML window");
     window.setFramerateLimit(FRAMERATE_LIMIT);
 
-    auto textures = load_textures("textures/actors/Guy_16x32");
-    Actor::User user(load_textures("textures/actors/Guy_16x32"), sf::Vector2f(0, 0) * static_cast<float>(PIXEL_SIZE));
+    auto textures = Actor::load_textures("textures/actors/Guy_16x32");
+    Actor::User user(Actor::load_textures("textures/actors/Guy_16x32"), sf::Vector2f(0, 0) * static_cast<float>(PIXEL_SIZE));
 
     window.setView(user.getView());
 
@@ -68,128 +68,56 @@ int main()
     // Play the music
     music.play();
     */
-
-
-    sf::UdpSocket socket;
-    sf::UdpSocket socket_send;
-    unsigned short port = PORT_LISTEN;
-    unsigned short port_send = PORT_SEND;
-    auto broadcast_ip = SERVER_IP;
-    auto my_ip = sf::IpAddress::getPublicAddress(sf::seconds(5.f));
-    auto my_local_ip = sf::IpAddress::getLocalAddress();
-    sf::IpAddress address_send(broadcast_ip);
-    socket.setBlocking(false);
-    sf::IpAddress address_receive(my_local_ip);
-    // bind the socket to a port
-    if (socket.bind(port) != sf::Socket::Done)
-        return EXIT_FAILURE;
-    if (socket_send.bind(port_send) != sf::Socket::Done)
-        return EXIT_FAILURE;
+    
+    auto UdpManager = Multiplayer::UdpManager(sf::IpAddress::getLocalAddress(), sf::IpAddress(SERVER_IP));
 
     for (size_t i = 0; i < 15; ++i)
-        Mob::mob_list.push_back(Actor::Bot(load_textures("textures/actors/Guy_16x32"), sf::Vector2f(std::rand() % WINDOW_SIZE_X, std::rand() % WINDOW_SIZE_Y) * static_cast<float>(PIXEL_SIZE)));
+        Mob::mob_list.push_back(Actor::Bot(Actor::load_textures("textures/actors/Guy_16x32"), sf::Vector2f(std::rand() % WINDOW_SIZE_X, std::rand() % WINDOW_SIZE_Y) * static_cast<float>(PIXEL_SIZE)));
 
     Controls::setLastActionTimepoint();
     // Start the game loop
 
-    sf::Font font;
+    /*sf::Font font;
     if (!font.loadFromFile("textures/89speedaffair.ttf"))
         return EXIT_FAILURE;
     sf::Text text(my_ip.toString(), font, 30);
     text.setPosition(100, 100);
     text.setStyle(sf::Text::Bold);
-    text.setFillColor(sf::Color::White);
+    text.setFillColor(sf::Color::White);*/
 
     sf::Packet data;
-    sf::Vector2f multiplayer_position;
-    // int ip, Actor::Player player
     std::map<std::string, Actor::Player> player_pool;
-    std::set<std::string> ip_pool;
 
     while (window.isOpen())
     {
         // needs another thread
-        //Mob::multiplayers_list.clear();
-        for (size_t i = 0; i < player_pool.size() + 1000; ++i)
+        // receiving
+        for (size_t i = 0; i < player_pool.size() + UDP_PACKETS_GAP; ++i)
         {
-            //data.clear();
-            int msg_local_ip, msg_ip;
-            sf::Uint32 sent_time;
-            sf::Vector2f new_position;
-            auto status = socket.receive(data, address_receive, port_send);
-            if (status != sf::Socket::Status::Done)
-                continue;
-            data >> new_position.x >> new_position.y >> msg_ip >> msg_local_ip >> sent_time;
-            //if (msg_ip == my_ip.toInteger() && msg_local_ip == my_local_ip.toInteger())
-            //    continue;
-            
-            auto id = sf::IpAddress(msg_ip).toString() + sf::IpAddress(msg_local_ip).toString();
-
-            sf::Uint32 time_now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-            int ping = static_cast<int>(time_now) - static_cast<int>(sent_time);
-            text.setString(std::to_string(time_now) + '\n' + std::to_string(sent_time) + '\n' + std::to_string(ping));
-            if (player_pool.count(id))
-                if (ping > MAX_PING)
-                {
-                    player_pool.erase(id);
-                    ip_pool.erase(id);
-                }
-                else
-                {
-                    player_pool[id].updatePosition(new_position);
-                    player_pool[id].updateTime(sent_time);
-                }
-            else
-                if (ping > MAX_PING)
-                    continue;
-                else
-                {
-                    player_pool[id] = Actor::Player(textures, new_position, msg_ip, msg_local_ip, sent_time);
-                    ip_pool.insert(id);
-                }
-
-            /*if (std::chrono::high_resolution_clock::now().time_since_epoch().count() - sent_time > 1000000000)
-                if (player_pool.count(msg_local_ip))
-                    player_pool.erase(msg_local_ip);
-                else
-                    continue;
-            */
-            //Mob::multiplayers_list.push_back(Actor::Actor(textures, multiplayer_position));
+            UdpManager.receive();
         }
-        //for (size_t i = 0; i < Mob::multiplayers_list.size(); ++i)
-        //    Mob::multiplayers_list[i].setPosition(multiplayer_position);
-        /*for (auto id : ip_pool)
-        {
-            auto time = player_pool[id].getLastUpdateTime();
-            sf::Uint32 time_now = static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count());
-            int ping = static_cast<int>(time_now) - static_cast<int>(time);
-            if (!ip_pool.count(id))
-                continue;
-            if (ping > MAX_PING)
-            {
-                player_pool.erase(id);
-                ip_pool.erase(id);
-            }
-        }*/
 
-        for (auto iter = ip_pool.begin(); iter != ip_pool.end();)
+        // handling player_data_pool
+        for (auto iter = UdpManager.getPlayerDataPool().begin(); iter != UdpManager.getPlayerDataPool().end();)
         {
-            auto time = player_pool[*iter].getLastUpdateTime();
+            auto time = (*iter).second.getTime();
             sf::Uint32 time_now = static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count());
             int ping = static_cast<int>(time_now) - static_cast<int>(time);
-            if (!ip_pool.count(*iter))
+            if (!player_pool.count((*iter).first))
             {
+                player_pool[(*iter).first] = Actor::Player((*iter).second);
                 ++iter;
                 continue;
             }
             else if (ping > MAX_PING)
             {
-                player_pool.erase(*iter);
-                ip_pool.erase(*iter++);
+                player_pool.erase((*iter).first);
+                UdpManager.removePlayerById((*iter++).first);
                 continue;
             }
             else
             {
+                player_pool[(*iter).first] << (*iter).second;
                 ++iter;
                 continue;
             }
@@ -198,12 +126,7 @@ int main()
         data.clear();
         if (!(data << user))
             return EXIT_FAILURE;
-        socket_send.send(data, address_send, port);
-
-        //text.setString(std::to_string(multiplayer_position.x) + ' ' + std::to_string(multiplayer_position.y));
-        //text.setString(/*my_ip.toString() + ", " +*/ my_local_ip.toString());
-        
-
+        UdpManager.send(data);
 
         // Process events
         sf::Event event;
@@ -212,8 +135,6 @@ int main()
             // Close window: exit
             if (event.type == sf::Event::Closed)
                 window.close();
-            
-            // boba
             Controls::addEvent(event);
         }
         auto direction = Controls::getDirection();
@@ -230,11 +151,11 @@ int main()
         window.draw(map);
         for (const auto& bot : Mob::mob_list)
             window.draw(bot.getSprite());
-        for (const auto& id : ip_pool)
-            window.draw(player_pool[id].getSprite());
+        for (const auto& player : player_pool)
+            window.draw(player.second.getSprite());
         window.draw(user.getSprite());
         // Draw the string
-        window.draw(text);
+        //window.draw(text);
 
         window.setView(user.getView());
         // Update the window

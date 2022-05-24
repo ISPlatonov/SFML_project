@@ -1,6 +1,6 @@
 include_directories(${SFML_project_SOURCE_DIR}/include)
 
-set(SOURCE_FILES main.cpp Actor.cpp WorldMap.cpp Controls.cpp LinearAlgebra.cpp Multiplayer.cpp)
+set(SOURCE_FILES main.cpp Multiplayer.cpp Actor.cpp WorldMap.cpp Controls.cpp LinearAlgebra.cpp)
 set(SERVER_SOURCE_FILES server.cpp Multiplayer.cpp)
 
 if (BUILD_SERVER_ONLY)

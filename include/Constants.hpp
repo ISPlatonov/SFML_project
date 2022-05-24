@@ -13,7 +13,9 @@
 
 #define TILE_SIZE PIXEL_SIZE
 
+// Network
 #define PORT_LISTEN size_t(55000)
 #define PORT_SEND size_t(55001)
 #define SERVER_IP std::string("77.73.71.158")
 #define MAX_PING int(5000)
+#define UDP_PACKETS_GAP size_t(1000)
