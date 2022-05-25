@@ -19,6 +19,16 @@ namespace Actor
     }
 
 
+    Actor::Actor(std::map<std::string, sf::Texture>&& textures, sf::Vector2f&& position)
+    {
+        this->textures = std::move(textures);
+        direction_x = "right";
+        sprite.setPosition(position);
+        sprite.setTexture(this->textures[direction_x]);
+        sprite.setScale(PIXEL_SIZE, PIXEL_SIZE);
+    }
+
+
     const sf::Sprite& Actor::getSprite() const
     {
         return sprite;
@@ -67,6 +77,14 @@ namespace Actor
         view = sf::View(position + (getSprite().getLocalBounds().getSize() / 2.f), static_cast<sf::Vector2f>(WINDOW_SIZE * static_cast<unsigned int>(PIXEL_SIZE)));
         int_ip = sf::IpAddress::getPublicAddress(sf::seconds(5.f)).toInteger();
         int_local_ip = sf::IpAddress::getLocalAddress().toInteger();
+    }
+
+
+    User::User(std::map<std::string, sf::Texture>&& textures, sf::Vector2f&& position) : Actor(textures, position)
+    {
+        view = std::move(sf::View(position + (getSprite().getLocalBounds().getSize() / 2.f), static_cast<sf::Vector2f>(WINDOW_SIZE * static_cast<unsigned int>(PIXEL_SIZE))));
+        int_ip = std::move(sf::IpAddress::getPublicAddress(sf::seconds(5.f)).toInteger());
+        int_local_ip = std::move(sf::IpAddress::getLocalAddress().toInteger());
     }
 
 
@@ -123,7 +141,7 @@ namespace Actor
 
     void Player::setPosition(const sf::Vector2f& position)
     {
-        auto prev_position = getSprite().getPosition();
+        auto prev_position = getPosition();
         auto move_vector = position - prev_position;
         move(move_vector);
     }
@@ -138,9 +156,15 @@ namespace Actor
     }
 
 
-    Actor::Actor(const Actor& actor) : Actor(actor.getTextures(), actor.getSprite().getPosition())
+    Actor::Actor(const Actor& actor) : Actor(actor.getTextures(), actor.getPosition())
     {
         
+    }
+
+
+    const sf::Vector2f& Actor::getPosition() const
+    {
+        return getSprite().getPosition();
     }
 
 
@@ -165,7 +189,7 @@ namespace Actor
 
     sf::Packet& operator <<(sf::Packet& packet, const User& user)
     {
-        auto position = user.getSprite().getPosition();
+        auto position = user.getPosition();
         sf::Uint32 time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
         return packet << position.x << position.y << user.getIp() << user.getLocalIp() << time;
     }
@@ -177,16 +201,16 @@ namespace Actor
     }
 
 
-    std::map<std::string, sf::Texture> load_textures(std::string texture_dir_path)
+    std::map<std::string, sf::Texture>&& load_textures(const std::string& texture_dir_path)
     {
         // Load a sprite to display
-        std::map<std::string, sf::Texture> textures;
-        textures["left"] = sf::Texture();
-        textures["right"] = sf::Texture();
-        textures["left"].loadFromFile(texture_dir_path + "/left.png");
-        textures["right"].loadFromFile(texture_dir_path + "/right.png");
+        std::map<std::string, sf::Texture>* textures = new std::map<std::string, sf::Texture>;
+        (*textures)["left"] = sf::Texture();
+        (*textures)["right"] = sf::Texture();
+        (*textures)["left"].loadFromFile(texture_dir_path + "/left.png");
+        (*textures)["right"].loadFromFile(texture_dir_path + "/right.png");
 
-        return textures;
+        return std::move(*textures);
     }
 
 

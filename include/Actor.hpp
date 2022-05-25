@@ -18,6 +18,7 @@ namespace Actor
         Actor();
         Actor(const Actor&);
         Actor(const std::map<std::string, sf::Texture>& textures, const sf::Vector2f& position);
+        Actor(std::map<std::string, sf::Texture>&& textures, sf::Vector2f&& position);
         void move_dt(const sf::Vector2f& direction, const sf::Uint32& dt);
         //void setPosition(sf::Vector2f p);
         void check_direction(const sf::Vector2f&);
@@ -50,6 +51,7 @@ namespace Actor
     {
     public:
         User(const std::map<std::string, sf::Texture>& textures, const sf::Vector2f& position);
+        User(std::map<std::string, sf::Texture>&& textures, sf::Vector2f&& position);
         void move_dt(const sf::Vector2f& direction, const sf::Uint32& dt);
         const sf::View& getView() const;
         const int& getIp() const;
@@ -82,7 +84,7 @@ namespace Actor
     };
 
 
-    std::map<std::string, sf::Texture> load_textures(std::string texture_dir_path);
+    std::map<std::string, sf::Texture>&& load_textures(const std::string& texture_dir_path);
     
     sf::Packet& operator <<(sf::Packet& packet, const User& user);
     Player& operator <<(Player& player, const Multiplayer::PlayerData& player_data);
