@@ -55,8 +55,8 @@ int main()
     WorldMap::ObjectMap ObjectMap;
     //auto apple = WorldMap::Object("textures/objects/apple", sf::Vector2f(100, 100), WorldMap::Passability::background);
     ObjectMap.insert(std::make_pair<WorldMap::Passability, WorldMap::Object>(WorldMap::Passability::background, WorldMap::Object("textures/objects/apple", sf::Vector2f(1000, 1000), WorldMap::Passability::background)));
-    ObjectMap.insert(std::make_pair<WorldMap::Passability, WorldMap::Object>(WorldMap::Passability::foreground, WorldMap::Object("textures/objects/apple", sf::Vector2f(500, 500), WorldMap::Passability::foreground)));
-    ObjectMap.insert(std::make_pair<WorldMap::Passability, WorldMap::Object>(WorldMap::Passability::impassible, WorldMap::Object("textures/objects/apple", sf::Vector2f(400, 400), WorldMap::Passability::impassible)));
+    ObjectMap.insert(std::make_pair<WorldMap::Passability, WorldMap::Object>(WorldMap::Passability::foreground, WorldMap::Object("textures/objects/grass", sf::Vector2f(200, 200), WorldMap::Passability::foreground)));
+    ObjectMap.insert(std::make_pair<WorldMap::Passability, WorldMap::Object>(WorldMap::Passability::impassible, WorldMap::Object("textures/objects/wooden_wall", sf::Vector2f(400, 400), WorldMap::Passability::impassible)));
     /*
     // Create a graphical text to display
     sf::Font font;
@@ -142,15 +142,10 @@ int main()
             Controls::addEvent(event);
         }
         auto direction = Controls::getDirection();
-        
         auto dt = Controls::getDeltaTime();
-        {
-            auto v = linalg::normalize(direction) * static_cast<float>(dt) * STEP_SIZE_MULTIPLIER * static_cast<float>(PIXEL_SIZE);
-            //text.setString(std::to_string(v.x) + ' ' + std::to_string(v.y));
-        }
         user.move_dt(direction, dt, ObjectMap);
         for (size_t i = 0; i < Mob::mob_list.size(); ++i)
-            Mob::mob_list[i].make_step(dt);
+            Mob::mob_list[i].make_step(dt, ObjectMap);
         
         Controls::setLastActionTimepoint();
         // Clear screen

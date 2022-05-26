@@ -47,15 +47,16 @@ namespace Actor
     }
 
 
-    void Actor::move_dt(const sf::Vector2f& direction, const sf::Uint32& dt, const WorldMap::ObjectMap& ObjectMap)
+    sf::Vector2f&& Actor::move_dt(const sf::Vector2f& direction, const sf::Uint32& dt, const WorldMap::ObjectMap& ObjectMap)
     {
         check_direction(direction); 
-        auto v = linalg::normalize(direction) * static_cast<float>(dt) * STEP_SIZE_MULTIPLIER * static_cast<float>(PIXEL_SIZE);
+        auto v = new sf::Vector2f(linalg::normalize(direction) * static_cast<float>(dt) * STEP_SIZE_MULTIPLIER * static_cast<float>(PIXEL_SIZE));
         for (const auto& object : ObjectMap)
         {
-            object.second.check_collision(v, object.second.getSprite().getGlobalBounds());
+            object.second.check_collision(*v, this->getSprite().getGlobalBounds());
         }
-        sprite.move(v);
+        sprite.move(*v);
+        return std::move(*v);
     }
 
 
@@ -66,16 +67,11 @@ namespace Actor
     }
 
 
-    void User::move_dt(const sf::Vector2f& direction, const sf::Uint32& dt, const WorldMap::ObjectMap& ObjectMap)
+    sf::Vector2f&& User::move_dt(const sf::Vector2f& direction, const sf::Uint32& dt, const WorldMap::ObjectMap& ObjectMap)
     {
-        check_direction(direction); 
-        auto v = linalg::normalize(direction) * static_cast<float>(dt) * STEP_SIZE_MULTIPLIER * static_cast<float>(PIXEL_SIZE);
-        for (const auto& object : ObjectMap)
-        {
-            object.second.check_collision(v, this->getSprite().getGlobalBounds());
-        }
-        sprite.move(v);
-        view.move(v);
+        auto v = new sf::Vector2f(Actor::move_dt(direction, dt, ObjectMap));
+        view.move(*v);
+        return std::move(*v);
     }
 
 
@@ -102,10 +98,10 @@ namespace Actor
     }
 
 
-    void Bot::make_step(const sf::Uint32& dt)
+    void Bot::make_step(const sf::Uint32& dt, const WorldMap::ObjectMap& ObjectMap)
     {
         prev_move_direction = linalg::normalize(linalg::normalize(sf::Vector2f(std::rand() % 11 - 11 / 2, std::rand() % 11 - 11 / 2)) * .2f + prev_move_direction * .8f);
-        move_dt(prev_move_direction, dt);
+        move_dt(prev_move_direction, dt, ObjectMap);
     }
 
 

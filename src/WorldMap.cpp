@@ -169,6 +169,7 @@ namespace WorldMap
                 {
                     vector.x = 0;
                     vector.y = 0;
+                    return;
                 }
             }
             this->check_collision(vector, rect, ++depth);

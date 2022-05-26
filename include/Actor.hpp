@@ -20,7 +20,7 @@ namespace Actor
         Actor(const Actor&);
         Actor(const std::map<std::string, sf::Texture>& textures, const sf::Vector2f& position);
         Actor(std::map<std::string, sf::Texture>&& textures, sf::Vector2f&& position);
-        void move_dt(const sf::Vector2f& direction, const sf::Uint32& dt, const WorldMap::ObjectMap& ObjectMap = {});
+        sf::Vector2f&& move_dt(const sf::Vector2f& direction, const sf::Uint32& dt, const WorldMap::ObjectMap& ObjectMap = {});
         //void setPosition(sf::Vector2f p);
         void check_direction(const sf::Vector2f&);
         const sf::Vector2f& getPosition() const;
@@ -38,10 +38,9 @@ namespace Actor
 
     class Bot : public Actor
     {
-        using Actor::Actor;
-
     public:
-        void make_step(const sf::Uint32& dt);
+        using Actor::Actor;
+        void make_step(const sf::Uint32& dt, const WorldMap::ObjectMap& ObjectMap = {});
 
     private:
         sf::Vector2f prev_move_direction = linalg::normalize(sf::Vector2f(std::rand() % 10 - 10 / 2, std::rand() % 10 - 10 / 2));
@@ -53,7 +52,7 @@ namespace Actor
     public:
         User(const std::map<std::string, sf::Texture>& textures, const sf::Vector2f& position);
         User(std::map<std::string, sf::Texture>&& textures, sf::Vector2f&& position);
-        void move_dt(const sf::Vector2f& direction, const sf::Uint32& dt, const WorldMap::ObjectMap& ObjectMap = {});
+        sf::Vector2f&& move_dt(const sf::Vector2f& direction, const sf::Uint32& dt, const WorldMap::ObjectMap& ObjectMap = {});
         const sf::View& getView() const;
         const int& getIp() const;
         const int& getLocalIp() const;        
