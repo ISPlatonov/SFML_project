@@ -8,6 +8,7 @@
 #include "Constants.hpp"
 #include "LinearAlgebra.hpp"
 #include "Multiplayer.hpp"
+#include "WorldMap.hpp"
 
 
 namespace Actor
@@ -19,7 +20,7 @@ namespace Actor
         Actor(const Actor&);
         Actor(const std::map<std::string, sf::Texture>& textures, const sf::Vector2f& position);
         Actor(std::map<std::string, sf::Texture>&& textures, sf::Vector2f&& position);
-        void move_dt(const sf::Vector2f& direction, const sf::Uint32& dt);
+        void move_dt(const sf::Vector2f& direction, const sf::Uint32& dt, const WorldMap::ObjectMap& ObjectMap = {});
         //void setPosition(sf::Vector2f p);
         void check_direction(const sf::Vector2f&);
         const sf::Vector2f& getPosition() const;
@@ -52,7 +53,7 @@ namespace Actor
     public:
         User(const std::map<std::string, sf::Texture>& textures, const sf::Vector2f& position);
         User(std::map<std::string, sf::Texture>&& textures, sf::Vector2f&& position);
-        void move_dt(const sf::Vector2f& direction, const sf::Uint32& dt);
+        void move_dt(const sf::Vector2f& direction, const sf::Uint32& dt, const WorldMap::ObjectMap& ObjectMap = {});
         const sf::View& getView() const;
         const int& getIp() const;
         const int& getLocalIp() const;        

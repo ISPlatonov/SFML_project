@@ -49,10 +49,14 @@ int main()
     };
 
     // create the tilemap from the level definition
-    TileMap map;
-    if (!map.load("textures/terrain.png", sf::Vector2u(16, 16), level, 8, 16))
-        return EXIT_FAILURE;
+    WorldMap::TileMap map("textures/terrain.png", sf::Vector2u(16, 16), level, 8, 16);
 
+    // create objects
+    WorldMap::ObjectMap ObjectMap;
+    //auto apple = WorldMap::Object("textures/objects/apple", sf::Vector2f(100, 100), WorldMap::Passability::background);
+    ObjectMap.insert(std::make_pair<WorldMap::Passability, WorldMap::Object>(WorldMap::Passability::background, WorldMap::Object("textures/objects/apple", sf::Vector2f(1000, 1000), WorldMap::Passability::background)));
+    ObjectMap.insert(std::make_pair<WorldMap::Passability, WorldMap::Object>(WorldMap::Passability::foreground, WorldMap::Object("textures/objects/apple", sf::Vector2f(500, 500), WorldMap::Passability::foreground)));
+    ObjectMap.insert(std::make_pair<WorldMap::Passability, WorldMap::Object>(WorldMap::Passability::impassible, WorldMap::Object("textures/objects/apple", sf::Vector2f(400, 400), WorldMap::Passability::impassible)));
     /*
     // Create a graphical text to display
     sf::Font font;
@@ -80,7 +84,7 @@ int main()
     /*sf::Font font;
     if (!font.loadFromFile("textures/89speedaffair.ttf"))
         return EXIT_FAILURE;
-    sf::Text text(my_ip.toString(), font, 30);
+    sf::Text text("hi", font, 30);
     text.setPosition(100, 100);
     text.setStyle(sf::Text::Bold);
     text.setFillColor(sf::Color::White);*/
@@ -140,7 +144,11 @@ int main()
         auto direction = Controls::getDirection();
         
         auto dt = Controls::getDeltaTime();
-        user.move_dt(direction, dt);
+        {
+            auto v = linalg::normalize(direction) * static_cast<float>(dt) * STEP_SIZE_MULTIPLIER * static_cast<float>(PIXEL_SIZE);
+            //text.setString(std::to_string(v.x) + ' ' + std::to_string(v.y));
+        }
+        user.move_dt(direction, dt, ObjectMap);
         for (size_t i = 0; i < Mob::mob_list.size(); ++i)
             Mob::mob_list[i].make_step(dt);
         
@@ -149,11 +157,22 @@ int main()
         window.clear();
         // Draw the sprite
         window.draw(map);
+        for (auto pass : {WorldMap::Passability::background, WorldMap::Passability::impassible})
+        {
+            auto range = ObjectMap.equal_range(pass);
+            while (range.first != range.second)
+                window.draw((*(range.first++)).second);
+        }
         for (const auto& bot : Mob::mob_list)
             window.draw(bot.getSprite());
         for (const auto& player : player_pool)
             window.draw(player.second.getSprite());
         window.draw(user.getSprite());
+        {
+            auto range = ObjectMap.equal_range(WorldMap::Passability::foreground);
+            while (range.first != range.second)
+                window.draw((*(range.first++)).second);
+        }
         // Draw the string
         //window.draw(text);
 

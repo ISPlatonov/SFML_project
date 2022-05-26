@@ -10,6 +10,7 @@
 //#define WORK_SPACE sf::Rect(16, 8, 96, 48)
 #define FRAMERATE_LIMIT size_t(60)
 #define STEP_SIZE_MULTIPLIER float(.05)
+#define MAX_RECURSION_DEPTH size_t(15)
 
 #define TILE_SIZE PIXEL_SIZE
 

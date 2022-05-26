@@ -47,10 +47,14 @@ namespace Actor
     }
 
 
-    void Actor::move_dt(const sf::Vector2f& direction, const sf::Uint32& dt)
+    void Actor::move_dt(const sf::Vector2f& direction, const sf::Uint32& dt, const WorldMap::ObjectMap& ObjectMap)
     {
         check_direction(direction); 
         auto v = linalg::normalize(direction) * static_cast<float>(dt) * STEP_SIZE_MULTIPLIER * static_cast<float>(PIXEL_SIZE);
+        for (const auto& object : ObjectMap)
+        {
+            object.second.check_collision(v, object.second.getSprite().getGlobalBounds());
+        }
         sprite.move(v);
     }
 
@@ -62,10 +66,14 @@ namespace Actor
     }
 
 
-    void User::move_dt(const sf::Vector2f& direction, const sf::Uint32& dt)
+    void User::move_dt(const sf::Vector2f& direction, const sf::Uint32& dt, const WorldMap::ObjectMap& ObjectMap)
     {
         check_direction(direction); 
         auto v = linalg::normalize(direction) * static_cast<float>(dt) * STEP_SIZE_MULTIPLIER * static_cast<float>(PIXEL_SIZE);
+        for (const auto& object : ObjectMap)
+        {
+            object.second.check_collision(v, this->getSprite().getGlobalBounds());
+        }
         sprite.move(v);
         view.move(v);
     }
