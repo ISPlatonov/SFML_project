@@ -4,34 +4,17 @@ set(SOURCE_FILES main.cpp Multiplayer.cpp Actor.cpp WorldMap.cpp Controls.cpp Li
 set(SERVER_SOURCE_FILES server.cpp Multiplayer.cpp)
 
 if (BUILD_SERVER_ONLY)
-    if(WIN32)
-        add_executable(server WIN32 ${SERVER_SOURCE_FILES})
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-Bstatic,--whole-archive -lwinpthread -Wl,--no-whole-archive")
-        set(CMAKE_CXX_STANDARD_LIBRARIES "-static-libgcc -static-libstdc++ -lwsock32 -lws2_32 ${CMAKE_CXX_STANDARD_LIBRARIES}")
-    else()
-        add_executable(server ${SERVER_SOURCE_FILES})
-    endif()
-
-    set(CMAKE_CXX_STANDARD_LIBRARIES "-static-libgcc -static-libstdc++ ${CMAKE_CXX_STANDARD_LIBRARIES}")
+    add_executable(server ${SERVER_SOURCE_FILES})
 
     find_package(SFML 2 REQUIRED COMPONENTS network system)
     target_link_libraries(server sfml-network sfml-system)
 
-    install(TARGETS server DESTINATION ${CMAKE_BINARY_DIR}/build)
+    install(TARGETS server DESTINATION ${CMAKE_SOURCE_DIR}/bin)
 
 
 else()
-    if(WIN32)
-        add_executable(SFML_project WIN32 ${SOURCE_FILES})
-        add_executable(server WIN32 ${SERVER_SOURCE_FILES})
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-Bstatic,--whole-archive -lwinpthread -Wl,--no-whole-archive")
-        set(CMAKE_CXX_STANDARD_LIBRARIES "-static-libgcc -static-libstdc++ -lwsock32 -lws2_32 ${CMAKE_CXX_STANDARD_LIBRARIES}")
-    else()
-        add_executable(SFML_project ${SOURCE_FILES})
-        add_executable(server ${SERVER_SOURCE_FILES})
-    endif()
-
-    set(CMAKE_CXX_STANDARD_LIBRARIES "-static-libgcc -static-libstdc++ ${CMAKE_CXX_STANDARD_LIBRARIES}")
+    add_executable(SFML_project ${SOURCE_FILES})
+    add_executable(server ${SERVER_SOURCE_FILES})
 
     target_include_directories(SFML_project PUBLIC include)
 
@@ -43,6 +26,7 @@ else()
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/textures $<TARGET_FILE_DIR:SFML_project>/textures)
 
-    install(TARGETS SFML_project server DESTINATION ${CMAKE_BINARY_DIR}/build)
+    install(TARGETS SFML_project server DESTINATION ${CMAKE_SOURCE_DIR}/bin)
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/textures DESTINATION ${CMAKE_SOURCE_DIR}/bin)
 
 endif()
