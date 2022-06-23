@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 
+
 namespace WorldMap
 {
     enum Passability
@@ -61,4 +62,13 @@ namespace WorldMap
 
     using ObjectMap = std::multimap<Passability, Object>;
 
+
+    class WorldMap
+    {
+    public:
+        static TileMap map;
+
+    private:
+        WorldMap();
+    };
 }

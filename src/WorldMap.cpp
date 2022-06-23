@@ -3,6 +3,30 @@
 
 namespace WorldMap
 {
+    // define the level with an array of tile indices
+    const int level[] =
+    {
+        2, 2, 2, 2, 2, 2, 2, 2,
+        2, 2, 2, 1, 1, 2, 2, 2,
+        2, 2, 1, 2, 32, 32, 1, 2,
+        2, 2, 1, 1, 1, 1, 1, 2,
+        2, 2, 2, 2, 2, 2, 2, 2,
+        2, 2, 2, 207, 207, 2, 2, 2,
+        2, 2, 2, 2, 207, 2, 2, 2,
+        2, 2, 2, 2, 2, 2, 2, 2,
+        2, 2, 2, 2, 2, 2, 2, 2,
+        2, 2, 2, 1, 1, 2, 2, 2,
+        2, 2, 1, 2, 32, 32, 1, 2,
+        2, 2, 1, 1, 1, 1, 1, 2,
+        2, 2, 2, 2, 2, 2, 2, 2,
+        2, 2, 2, 207, 207, 2, 2, 2,
+        2, 2, 2, 2, 207, 2, 2, 2,
+        2, 2, 2, 2, 2, 2, 2, 2,
+    };
+
+    TileMap WorldMap::map("textures/terrain.png", sf::Vector2u(16, 16), level, 8, 16);
+
+
     TileMap::TileMap(const std::string& tileset, sf::Vector2u tileSize, const int* tiles, unsigned int width, unsigned int height)
     {
         // load the tileset texture

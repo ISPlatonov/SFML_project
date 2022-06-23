@@ -5,8 +5,32 @@ sf::Vector2f Controls::direction;
 bool Controls::left = 0,
      Controls::right = 0,
      Controls::up = 0,
-     Controls::down = 0;
+     Controls::down = 0,
+     Controls::draw_menu = 0;
 sf::Uint32 Controls::last_action_timepoint;
+sf::RenderWindow Controls::window(sf::VideoMode().getFullscreenModes().at(0), "SFML window", sf::Style::Fullscreen);
+Actor::User Controls::user(Actor::load_textures("textures/actors/Guy_16x32"), sf::Vector2f(0, 0) * static_cast<float>(PIXEL_SIZE));
+sf::RectangleShape Controls::menu = sf::RectangleShape(sf::Vector2f(Controls::window.getSize()) * .1f);
+
+
+void Controls::applyWindowSettings()
+{
+    window.setFramerateLimit(FRAMERATE_LIMIT);
+    //window.setVerticalSyncEnabled(VSYNC);
+}
+
+
+void Controls::handleEvents()
+{
+    sf::Event event;
+    while (window.pollEvent(event))
+    {
+        // Close window: exit
+        if (event.type == sf::Event::Closed)
+            window.close();
+        addEvent(event);
+    }
+}
 
 
 void Controls::addEvent(sf::Event event)
@@ -25,6 +49,10 @@ void Controls::addEvent(sf::Event event)
                 break;
             case (sf::Keyboard::S):
                 down = 1;
+                break;
+            case (sf::Keyboard::Escape):
+                // open menu
+                draw_menu = !draw_menu;
                 break;
             default:
                 break;
@@ -46,6 +74,11 @@ void Controls::addEvent(sf::Event event)
                 break;
             default:
                 break;
+        }
+    else if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
+        {
+            if (draw_menu && menu.getGlobalBounds().contains(window.mapPixelToCoords(sf::Mouse::getPosition())))
+                window.close();
         }
 }
 
@@ -78,4 +111,24 @@ sf::Uint32 Controls::getDeltaTime()
     //setLastActionTimepoint(t);
 
     return dt;
+}
+
+
+void Controls::drawMenu()
+{
+    if (draw_menu)
+    {
+        auto center = user.getView().getCenter();
+        auto font = sf::Font();
+        font.loadFromFile("textures/font.ttf");
+        auto text = sf::Text("Exit", font);
+        text.setFillColor(sf::Color::Black);
+        menu.setPosition(center - menu.getSize() / 2.f);
+        text.setPosition(center - menu.getSize() / 2.f);
+        menu.setOutlineColor(sf::Color::Cyan);
+        menu.setOutlineThickness(5);
+        
+        window.draw(menu);
+        window.draw(text);
+    }
 }

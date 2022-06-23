@@ -18,38 +18,11 @@
 
 int main()
 {
-    // Create the main window
-    sf::RenderWindow window(sf::VideoMode(WINDOW_SIZE_X * PIXEL_SIZE, WINDOW_SIZE_Y * PIXEL_SIZE), "SFML window");
-    window.setFramerateLimit(FRAMERATE_LIMIT);
+    Controls::applyWindowSettings();
 
     auto textures = Actor::load_textures("textures/actors/Guy_16x32");
-    Actor::User user(Actor::load_textures("textures/actors/Guy_16x32"), sf::Vector2f(0, 0) * static_cast<float>(PIXEL_SIZE));
 
-    window.setView(user.getView());
-
-    // define the level with an array of tile indices
-    const int level[] =
-    {
-        2, 2, 2, 2, 2, 2, 2, 2,
-        2, 2, 2, 1, 1, 2, 2, 2,
-        2, 2, 1, 2, 32, 32, 1, 2,
-        2, 2, 1, 1, 1, 1, 1, 2,
-        2, 2, 2, 2, 2, 2, 2, 2,
-        2, 2, 2, 207, 207, 2, 2, 2,
-        2, 2, 2, 2, 207, 2, 2, 2,
-        2, 2, 2, 2, 2, 2, 2, 2,
-        2, 2, 2, 2, 2, 2, 2, 2,
-        2, 2, 2, 1, 1, 2, 2, 2,
-        2, 2, 1, 2, 32, 32, 1, 2,
-        2, 2, 1, 1, 1, 1, 1, 2,
-        2, 2, 2, 2, 2, 2, 2, 2,
-        2, 2, 2, 207, 207, 2, 2, 2,
-        2, 2, 2, 2, 207, 2, 2, 2,
-        2, 2, 2, 2, 2, 2, 2, 2,
-    };
-
-    // create the tilemap from the level definition
-    WorldMap::TileMap map("textures/terrain.png", sf::Vector2u(16, 16), level, 8, 16);
+    Controls::window.setView(Controls::user.getView());
 
     // create objects
     WorldMap::ObjectMap ObjectMap;
@@ -79,7 +52,6 @@ int main()
         Mob::mob_list.push_back(Actor::Bot(Actor::load_textures("textures/actors/Guy_16x32"), sf::Vector2f(std::rand() % WINDOW_SIZE_X, std::rand() % WINDOW_SIZE_Y) * static_cast<float>(PIXEL_SIZE)));
 
     Controls::setLastActionTimepoint();
-    // Start the game loop
 
     /*sf::Font font;
     if (!font.loadFromFile("textures/89speedaffair.ttf"))
@@ -92,7 +64,7 @@ int main()
     sf::Packet data;
     std::map<std::string, Actor::Player> player_pool;
 
-    while (window.isOpen())
+    while (Controls::window.isOpen())
     {
         // needs another thread
         // receiving
@@ -128,52 +100,46 @@ int main()
         }
         
         data.clear();
-        if (!(data << user))
+        if (!(data << Controls::user))
             return EXIT_FAILURE;
         UdpManager.send(data);
 
         // Process events
-        sf::Event event;
-        while (window.pollEvent(event))
-        {
-            // Close window: exit
-            if (event.type == sf::Event::Closed)
-                window.close();
-            Controls::addEvent(event);
-        }
+        Controls::handleEvents();
         auto direction = Controls::getDirection();
         auto dt = Controls::getDeltaTime();
-        user.move_dt(direction, dt, ObjectMap);
+        Controls::user.move_dt(direction, dt, ObjectMap);
         for (size_t i = 0; i < Mob::mob_list.size(); ++i)
             Mob::mob_list[i].make_step(dt, ObjectMap);
         
         Controls::setLastActionTimepoint();
         // Clear screen
-        window.clear();
+        Controls::window.clear();
         // Draw the sprite
-        window.draw(map);
+        Controls::window.draw(WorldMap::WorldMap::map);
         for (auto pass : {WorldMap::Passability::background, WorldMap::Passability::impassible})
         {
             auto range = ObjectMap.equal_range(pass);
             while (range.first != range.second)
-                window.draw((*(range.first++)).second);
+                Controls::window.draw((*(range.first++)).second);
         }
         for (const auto& bot : Mob::mob_list)
-            window.draw(bot.getSprite());
+            Controls::window.draw(bot.getSprite());
         for (const auto& player : player_pool)
-            window.draw(player.second.getSprite());
-        window.draw(user.getSprite());
+            Controls::window.draw(player.second.getSprite());
+        Controls::window.draw(Controls::user.getSprite());
         {
             auto range = ObjectMap.equal_range(WorldMap::Passability::foreground);
             while (range.first != range.second)
-                window.draw((*(range.first++)).second);
+                Controls::window.draw((*(range.first++)).second);
         }
         // Draw the string
         //window.draw(text);
 
-        window.setView(user.getView());
+        Controls::window.setView(Controls::user.getView());
+        Controls::drawMenu();
         // Update the window
-        window.display();
+        Controls::window.display();
     }
     return EXIT_SUCCESS;
 }
