@@ -9,7 +9,7 @@ bool Controls::left = 0,
      Controls::draw_menu = 0;
 sf::Uint32 Controls::last_action_timepoint;
 sf::RenderWindow Controls::window(sf::VideoMode().getFullscreenModes().at(0), "SFML window", sf::Style::Fullscreen);
-Actor::User Controls::user(Actor::load_textures("textures/actors/Guy_16x32"), sf::Vector2f(0, 0) * static_cast<float>(PIXEL_SIZE));
+Actor::User Controls::user(Actor::load_textures("textures/actors/Guy_16x32"), - sf::Vector2f(16, 32) / 2.f * static_cast<float>(PIXEL_SIZE));
 sf::RectangleShape Controls::menu = sf::RectangleShape(sf::Vector2f(Controls::window.getSize()) * .1f);
 
 
@@ -118,7 +118,7 @@ void Controls::drawMenu()
 {
     if (draw_menu)
     {
-        auto center = user.getView().getCenter();
+        auto center = user.getView().getCenter() + static_cast<sf::Vector2f>(user.getSprite().getTexture()->getSize()) / 2.f * static_cast<float>(PIXEL_SIZE);
         auto font = sf::Font();
         font.loadFromFile("textures/font.ttf");
         auto text = sf::Text("Exit", font);
