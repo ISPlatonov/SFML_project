@@ -78,7 +78,7 @@ namespace Actor
     User::User(const std::map<std::string, sf::Texture>& textures, const sf::Vector2f& position) : Actor(textures, position)
     {
         // make it static...
-        view = sf::View(position + (getSprite().getLocalBounds().getSize() / 2.f), static_cast<sf::Vector2f>(WINDOW_SIZE * static_cast<unsigned int>(PIXEL_SIZE)));
+        view = sf::View(position + (getSprite().getLocalBounds().getSize() / 2.f * static_cast<float>(PIXEL_SIZE)), static_cast<sf::Vector2f>(WINDOW_SIZE * static_cast<float>(PIXEL_SIZE)));
         int_ip = sf::IpAddress::getPublicAddress(sf::seconds(5.f)).toInteger();
         int_local_ip = sf::IpAddress::getLocalAddress().toInteger();
     }
@@ -86,7 +86,7 @@ namespace Actor
 
     User::User(std::map<std::string, sf::Texture>&& textures, sf::Vector2f&& position) : Actor(textures, position)
     {
-        view = std::move(sf::View(position + (getSprite().getLocalBounds().getSize() / 2.f), static_cast<sf::Vector2f>(WINDOW_SIZE * static_cast<unsigned int>(PIXEL_SIZE))));
+        view = std::move(sf::View(position + (getSprite().getLocalBounds().getSize() / 2.f * static_cast<float>(PIXEL_SIZE)), static_cast<sf::Vector2f>(WINDOW_SIZE * static_cast<float>(PIXEL_SIZE))));
         int_ip = std::move(sf::IpAddress::getPublicAddress(sf::seconds(5.f)).toInteger());
         int_local_ip = std::move(sf::IpAddress::getLocalAddress().toInteger());
     }
