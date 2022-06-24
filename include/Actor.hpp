@@ -36,7 +36,7 @@ namespace Actor
     };
 
 
-    class Bot : public Actor
+    class Bot : public virtual Actor
     {
     public:
         using Actor::Actor;
@@ -47,7 +47,7 @@ namespace Actor
     };
 
 
-    class User : public Actor
+    class User : public virtual Actor
     {
     public:
         User(const std::map<std::string, sf::Texture>& textures, const sf::Vector2f& position);
@@ -63,7 +63,7 @@ namespace Actor
     };
 
 
-    class Player : public Actor
+    class Player : public virtual Actor
     {
     public:
         // data << x << y << my_ip.toInteger() << my_local_ip.toInteger() << std::chrono::high_resolution_clock::now().time_since_epoch().count()
