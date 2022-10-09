@@ -42,7 +42,7 @@ cmake --build build --config Release --target install
 - `server` - game server executable
 - `textures` - dir with all textures
 
-### Architecture
+## Architecture
 
 ```mermaid
 flowchart LR

@@ -11,11 +11,11 @@ namespace Multiplayer
     };
 
 
-    sf::IpAddress UdpManager::address_send = sf::IpAddress();
-    sf::IpAddress UdpManager::address_receive = sf::IpAddress();
-    sf::IpAddress UdpManager::ip = sf::IpAddress(), UdpManager::local_ip = sf::IpAddress();
-    unsigned short UdpManager::port = 0;
-    unsigned short UdpManager::port_send = 0;
+    //sf::IpAddress UdpManager::address_send = sf::IpAddress();
+    //sf::IpAddress UdpManager::address_receive = sf::IpAddress();
+    //sf::IpAddress UdpManager::ip = sf::IpAddress(), UdpManager::local_ip = sf::IpAddress();
+    //unsigned short UdpManager::port = 0;
+    //unsigned short UdpManager::port_send = 0;
     std::map<std::string, PlayerData> UdpManager::player_data_pool = {};
 
 
@@ -150,7 +150,7 @@ namespace Multiplayer
         if (status != sf::Socket::Status::Done)
             return status;
         DataType data_type;
-        size_t data_type_enum;
+        sf::Uint32 data_type_enum;
         data >> data_type_enum;
         data_type = static_cast<DataType>(data_type_enum);
         if (data_type == DataType::Object)

@@ -78,11 +78,11 @@ namespace Multiplayer
     private:
         sf::UdpSocket socket;
         sf::UdpSocket socket_send;
-        static sf::IpAddress address_send;
-        static sf::IpAddress address_receive;
-        static sf::IpAddress ip, local_ip;
-        static unsigned short port;
-        static unsigned short port_send;
+        /*static*/ sf::IpAddress address_send;
+        /*static*/ sf::IpAddress address_receive;
+        /*static*/ sf::IpAddress ip, local_ip;
+        /*static*/ unsigned short port;
+        /*static*/ unsigned short port_send;
         static std::map<std::string, PlayerData> player_data_pool;
         static std::map<std::pair<float, float>, ObjectData> object_data_pool;
     };
