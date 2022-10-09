@@ -16,7 +16,7 @@ sf::RectangleShape Controls::menu = sf::RectangleShape(sf::Vector2f(Controls::wi
 void Controls::applyWindowSettings()
 {
     window.setFramerateLimit(FRAMERATE_LIMIT);
-    //window.setVerticalSyncEnabled(VSYNC);
+    window.setVerticalSyncEnabled(ENABLE_VSYNC);
 }
 
 

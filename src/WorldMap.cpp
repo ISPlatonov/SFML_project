@@ -82,132 +82,63 @@ namespace WorldMap
     }
 
 
-    Object::Object(const std::string& texture_address, const sf::Vector2f& new_position, const Passability& new_passability)
+    WorldMap::WorldMap(const sf::Vector2u& size)
     {
-        if (!this->texture.loadFromFile(texture_address + "/texture.png"))
-            delete this;
-        position = new_position;
-        passability = new_passability;
-        sprite.setScale(TILE_SIZE, TILE_SIZE);
-        sprite.setTexture(texture);
-        sprite.setPosition(position);
-        // need a fix
-    }
-
-
-    Object::Object(const sf::Texture& new_texture, const sf::Vector2f& new_position, const Passability& new_passability)
-    {
-        texture = new_texture;
-        position = new_position;
-        passability = new_passability;
-        sprite.setScale(TILE_SIZE, TILE_SIZE);
-        sprite.setTexture(texture);
-        sprite.setPosition(position);
-        // need a fix
-    }
-
-
-    Object::Object(sf::Texture&& new_texture, sf::Vector2f&& new_position, Passability&& new_passability)
-    {
-        texture = std::move(new_texture);
-        position = std::move(new_position);
-        passability = std::move(new_passability);
-        sprite.setScale(TILE_SIZE, TILE_SIZE);
-        sprite.setTexture(texture);
-        sprite.setPosition(position);
-        // need a fix
-    }
-
-
-    void Object::draw(sf::RenderTarget& target, sf::RenderStates states) const
-    {
-        // apply the transform
-        states.transform *= getTransform();
-
-        // apply the tileset texture
-        states.texture = &texture;
-
-        // draw the vertex array
-        target.draw(sprite, states);
-    }
-
-
-    const Passability& Object::getPassability() const
-    {
-        return passability;
-    }
-
-
-    const sf::Texture& Object::getTexture() const
-    {
-        return texture;
-    }
-    
-    
-    const sf::Vector2f& Object::getPosition() const
-    {
-        return position;
-    }
-
-
-    const sf::Sprite& Object::getSprite() const
-    {
-        return sprite;
-    }
-
-
-    bool Object::intersection(const sf::FloatRect& new_rect) const
-    {
-        auto bounds = getSprite().getGlobalBounds();
-        bool f = bounds.intersects(new_rect);
-        return f;
-    }
-
-
-    void Object::check_collision(sf::Vector2f& vector, const sf::FloatRect& rect, size_t& depth) const
-    {
-        if (this->intersection(sf::FloatRect(rect.getPosition() + vector, rect.getSize())))
+        //int level_map[size.y][size.x];
+        for (auto y = 0; y < size.y; ++y)
         {
-            if (!this->intersection(sf::FloatRect(rect.getPosition() + sf::Vector2f(vector.x, 0), rect.getSize())))
+            for (auto x = 0; x < size.x; ++x)
             {
-                if (depth < MAX_RECURSION_DEPTH)
-                    vector.y /= 2;
-                else
-                    vector.y = 0;
+                //level_map[y][x] = std::uniform_int_distribution<int>(0, )
+                //ObjectMap.append())
             }
-            else if (!this->intersection(sf::FloatRect(rect.getPosition() + sf::Vector2f(0, vector.y), rect.getSize())))
-            {
-                if (depth < MAX_RECURSION_DEPTH)
-                    vector.x /= 2;
-                else
-                    vector.x = 0;
-            }
-            else
-            {
-                if (depth < MAX_RECURSION_DEPTH)
-                {
-                    vector.x /= 2;
-                    vector.y /= 2;
-                }
-                else
-                {
-                    vector.x = 0;
-                    vector.y = 0;
-                    return;
-                }
-            }
-            this->check_collision(vector, rect, ++depth);
         }
-        else
-            return;
     }
 
 
-    void Object::check_collision(sf::Vector2f& vector, const sf::FloatRect& rect) const
+    ObjectMap::ObjectMap()
     {
-        if (passability != Passability::impassible)
-            return;
-        size_t depth = 0;
-        check_collision(vector, rect, depth);
+
+    }
+
+
+    const std::map<std::pair<float, float>, Object::Object>& ObjectMap::getObjectMap(Object::Passability passability) const
+    {
+        switch (passability)
+        {
+            case Object::Passability::background:
+                return background_objects;
+                break;
+
+            case Object::Passability::foreground:
+                return foreground_objects;
+                break;
+
+            case Object::Passability::impassible:
+                return impassible_objects;
+                break;
+
+            default:
+                throw;
+        }
+    }
+
+
+    void ObjectMap::addObject(Multiplayer::ObjectData object_data)
+    {
+        Object::Object object;
+        object << object_data;
+        switch (object.getPassability())
+        {
+            case Object::Passability::background:
+                background_objects[std::pair<float, float>(object.getPosition().x, object.getPosition().y)] = object;
+                break;
+            case Object::Passability::foreground:
+                foreground_objects[std::pair<float, float>(object.getPosition().x, object.getPosition().y)] = object;
+                break;
+            case Object::Passability::impassible:
+                impassible_objects[std::pair<float, float>(object.getPosition().x, object.getPosition().y)] = object;
+                break;
+        }
     }
 } // namespace WorldMap

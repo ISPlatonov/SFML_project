@@ -51,7 +51,7 @@ namespace Actor
     {
         check_direction(direction); 
         auto v = new sf::Vector2f(linalg::normalize(direction) * static_cast<float>(dt) * STEP_SIZE_MULTIPLIER * static_cast<float>(PIXEL_SIZE));
-        for (const auto& object : ObjectMap)
+        for (const auto& object : ObjectMap.getObjectMap(Object::Passability::impassible))
         {
             object.second.check_collision(*v, this->getSprite().getGlobalBounds());
         }

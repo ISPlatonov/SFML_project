@@ -3,46 +3,87 @@
 
 namespace Multiplayer
 {
-    PlayerData::PlayerData()
+    std::map<std::pair<float, float>, ObjectData> UdpManager::object_data_pool = 
     {
-        position = sf::Vector2f();
-        ip = sf::IpAddress::None.toInteger();
-        local_ip = sf::IpAddress::None.toInteger();
-        sent_time = 0;
-    }
-    
-    
-    PlayerData::PlayerData(const PlayerData& player)
+        { std::pair<float, float>(100 * PIXEL_SIZE, 100 * PIXEL_SIZE), Multiplayer::ObjectData(sf::Vector2f(100 * PIXEL_SIZE, 100 * PIXEL_SIZE), static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()), Object::ObjectName::apple, Object::Passability::background) },
+        { std::pair<float, float>(20 * PIXEL_SIZE, 20 * PIXEL_SIZE), Multiplayer::ObjectData(sf::Vector2f(20 * PIXEL_SIZE, 20 * PIXEL_SIZE), static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()), Object::ObjectName::grass, Object::Passability::foreground) },
+        { std::pair<float, float>(40 * PIXEL_SIZE, 40 * PIXEL_SIZE), Multiplayer::ObjectData(sf::Vector2f(40 * PIXEL_SIZE, 40 * PIXEL_SIZE), static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()), Object::ObjectName::wooden_wall, Object::Passability::impassible) }
+    };
+
+
+    sf::IpAddress UdpManager::address_send = sf::IpAddress();
+    sf::IpAddress UdpManager::address_receive = sf::IpAddress();
+    sf::IpAddress UdpManager::ip = sf::IpAddress(), UdpManager::local_ip = sf::IpAddress();
+    unsigned short UdpManager::port = 0;
+    unsigned short UdpManager::port_send = 0;
+    std::map<std::string, PlayerData> UdpManager::player_data_pool = {};
+
+
+    Transportable::Transportable()
     {
-        this->position = player.getPosition();
-        this->ip = player.getIp();
-        this->local_ip = player.getLocalIp();
-        this->sent_time = player.getTime();
+
     }
-        
-        
-    PlayerData::PlayerData(sf::Vector2f position, int ip, int local_ip, sf::Uint32 time)
+
+
+    PlayerData::PlayerData() : Transportable::Transportable()
+    {
+
+    }
+
+
+    Transportable::Transportable(sf::Vector2f position, sf::Uint32 sent_time)
     {
         this->position = position;
+        this->sent_time = sent_time;
+    }
+
+
+    PlayerData::PlayerData(const PlayerData& player) : Transportable::Transportable(player.getPosition(), player.getTime())
+    {
+        this->ip = player.getIp();
+        this->local_ip = player.getLocalIp();
+    }
+        
+        
+    PlayerData::PlayerData(sf::Vector2f position, int ip, int local_ip, sf::Uint32 time) : Transportable::Transportable(position, time)
+    {
         this->ip = ip;
         this->local_ip = local_ip;
-        this->sent_time = time;
     }
-    
-    
-    void PlayerData::setPosition(const sf::Vector2f& new_position)
+
+
+    ObjectData::ObjectData() : Transportable::Transportable()
+    {
+
+    }
+
+
+    ObjectData::ObjectData(const ObjectData& object) : Transportable::Transportable(object.getPosition(), object.getTime())
+    {
+        object_name = object.object_name;
+    }
+
+
+    ObjectData::ObjectData(sf::Vector2f position, sf::Uint32 time, Object::ObjectName name, Object::Passability passability) : Transportable::Transportable(position, time)
+    {
+        this->object_name = name;
+        this->passability = passability;
+    }
+
+
+    void Transportable::setPosition(const sf::Vector2f& new_position)
     {
         position = new_position;
     }
     
     
-    void PlayerData::setTime(const sf::Uint32& new_time)
+    void Transportable::setTime(const sf::Uint32& new_time)
     {
         sent_time = new_time;
     }
         
         
-    const::sf::Vector2f& PlayerData::getPosition() const
+    const::sf::Vector2f& Transportable::getPosition() const
     {
         return position;
     }
@@ -60,9 +101,21 @@ namespace Multiplayer
     }
     
     
-    const sf::Uint32& PlayerData::getTime() const
+    const sf::Uint32& Transportable::getTime() const
     {
         return sent_time;
+    }
+
+
+    const Object::ObjectName& ObjectData::getName() const
+    {
+        return object_name;
+    }
+
+
+    const Object::Passability& ObjectData::getPassability() const
+    {
+        return passability;
     }
 
 
@@ -91,37 +144,56 @@ namespace Multiplayer
     {
         //data.clear();
         sf::Packet data;
-        int msg_local_ip, msg_ip;
         sf::Uint32 sent_time;
         sf::Vector2f new_position;
         auto status = socket.receive(data, address_receive, port_send);
         if (status != sf::Socket::Status::Done)
             return status;
-        data >> new_position.x >> new_position.y >> msg_ip >> msg_local_ip >> sent_time;
-        //if (msg_ip == my_ip.toInteger() && msg_local_ip == my_local_ip.toInteger())
-        //    continue;
-        
-        auto id = sf::IpAddress(msg_ip).toString() + sf::IpAddress(msg_local_ip).toString();
+        DataType data_type;
+        size_t data_type_enum;
+        data >> data_type_enum;
+        data_type = static_cast<DataType>(data_type_enum);
+        if (data_type == DataType::Object)
+        {
+            // receive object
+            Object::ObjectName object_name;
+            Object::Passability passability;
+            sf::Uint32 object_name_enum;
+            sf::Uint32 passability_enum;
+            data >> new_position.x >> new_position.y >> sent_time >> object_name_enum >> passability_enum;
+            object_name = static_cast<Object::ObjectName>(object_name_enum);
+            passability = static_cast<Object::Passability>(passability_enum);
+            object_data_pool[std::pair<float, float>(new_position.x, new_position.y)] = ObjectData(new_position, sent_time, object_name, passability);
+        }
+        else if (data_type == DataType::Player)
+        {
+            int msg_local_ip, msg_ip;
+            data >> new_position.x >> new_position.y >> msg_ip >> msg_local_ip >> sent_time;
+            //if (msg_ip == my_ip.toInteger() && msg_local_ip == my_local_ip.toInteger())
+            //    continue;
 
-        sf::Uint32 time_now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-        int ping = static_cast<int>(time_now) - static_cast<int>(sent_time);
-        if (player_data_pool.count(id))
-            if (ping > MAX_PING)
-            {
-                player_data_pool.erase(id);
-            }
+            auto id = sf::IpAddress(msg_ip).toString() + sf::IpAddress(msg_local_ip).toString();
+
+            sf::Uint32 time_now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+            int ping = static_cast<int>(time_now) - static_cast<int>(sent_time);
+            if (player_data_pool.count(id))
+                if (ping > MAX_PING)
+                {
+                    player_data_pool.erase(id);
+                }
+                else
+                {
+                    player_data_pool[id].setPosition(new_position);
+                    player_data_pool[id].setTime(sent_time);
+                }
             else
-            {
-                player_data_pool[id].setPosition(new_position);
-                player_data_pool[id].setTime(sent_time);
-            }
-        else
-            if (ping > MAX_PING)
-                return status;
-            else
-            {
-                player_data_pool[id] = PlayerData(new_position, msg_ip, msg_local_ip, sent_time);
-            }
+                if (ping > MAX_PING)
+                    return status;
+                else
+                {
+                    player_data_pool[id] = PlayerData(new_position, msg_ip, msg_local_ip, sent_time);
+                }
+        }
         return status;
     }
 
@@ -129,6 +201,12 @@ namespace Multiplayer
     const std::map<std::string, PlayerData>& UdpManager::getPlayerDataPool() const
     {
         return player_data_pool;
+    }
+
+
+    const std::map<std::pair<float, float>, ObjectData>& UdpManager::getObjectDataPool() const
+    {
+        return object_data_pool;
     }
 
 
@@ -146,5 +224,24 @@ namespace Multiplayer
         if (dest_ip == sf::IpAddress())
             socket_send.send(packet, address_send, port);
         socket_send.send(packet, dest_ip, port);
+    }
+
+
+    sf::Packet& operator <<(sf::Packet& packet, const Object::Object& object)
+    {
+        auto position = object.getPosition();
+        sf::Uint32 time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+        packet << position.x << position.y << time << object.getName() << static_cast<sf::Uint32>(object.getPassability());
+        return packet;
+    }
+
+
+    Object::Object& operator <<(Object::Object& object, const ObjectData& object_data)
+    {
+        auto position = object_data.getPosition();
+        auto name = object_data.getName();
+        auto passability = object_data.getPassability();
+        object = Object::Object(Object::Object::NameToTextureMap[name], position, passability);
+        return object;
     }
 }

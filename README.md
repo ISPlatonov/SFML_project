@@ -41,3 +41,31 @@ cmake --build build --config Release --target install
 
 - `server` - game server executable
 - `textures` - dir with all textures
+
+### Architecture
+
+```mermaid
+flowchart LR
+    main --> Controls
+    main --> WM[World Map]
+    main --> Mob
+    main --> UdpManager
+    main --> Constants(Constants)
+    subgraph Controls class
+        Controls --> User
+        Controls --> Window(Window)
+        Controls --> Events
+    end
+    subgraph World Map class
+        WM --> OM(Object Map)
+        WM --> TileMap(TileMap)
+    end
+    subgraph Mob class
+        Mob --> PP(Player Pool)
+        Mob --> MobPool(MobPool)
+    end
+    subgraph Multiplayer class
+        UdpManager --> PDP(Player Data Pool)
+        UdpManager --> UdpSocket
+    end
+```

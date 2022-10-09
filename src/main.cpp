@@ -25,9 +25,7 @@ int main()
     // create objects
     WorldMap::ObjectMap ObjectMap;
     //auto apple = WorldMap::Object("textures/objects/apple", sf::Vector2f(100, 100), WorldMap::Passability::background);
-    ObjectMap.insert(std::make_pair<WorldMap::Passability, WorldMap::Object>(WorldMap::Passability::background, WorldMap::Object("textures/objects/apple", sf::Vector2f(1000, 1000), WorldMap::Passability::background)));
-    ObjectMap.insert(std::make_pair<WorldMap::Passability, WorldMap::Object>(WorldMap::Passability::foreground, WorldMap::Object("textures/objects/grass", sf::Vector2f(200, 200), WorldMap::Passability::foreground)));
-    ObjectMap.insert(std::make_pair<WorldMap::Passability, WorldMap::Object>(WorldMap::Passability::impassible, WorldMap::Object("textures/objects/wooden_wall", sf::Vector2f(400, 400), WorldMap::Passability::impassible)));
+    
     /*
     // Create a graphical text to display
     sf::Font font;
@@ -46,8 +44,8 @@ int main()
     
     auto UdpManager = Multiplayer::UdpManager(sf::IpAddress::getLocalAddress(), sf::IpAddress(SERVER_IP));
 
-    for (size_t i = 0; i < 15; ++i)
-        Mob::mob_list.push_back(Actor::Bot(Actor::load_textures("textures/actors/Guy_16x32"), sf::Vector2f(std::rand() % WINDOW_SIZE_X, std::rand() % WINDOW_SIZE_Y) * static_cast<float>(PIXEL_SIZE)));
+    //for (size_t i = 0; i < 15; ++i)
+    //    Mob::mob_list.push_back(Actor::Bot(Actor::load_textures("textures/actors/Guy_16x32"), sf::Vector2f(std::rand() % WINDOW_SIZE_X, std::rand() % WINDOW_SIZE_Y) * static_cast<float>(PIXEL_SIZE)));
 
     Controls::setLastActionTimepoint();
 
@@ -96,6 +94,11 @@ int main()
                 continue;
             }
         }
+
+        for (auto iter : UdpManager.getObjectDataPool())
+        {
+            ObjectMap.addObject(iter.second);
+        }
         
         data.clear();
         if (!(data << Controls::user))
@@ -115,22 +118,17 @@ int main()
         Controls::window.clear();
         // Draw the sprite
         Controls::window.draw(WorldMap::WorldMap::map);
-        for (auto pass : {WorldMap::Passability::background, WorldMap::Passability::impassible})
-        {
-            auto range = ObjectMap.equal_range(pass);
-            while (range.first != range.second)
-                Controls::window.draw((*(range.first++)).second);
-        }
+        for (auto iter : ObjectMap.getObjectMap(Object::Passability::background))
+            Controls::window.draw(iter.second);
+        for (auto iter : ObjectMap.getObjectMap(Object::Passability::impassible))
+            Controls::window.draw(iter.second);
         for (const auto& bot : Mob::mob_list)
             Controls::window.draw(bot.getSprite());
         for (const auto& player : player_pool)
             Controls::window.draw(player.second.getSprite());
         Controls::window.draw(Controls::user.getSprite());
-        {
-            auto range = ObjectMap.equal_range(WorldMap::Passability::foreground);
-            while (range.first != range.second)
-                Controls::window.draw((*(range.first++)).second);
-        }
+        for (auto iter : ObjectMap.getObjectMap(Object::Passability::foreground))
+            Controls::window.draw(iter.second);
         // Draw the string
         //window.draw(text);
 

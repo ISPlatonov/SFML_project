@@ -48,9 +48,15 @@ void UdpWorker(Multiplayer::UdpManager& UdpManager)
                 continue;
             }
             sf::Packet data;
-            data << x << y << ip << local_ip << time;
+            data << static_cast<sf::Uint32>(Multiplayer::DataType::Player) << x << y << ip << local_ip << time;
             UdpManager.send(data, sf::IpAddress((*dest_iter++).second.getLocalIp()));
             std::cout << "sent" << std::endl;
+        }
+        for (auto object_iter = UdpManager.getObjectDataPool().begin(); object_iter != UdpManager.getObjectDataPool().end(); ++object_iter)
+        {
+            sf::Packet data;
+            data << static_cast<sf::Uint32>(Multiplayer::DataType::Object) << (*object_iter).second.getPosition().x << (*object_iter).second.getPosition().y << (*object_iter).second.getTime() << (*object_iter).second.getName() << (*object_iter).second.getPassability();
+            UdpManager.send(data, sf::IpAddress((*iter).second.getLocalIp()));
         }
         ++iter;
     }
@@ -69,8 +75,6 @@ int main()
         
         UdpWorker(UdpManager);
  
-        //while (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count() - last_timepoint < 10);
-        //std::cout << std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count() - last_timepoint) << std::endl;
         auto dt = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count() - last_timepoint;
         sf::sleep(((1000 / FRAMERATE_LIMIT) >= dt ? sf::milliseconds((1000 / FRAMERATE_LIMIT) - dt) : sf::Time()));
     }

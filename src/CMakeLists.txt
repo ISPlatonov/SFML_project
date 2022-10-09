@@ -1,13 +1,13 @@
 include_directories(${SFML_project_SOURCE_DIR}/include)
 
-set(SOURCE_FILES main.cpp Multiplayer.cpp Actor.cpp WorldMap.cpp Controls.cpp LinearAlgebra.cpp)
-set(SERVER_SOURCE_FILES server.cpp Multiplayer.cpp)
+set(SOURCE_FILES main.cpp Multiplayer.cpp Actor.cpp WorldMap.cpp Controls.cpp Object.cpp LinearAlgebra.cpp)
+set(SERVER_SOURCE_FILES server.cpp Multiplayer.cpp Object.cpp)
 
 if (BUILD_SERVER_ONLY)
     add_executable(server ${SERVER_SOURCE_FILES})
 
-    find_package(SFML 2 REQUIRED COMPONENTS network system)
-    target_link_libraries(server sfml-network sfml-system)
+    find_package(SFML 2 REQUIRED COMPONENTS graphics window network system)
+    target_link_libraries(server sfml-graphics sfml-window sfml-network sfml-system)
 
     install(TARGETS server DESTINATION ${CMAKE_SOURCE_DIR}/bin)
 
@@ -20,7 +20,7 @@ else()
 
     find_package(SFML 2 REQUIRED COMPONENTS graphics window audio network system)
     target_link_libraries(SFML_project sfml-graphics sfml-window sfml-audio sfml-network sfml-system)
-    target_link_libraries(server sfml-network sfml-system)
+    target_link_libraries(server sfml-graphics sfml-window sfml-network sfml-system)
 
     add_custom_command(TARGET SFML_project POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory

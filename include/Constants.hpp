@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
+#include <SFML/Window.hpp>
 #include <string>
 
 #define PIXEL_SIZE size_t(10)
@@ -9,6 +9,7 @@
 #define WINDOW_SIZE sf::Vector2f(WINDOW_SIZE_X, WINDOW_SIZE_Y)
 //#define WORK_SPACE sf::Rect(16, 8, 96, 48)
 #define FRAMERATE_LIMIT size_t(60)
+#define ENABLE_VSYNC bool(true)
 #define STEP_SIZE_MULTIPLIER float(.05)
 #define MAX_RECURSION_DEPTH size_t(15)
 
