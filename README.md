@@ -46,15 +46,17 @@ cmake --build build --config Release --target install
 
 ```mermaid
 flowchart LR
-    main --> Controls
-    main --> WM[World Map]
+    main{{main}} --> Controls
+    main --> WM(World Map)
     main --> Mob
-    main --> UdpManager
-    main --> Constants(Constants)
-    subgraph Controls class
-        Controls --> User
-        Controls --> Window(Window)
-        Controls --> Events
+    main --> UdpManager(UdpManager)
+    server{{server}} --> UdpManager
+    subgraph Multiplayer class
+        UdpManager --> PDP(Player Data Pool)
+        UdpManager --> ODP(Object Data Pool)
+        UdpManager --> UdpSocket
+        PDP -.- Transportable[[Transportable]]
+        ODP -.- Transportable
     end
     subgraph World Map class
         WM --> OM(Object Map)
@@ -64,8 +66,23 @@ flowchart LR
         Mob --> PP(Player Pool)
         Mob --> MobPool(MobPool)
     end
-    subgraph Multiplayer class
-        UdpManager --> PDP(Player Data Pool)
-        UdpManager --> UdpSocket
+    subgraph Controls class
+        Controls --> user{{user}}
+        Controls --> Window(Window)
+        Controls --> Events
     end
+    subgraph Object class
+        Object
+    end
+    subgraph Actor class
+        User -.- Actor[[Actor]]
+        Bot -.- Actor
+        Player -.- Actor
+    end
+    ODP --> Object
+    OM --> Object
+    user --> User
+    PDP --> Player
+    PP --> Player
+    MobPool --> Bot
 ```
