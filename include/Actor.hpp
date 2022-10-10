@@ -5,10 +5,12 @@
 #include <chrono>
 #include <map>
 #include <string>
+#include <unordered_map>
 #include "Constants.hpp"
 #include "LinearAlgebra.hpp"
 #include "Multiplayer.hpp"
 #include "WorldMap.hpp"
+#include "Object.hpp"
 
 
 namespace Actor
@@ -26,11 +28,15 @@ namespace Actor
         const sf::Vector2f& getPosition() const;
         const sf::Sprite& getSprite() const;
         const std::map<std::string, sf::Texture>& getTextures() const;
+        const size_t objectNumber(Object::ObjectName) const;
+        const size_t addObject(Object::ObjectName);
+        const size_t removeObject(Object::ObjectName);
 
     protected:    
         sf::Sprite sprite;
         std::map<std::string, sf::Texture> textures;
         std::string direction_x;
+        std::unordered_map<Object::ObjectName, size_t> inventory;
 
         virtual void draw(sf::RenderTarget& target, sf::RenderStates states=sf::RenderStates()) const;
     };

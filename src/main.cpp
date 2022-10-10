@@ -2,12 +2,9 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
 #include <map>
-#include <string>
-#include <cstdlib>
 #include "Mob.hpp"
 #include "Constants.hpp"
 #include "WorldMap.hpp"
-//#include "LinearAlgebra.hpp"
 #include "Controls.hpp"
 #include "Multiplayer.hpp"
 

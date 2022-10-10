@@ -60,6 +60,38 @@ namespace Actor
     }
 
 
+    const size_t Actor::objectNumber(Object::ObjectName name) const
+    {
+        if (!inventory.count(name))
+            return 0;
+        else
+            return inventory.at(name);
+    }
+
+
+    const size_t Actor::addObject(Object::ObjectName name)
+    {
+        if (!inventory.count(name))
+            inventory[name] = 1;
+        else
+            inventory[name] += 1;
+        return objectNumber(name);
+    }
+
+
+    const size_t Actor::removeObject(Object::ObjectName name)
+    {
+        if (!inventory.count(name))
+            return 0;
+        else
+            inventory[name] -= 1;
+        auto num = objectNumber(name);
+        if (!num)
+            inventory.erase(inventory.find(name));
+        return num;
+    }
+
+
     void Actor::draw(sf::RenderTarget& target, sf::RenderStates states) const
     {
         states.transform *= getTransform();
