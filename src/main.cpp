@@ -95,13 +95,11 @@ int main()
             }
         }
 
-        for (auto iter : UdpManager.getObjectDataPool())
-        {
-            ObjectMap.addObject(iter.second);
-        }
+        for (auto iter = UdpManager.getObjectDataPool().begin(); iter != UdpManager.getObjectDataPool().end(); ++iter)
+            ObjectMap.addObject((*iter).second);
         
         data.clear();
-        if (!(data << Controls::user))
+        if (!(data << Multiplayer::DataType::Player << Controls::user))
             return EXIT_FAILURE;
         UdpManager.send(data);
 

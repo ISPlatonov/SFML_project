@@ -128,17 +128,27 @@ namespace WorldMap
     {
         Object::Object object;
         object << object_data;
+        auto point = std::pair<float, float>(object.getPosition().x, object.getPosition().y);
         switch (object.getPassability())
         {
             case Object::Passability::background:
-                background_objects[std::pair<float, float>(object.getPosition().x, object.getPosition().y)] = object;
-                break;
+                if (!background_objects.count(point) || background_objects[point].getName() != object.getName())
+                {
+                    background_objects[point] = object;
+                    break;
+                }
             case Object::Passability::foreground:
-                foreground_objects[std::pair<float, float>(object.getPosition().x, object.getPosition().y)] = object;
-                break;
+                if (!foreground_objects.count(point) || foreground_objects[point].getName() != object.getName())
+                {
+                    foreground_objects[point] = object;
+                    break;
+                }
             case Object::Passability::impassible:
-                impassible_objects[std::pair<float, float>(object.getPosition().x, object.getPosition().y)] = object;
-                break;
+                if (!impassible_objects.count(point) || impassible_objects[point].getName() != object.getName())
+                {
+                    impassible_objects[point] = object;
+                    break;
+                }
         }
     }
 } // namespace WorldMap

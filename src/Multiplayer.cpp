@@ -3,12 +3,12 @@
 
 namespace Multiplayer
 {
-    std::map<std::pair<float, float>, ObjectData> UdpManager::object_data_pool = 
-    {
-        { std::pair<float, float>(100 * PIXEL_SIZE, 100 * PIXEL_SIZE), Multiplayer::ObjectData(sf::Vector2f(100 * PIXEL_SIZE, 100 * PIXEL_SIZE), static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()), Object::ObjectName::apple, Object::Passability::background) },
-        { std::pair<float, float>(20 * PIXEL_SIZE, 20 * PIXEL_SIZE), Multiplayer::ObjectData(sf::Vector2f(20 * PIXEL_SIZE, 20 * PIXEL_SIZE), static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()), Object::ObjectName::grass, Object::Passability::foreground) },
-        { std::pair<float, float>(40 * PIXEL_SIZE, 40 * PIXEL_SIZE), Multiplayer::ObjectData(sf::Vector2f(40 * PIXEL_SIZE, 40 * PIXEL_SIZE), static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()), Object::ObjectName::wooden_wall, Object::Passability::impassible) }
-    };
+    //std::map<std::pair<float, float>, ObjectData> UdpManager::object_data_pool = 
+    //{
+    //    { std::pair<float, float>(100 * PIXEL_SIZE, 100 * PIXEL_SIZE), Multiplayer::ObjectData(sf::Vector2f(100 * PIXEL_SIZE, 100 * PIXEL_SIZE), static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()), Object::ObjectName::apple, Object::Passability::background) },
+    //    { std::pair<float, float>(20 * PIXEL_SIZE, 20 * PIXEL_SIZE), Multiplayer::ObjectData(sf::Vector2f(20 * PIXEL_SIZE, 20 * PIXEL_SIZE), static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()), Object::ObjectName::grass, Object::Passability::foreground) },
+    //    { std::pair<float, float>(40 * PIXEL_SIZE, 40 * PIXEL_SIZE), Multiplayer::ObjectData(sf::Vector2f(40 * PIXEL_SIZE, 40 * PIXEL_SIZE), static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()), Object::ObjectName::wooden_wall, Object::Passability::impassible) }
+    //};
 
 
     //sf::IpAddress UdpManager::address_send = sf::IpAddress();
@@ -16,7 +16,7 @@ namespace Multiplayer
     //sf::IpAddress UdpManager::ip = sf::IpAddress(), UdpManager::local_ip = sf::IpAddress();
     //unsigned short UdpManager::port = 0;
     //unsigned short UdpManager::port_send = 0;
-    std::map<std::string, PlayerData> UdpManager::player_data_pool = {};
+    //std::map<std::string, PlayerData> UdpManager::player_data_pool = {};
 
 
     Transportable::Transportable()
@@ -163,7 +163,7 @@ namespace Multiplayer
             data >> new_position.x >> new_position.y >> sent_time >> object_name_enum >> passability_enum;
             object_name = static_cast<Object::ObjectName>(object_name_enum);
             passability = static_cast<Object::Passability>(passability_enum);
-            object_data_pool[std::pair<float, float>(new_position.x, new_position.y)] = ObjectData(new_position, sent_time, object_name, passability);
+            addObject(ObjectData(new_position, sent_time, object_name, passability));
         }
         else if (data_type == DataType::Player)
         {
@@ -216,6 +216,28 @@ namespace Multiplayer
             return std::map<std::string, PlayerData>::iterator();
         else
             return player_data_pool.erase(player_data_pool.find(id));
+    }
+
+
+    std::map<std::pair<float, float>, ObjectData>::iterator UdpManager::removeObjectByPoint(const std::pair<float, float>& point)
+    {
+        if (!object_data_pool.count(point))
+            return std::map<std::pair<float, float>, ObjectData>::iterator();
+        else
+            return object_data_pool.erase(object_data_pool.find(point));
+    }
+
+
+    void UdpManager::addObject(const Object::Object& object)
+    {
+        ObjectData object_data(object.getPosition(), static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()), object.getName(), object.getPassability());
+        object_data_pool[std::pair<float, float>(object.getPosition().x, object.getPosition().y)] = object_data;
+    }
+
+
+    void UdpManager::addObject(const Multiplayer::ObjectData& object_data)
+    {
+        object_data_pool[std::pair<float, float>(object_data.getPosition().x, object_data.getPosition().y)] = object_data;
     }
 
 

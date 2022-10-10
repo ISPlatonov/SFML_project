@@ -74,6 +74,9 @@ namespace Multiplayer
         const std::map<std::string, PlayerData>& getPlayerDataPool() const;
         const std::map<std::pair<float, float>, ObjectData>& getObjectDataPool() const;
         std::map<std::string, PlayerData>::iterator removePlayerById(const std::string& id);
+        std::map<std::pair<float, float>, ObjectData>::iterator removeObjectByPoint(const std::pair<float, float>& point);
+        void addObject(const Object::Object& object);
+        void addObject(const Multiplayer::ObjectData& object_data);
 
     private:
         sf::UdpSocket socket;
@@ -83,8 +86,8 @@ namespace Multiplayer
         /*static*/ sf::IpAddress ip, local_ip;
         /*static*/ unsigned short port;
         /*static*/ unsigned short port_send;
-        static std::map<std::string, PlayerData> player_data_pool;
-        static std::map<std::pair<float, float>, ObjectData> object_data_pool;
+        /*static*/ std::map<std::string, PlayerData> player_data_pool;
+        /*static*/ std::map<std::pair<float, float>, ObjectData> object_data_pool;
     };
 
 

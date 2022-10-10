@@ -67,7 +67,16 @@ int main()
 {
     std::cout << std::flush << std::endl;
     Multiplayer::UdpManager UdpManager(sf::IpAddress::getLocalAddress(), sf::IpAddress::Any);
-
+    {
+        std::map<std::pair<float, float>, Multiplayer::ObjectData> object_data_pool_init = 
+        {
+            { std::pair<float, float>(100 * PIXEL_SIZE, 100 * PIXEL_SIZE), Multiplayer::ObjectData(sf::Vector2f(100 * PIXEL_SIZE, 100 * PIXEL_SIZE), static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()), Object::ObjectName::apple, Object::Passability::background) },
+            { std::pair<float, float>(20 * PIXEL_SIZE, 20 * PIXEL_SIZE), Multiplayer::ObjectData(sf::Vector2f(20 * PIXEL_SIZE, 20 * PIXEL_SIZE), static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()), Object::ObjectName::grass, Object::Passability::foreground) },
+            { std::pair<float, float>(40 * PIXEL_SIZE, 40 * PIXEL_SIZE), Multiplayer::ObjectData(sf::Vector2f(40 * PIXEL_SIZE, 40 * PIXEL_SIZE), static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()), Object::ObjectName::wooden_wall, Object::Passability::impassible) }
+        };
+        for (auto object : object_data_pool_init)
+            UdpManager.addObject(object.second);
+    }
     while (true)
     {
         // needs another thread
