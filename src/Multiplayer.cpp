@@ -60,7 +60,8 @@ namespace Multiplayer
 
     ObjectData::ObjectData(const ObjectData& object) : Transportable::Transportable(object.getPosition(), object.getTime())
     {
-        object_name = object.object_name;
+        object_name = object.getName();
+        passability = object.getPassability();
     }
 
 
@@ -142,7 +143,6 @@ namespace Multiplayer
 
     sf::Socket::Status UdpManager::receive()
     {
-        //data.clear();
         sf::Packet data;
         sf::Uint32 sent_time;
         sf::Vector2f new_position;
@@ -153,46 +153,43 @@ namespace Multiplayer
         sf::Uint32 data_type_enum;
         data >> data_type_enum;
         data_type = static_cast<DataType>(data_type_enum);
-        if (data_type == DataType::Object)
-        {
-            // receive object
-            Object::ObjectName object_name;
-            Object::Passability passability;
-            sf::Uint32 object_name_enum;
-            sf::Uint32 passability_enum;
-            data >> new_position.x >> new_position.y >> sent_time >> object_name_enum >> passability_enum;
-            object_name = static_cast<Object::ObjectName>(object_name_enum);
-            passability = static_cast<Object::Passability>(passability_enum);
-            addObject(ObjectData(new_position, sent_time, object_name, passability));
-        }
-        else if (data_type == DataType::Player)
-        {
-            int msg_local_ip, msg_ip;
-            data >> new_position.x >> new_position.y >> msg_ip >> msg_local_ip >> sent_time;
-            //if (msg_ip == my_ip.toInteger() && msg_local_ip == my_local_ip.toInteger())
-            //    continue;
 
-            auto id = sf::IpAddress(msg_ip).toString() + sf::IpAddress(msg_local_ip).toString();
+        switch (data_type)
+        {
+            case DataType::Object:
+                // receive object
+                Object::ObjectName object_name;
+                Object::Passability passability;
+                sf::Uint32 object_name_enum;
+                sf::Uint32 passability_enum;
+                data >> new_position.x >> new_position.y >> sent_time >> object_name_enum >> passability_enum;
+                object_name = static_cast<Object::ObjectName>(object_name_enum);
+                passability = static_cast<Object::Passability>(passability_enum);
+                addObject(ObjectData(new_position, sent_time, object_name, passability));
+                break;
 
-            sf::Uint32 time_now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-            int ping = static_cast<int>(time_now) - static_cast<int>(sent_time);
-            if (player_data_pool.count(id))
-                if (ping > MAX_PING)
-                {
-                    player_data_pool.erase(id);
-                }
+            case DataType::Player:
+                int msg_local_ip, msg_ip;
+                data >> new_position.x >> new_position.y >> msg_ip >> msg_local_ip >> sent_time;
+                //if (msg_ip == my_ip.toInteger() && msg_local_ip == my_local_ip.toInteger())
+                //    continue;
+                auto id = sf::IpAddress(msg_ip).toString() + sf::IpAddress(msg_local_ip).toString();
+                sf::Uint32 time_now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+                int ping = static_cast<int>(time_now) - static_cast<int>(sent_time);
+                if (player_data_pool.count(id))
+                    if (ping > MAX_PING)
+                        player_data_pool.erase(id);
+                    else
+                    {
+                        player_data_pool[id].setPosition(new_position);
+                        player_data_pool[id].setTime(sent_time);
+                    }
                 else
-                {
-                    player_data_pool[id].setPosition(new_position);
-                    player_data_pool[id].setTime(sent_time);
-                }
-            else
-                if (ping > MAX_PING)
-                    return status;
-                else
-                {
-                    player_data_pool[id] = PlayerData(new_position, msg_ip, msg_local_ip, sent_time);
-                }
+                    if (ping > MAX_PING)
+                        return status;
+                    else
+                        player_data_pool[id] = PlayerData(new_position, msg_ip, msg_local_ip, sent_time);
+                break;
         }
         return status;
     }
@@ -253,7 +250,7 @@ namespace Multiplayer
     {
         auto position = object.getPosition();
         sf::Uint32 time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-        packet << position.x << position.y << time << object.getName() << static_cast<sf::Uint32>(object.getPassability());
+        packet << position.x << position.y << time << object.getName() << object.getPassability();
         return packet;
     }
 
