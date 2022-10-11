@@ -128,7 +128,7 @@ namespace WorldMap
     {
         Object::Object object;
         object << object_data;
-        auto point = std::pair<float, float>(object.getPosition().x, object.getPosition().y);
+        auto point = std::pair<float, float>(object.getPosition().x * static_cast<float>(PIXEL_SIZE), object.getPosition().y * static_cast<float>(PIXEL_SIZE));
         switch (object.getPassability())
         {
             case Object::Passability::background:

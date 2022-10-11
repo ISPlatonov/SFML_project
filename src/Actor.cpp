@@ -225,7 +225,7 @@ namespace Actor
 
     sf::Packet& operator <<(sf::Packet& packet, const User& user)
     {
-        auto position = user.getPosition();
+        auto position = user.getPosition() / static_cast<float>(PIXEL_SIZE);
         sf::Uint32 time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
         return packet << position.x << position.y << user.getIp() << user.getLocalIp() << time;
     }
@@ -253,14 +253,14 @@ namespace Actor
     // ip and local_ip won't be changed
     Player& operator <<(Player& player, const Multiplayer::PlayerData& player_data)
     {
-        player.setPosition(player_data.getPosition());
+        player.setPosition(player_data.getPosition() * static_cast<float>(PIXEL_SIZE));
         player.setTime(player_data.getTime());
         return player;
     }
 
 
     // !!! rewrite PlayerData!!!
-    Player::Player(const Multiplayer::PlayerData& player_data) : Player(load_textures("textures/actors/Guy_16x32"), player_data.getPosition(), player_data.getIp(), player_data.getLocalIp(), player_data.getTime())
+    Player::Player(const Multiplayer::PlayerData& player_data) : Player(load_textures("textures/actors/Guy_16x32"), player_data.getPosition() * static_cast<float>(PIXEL_SIZE), player_data.getIp(), player_data.getLocalIp(), player_data.getTime())
     {
 
     }

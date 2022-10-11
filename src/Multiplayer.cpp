@@ -181,7 +181,7 @@ namespace Multiplayer
                         player_data_pool.erase(id);
                     else
                     {
-                        player_data_pool[id].setPosition(new_position);
+                        player_data_pool[id].setPosition(new_position * static_cast<float>(PIXEL_SIZE));
                         player_data_pool[id].setTime(sent_time);
                     }
                 else
@@ -227,8 +227,8 @@ namespace Multiplayer
 
     void UdpManager::addObject(const Object::Object& object)
     {
-        ObjectData object_data(object.getPosition(), static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()), object.getName(), object.getPassability());
-        object_data_pool[std::pair<float, float>(object.getPosition().x, object.getPosition().y)] = object_data;
+        ObjectData object_data(object.getPosition() / static_cast<float>(PIXEL_SIZE), static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()), object.getName(), object.getPassability());
+        object_data_pool[std::pair<float, float>(object_data.getPosition().x, object_data.getPosition().y)] = object_data;
     }
 
 
@@ -248,7 +248,7 @@ namespace Multiplayer
 
     sf::Packet& operator <<(sf::Packet& packet, const Object::Object& object)
     {
-        auto position = object.getPosition();
+        auto position = object.getPosition() / static_cast<float>(PIXEL_SIZE);
         sf::Uint32 time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
         packet << position.x << position.y << time << object.getName() << object.getPassability();
         return packet;
@@ -257,7 +257,7 @@ namespace Multiplayer
 
     Object::Object& operator <<(Object::Object& object, const ObjectData& object_data)
     {
-        auto position = object_data.getPosition();
+        auto position = object_data.getPosition() * static_cast<float>(PIXEL_SIZE);
         auto name = object_data.getName();
         auto passability = object_data.getPassability();
         object = Object::Object(Object::Object::NameToTextureMap[name], position, passability);
