@@ -195,14 +195,16 @@ namespace Multiplayer
             case DataType::Player:
                 int msg_local_ip, msg_ip;
                 data >> new_position.x >> new_position.y >> msg_ip >> msg_local_ip >> sent_time;
-                size_t inventory_size;
-                data >> inventory_size;
+                sf::Uint32 inventory_size_uint32;
+                data >> inventory_size_uint32;
+                size_t inventory_size = static_cast<size_t>(inventory_size_uint32);
                 std::unordered_map<Object::ObjectName, size_t> inventory;
                 for (size_t i = 0; i < inventory_size; ++i)
                 {
                     sf::Uint32 object_name_enum;
-                    size_t object_num;
-                    data >> object_name_enum >> object_num;
+                    sf::Uint32 object_num_uint32;
+                    data >> object_name_enum >> object_num_uint32;
+                    size_t object_num = static_cast<size_t>(object_num_uint32);
                     inventory[static_cast<Object::ObjectName>(object_name_enum)] = object_num;
                 }
                 //if (msg_ip == my_ip.toInteger() && msg_local_ip == my_local_ip.toInteger())

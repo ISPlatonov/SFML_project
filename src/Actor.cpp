@@ -236,10 +236,10 @@ namespace Actor
         auto position = user.getPosition() / static_cast<float>(PIXEL_SIZE);
         sf::Uint32 time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
         packet << position.x << position.y << user.getIp() << user.getLocalIp() << time;
-        packet << user.getInventory().size();
+        packet << static_cast<sf::Uint32>(user.getInventory().size());
         for (auto iter : user.getInventory())
         {
-            packet << iter.first << iter.second;
+            packet << iter.first << static_cast<sf::Uint32>(iter.second);
         }
         return packet;
     }
