@@ -49,6 +49,11 @@ void UdpWorker(Multiplayer::UdpManager& UdpManager)
             }
             sf::Packet data;
             data << static_cast<sf::Uint32>(Multiplayer::DataType::Player) << x << y << ip << local_ip << time;
+            data << static_cast<sf::Uint32>((*iter).second.getInventory().size());
+            for (auto pair : (*iter).second.getInventory())
+            {
+                data << pair.first << static_cast<sf::Uint32>(pair.second);
+            }
             UdpManager.send(data, sf::IpAddress((*dest_iter++).second.getLocalIp()));
             std::cout << "sent" << std::endl;
         }
