@@ -4,10 +4,10 @@
 #include <SFML/Network.hpp>
 #include <string>
 #include <chrono>
+#include <unordered_map>
 //#include "Actor.hpp"
 #include "Constants.hpp"
 #include "Object.hpp"
-//#include "WorldMap.hpp"
 
 
 namespace Multiplayer
@@ -40,13 +40,18 @@ namespace Multiplayer
     public:
         PlayerData();
         PlayerData(const PlayerData& player);
-        PlayerData(sf::Vector2f position, int ip, int local_ip, sf::Uint32 time);
+        PlayerData(const sf::Vector2f& position, const int& ip, const int& local_ip, const sf::Uint32& time, const std::unordered_map<Object::ObjectName, size_t>& inventory);
         const int& getIp() const;
         const int& getLocalIp() const;
+        const size_t objectNumber(Object::ObjectName) const;
+        const size_t addObject(Object::ObjectName);
+        const size_t removeObject(Object::ObjectName);
+        const std::unordered_map<Object::ObjectName, size_t>& getInventory() const;
 
     private:
         // data >> new_position.x >> new_position.y >> msg_ip >> msg_local_ip >> sent_time;
         int ip, local_ip;
+        std::unordered_map<Object::ObjectName, size_t> inventory;
     };
 
 

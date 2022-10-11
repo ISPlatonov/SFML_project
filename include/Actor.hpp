@@ -20,8 +20,8 @@ namespace Actor
     public:
         Actor();
         Actor(const Actor&);
-        Actor(const std::map<std::string, sf::Texture>& textures, const sf::Vector2f& position);
-        Actor(std::map<std::string, sf::Texture>&& textures, sf::Vector2f&& position);
+        Actor(const std::map<std::string, sf::Texture>& textures, const sf::Vector2f& position, const std::unordered_map<Object::ObjectName, size_t>& inventory);
+        Actor(std::map<std::string, sf::Texture>&& textures, sf::Vector2f&& position, std::unordered_map<Object::ObjectName, size_t>&& inventory);
         sf::Vector2f&& move_dt(const sf::Vector2f& direction, const sf::Uint32& dt, const WorldMap::ObjectMap& ObjectMap = {});
         //void setPosition(sf::Vector2f p);
         void check_direction(const sf::Vector2f&);
@@ -31,6 +31,8 @@ namespace Actor
         const size_t objectNumber(Object::ObjectName) const;
         const size_t addObject(Object::ObjectName);
         const size_t removeObject(Object::ObjectName);
+        const std::unordered_map<Object::ObjectName, size_t>& getInventory() const;
+        void setInventory(const std::unordered_map<Object::ObjectName, size_t>&);
 
     protected:    
         sf::Sprite sprite;
@@ -56,8 +58,8 @@ namespace Actor
     class User : public virtual Actor
     {
     public:
-        User(const std::map<std::string, sf::Texture>& textures, const sf::Vector2f& position);
-        User(std::map<std::string, sf::Texture>&& textures, sf::Vector2f&& position);
+        User(const std::map<std::string, sf::Texture>& textures, const sf::Vector2f& position, const std::unordered_map<Object::ObjectName, size_t>& inventory = {});
+        User(std::map<std::string, sf::Texture>&& textures, sf::Vector2f&& position, std::unordered_map<Object::ObjectName, size_t>&& inventory = {});
         sf::Vector2f&& move_dt(const sf::Vector2f& direction, const sf::Uint32& dt, const WorldMap::ObjectMap& ObjectMap = {});
         const sf::View& getView() const;
         const int& getIp() const;
@@ -73,7 +75,7 @@ namespace Actor
     {
     public:
         // data << x << y << my_ip.toInteger() << my_local_ip.toInteger() << std::chrono::high_resolution_clock::now().time_since_epoch().count()
-        Player(const std::map<std::string, sf::Texture>& textures, const sf::Vector2f& position, const int& ip, const int& local_ip, const sf::Uint32& creation_time);
+        Player(const std::map<std::string, sf::Texture>& textures, const sf::Vector2f& position, const int& ip, const int& local_ip, const sf::Uint32& creation_time, const std::unordered_map<Object::ObjectName, size_t>& inventory);
         Player(const Player&);
         Player(const Multiplayer::PlayerData&);
         Player();
