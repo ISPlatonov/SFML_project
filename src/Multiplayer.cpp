@@ -181,7 +181,7 @@ namespace Multiplayer
                         player_data_pool.erase(id);
                     else
                     {
-                        player_data_pool[id].setPosition(new_position * static_cast<float>(PIXEL_SIZE));
+                        player_data_pool[id].setPosition(new_position);
                         player_data_pool[id].setTime(sent_time);
                     }
                 else
