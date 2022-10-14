@@ -9,23 +9,25 @@ namespace Actor
     }
 
 
-    Actor::Actor(const std::map<std::string, sf::Texture>& textures, const sf::Vector2f& position, const std::unordered_map<Object::ObjectName, size_t>& new_inventory)
+    Actor::Actor(const sf::Vector2f& position, const std::unordered_map<Object::ObjectName, size_t>& new_inventory)
     {
-        this->textures = textures;
+        if (!Actor::textures.size())
+            load_textures("textures/actors/Guy_16x32");
         direction_x = "right";
         sprite.setPosition(position);
-        sprite.setTexture(this->textures[direction_x]);
+        sprite.setTexture(Actor::textures.at(direction_x));
         sprite.setScale(PIXEL_SIZE, PIXEL_SIZE);
         setInventory(new_inventory);
     }
 
 
-    Actor::Actor(std::map<std::string, sf::Texture>&& textures, sf::Vector2f&& position, std::unordered_map<Object::ObjectName, size_t>&& new_inventory)
+    Actor::Actor(sf::Vector2f&& position, std::unordered_map<Object::ObjectName, size_t>&& new_inventory)
     {
-        this->textures = std::move(textures);
+        if (!Actor::textures.size())
+            load_textures("textures/actors/Guy_16x32");
         direction_x = "right";
         sprite.setPosition(position);
-        sprite.setTexture(this->textures[direction_x]);
+        sprite.setTexture(Actor::textures.at(direction_x));
         sprite.setScale(PIXEL_SIZE, PIXEL_SIZE);
         inventory = new_inventory;
     }
@@ -45,7 +47,7 @@ namespace Actor
             direction_x = "left";
         else
             return;
-        sprite.setTexture(textures[direction_x]);
+        sprite.setTexture(Actor::textures.at(direction_x));
     }
 
 
@@ -115,7 +117,7 @@ namespace Actor
     }
 
 
-    User::User(const std::map<std::string, sf::Texture>& textures, const sf::Vector2f& position, const std::unordered_map<Object::ObjectName, size_t>& new_inventory) : Actor(textures, position, new_inventory)
+    User::User(const sf::Vector2f& position, const std::unordered_map<Object::ObjectName, size_t>& new_inventory) : Actor(position, new_inventory)
     {
         // make it static...
         view = sf::View(position + (getSprite().getLocalBounds().getSize() / 2.f * static_cast<float>(PIXEL_SIZE)), static_cast<sf::Vector2f>(WINDOW_SIZE * static_cast<float>(PIXEL_SIZE)));
@@ -124,7 +126,7 @@ namespace Actor
     }
 
 
-    User::User(std::map<std::string, sf::Texture>&& textures, sf::Vector2f&& position, std::unordered_map<Object::ObjectName, size_t>&& new_inventory) : Actor(textures, position, new_inventory)
+    User::User(sf::Vector2f&& position, std::unordered_map<Object::ObjectName, size_t>&& new_inventory) : Actor(position, new_inventory)
     {
         view = std::move(sf::View(position + (getSprite().getLocalBounds().getSize() / 2.f * static_cast<float>(PIXEL_SIZE)), static_cast<sf::Vector2f>(WINDOW_SIZE * static_cast<float>(PIXEL_SIZE))));
         int_ip = std::move(sf::IpAddress::getPublicAddress(sf::seconds(5.f)).toInteger());
@@ -145,7 +147,7 @@ namespace Actor
     }
 
 
-    Player::Player(const std::map<std::string, sf::Texture>& textures, const sf::Vector2f& position, const int& int_ip, const int& int_local_ip, const sf::Uint32& creation_time, const std::unordered_map<Object::ObjectName, size_t>& new_inventory) : Actor(textures, position, new_inventory)
+    Player::Player(const sf::Vector2f& position, const int& int_ip, const int& int_local_ip, const sf::Uint32& creation_time, const std::unordered_map<Object::ObjectName, size_t>& new_inventory) : Actor(position, new_inventory)
     {
         this->int_ip = int_ip;
         this->int_local_ip = int_local_ip;
@@ -200,7 +202,7 @@ namespace Actor
     }
 
 
-    Actor::Actor(const Actor& actor) : Actor(actor.getTextures(), actor.getPosition(), actor.getInventory())
+    Actor::Actor(const Actor& actor) : Actor(actor.getPosition(), actor.getInventory())
     {
         
     }
@@ -215,12 +217,6 @@ namespace Actor
     Player::Player() : Actor()
     {
 
-    }
-
-
-    const std::map<std::string, sf::Texture>& Actor::getTextures() const
-    {
-        return textures;
     }
 
 
@@ -257,16 +253,15 @@ namespace Actor
     }
 
 
-    std::map<std::string, sf::Texture>&& load_textures(const std::string& texture_dir_path)
+    void Actor::load_textures(const std::string& texture_dir_path)
     {
         // Load a sprite to display
-        std::map<std::string, sf::Texture>* textures = new std::map<std::string, sf::Texture>;
-        (*textures)["left"] = sf::Texture();
-        (*textures)["right"] = sf::Texture();
-        (*textures)["left"].loadFromFile(texture_dir_path + "/left.png");
-        (*textures)["right"].loadFromFile(texture_dir_path + "/right.png");
-
-        return std::move(*textures);
+        auto left_texture = sf::Texture();
+        left_texture.loadFromFile(texture_dir_path + "/left.png");
+        auto right_texture = sf::Texture();
+        right_texture.loadFromFile(texture_dir_path + "/right.png");
+        Actor::textures["left"] = std::move(left_texture);
+        Actor::textures["right"] = std::move(right_texture);
     }
 
 
@@ -281,7 +276,7 @@ namespace Actor
 
 
     // !!! rewrite PlayerData!!!
-    Player::Player(const Multiplayer::PlayerData& player_data) : Player(load_textures("textures/actors/Guy_16x32"), player_data.getPosition() * static_cast<float>(PIXEL_SIZE), player_data.getIp(), player_data.getLocalIp(), player_data.getTime(), player_data.getInventory())
+    Player::Player(const Multiplayer::PlayerData& player_data) : Player(player_data.getPosition() * static_cast<float>(PIXEL_SIZE), player_data.getIp(), player_data.getLocalIp(), player_data.getTime(), player_data.getInventory())
     {
 
     }

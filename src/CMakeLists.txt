@@ -1,7 +1,7 @@
 include_directories(${SFML_project_SOURCE_DIR}/include)
 
-set(SOURCE_FILES main.cpp Multiplayer.cpp Actor.cpp WorldMap.cpp Controls.cpp Object.cpp LinearAlgebra.cpp)
-set(SERVER_SOURCE_FILES server.cpp Multiplayer.cpp Object.cpp)
+file(GLOB SOURCE_FILES CONFIGURE_DEPENDS ${SFML_project_SOURCE_DIR}/src/*.cpp)
+set(SERVER_SOURCE_FILES server/server.cpp Multiplayer.cpp Object.cpp)
 
 if (BUILD_SERVER_ONLY)
     add_executable(server ${SERVER_SOURCE_FILES})

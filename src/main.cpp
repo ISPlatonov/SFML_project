@@ -15,8 +15,6 @@ int main()
 {
     Controls::applyWindowSettings();
 
-    auto textures = Actor::load_textures("textures/actors/Guy_16x32");
-
     Controls::window.setView(Controls::user.getView());
 
     // create objects

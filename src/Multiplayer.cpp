@@ -189,7 +189,7 @@ namespace Multiplayer
                 data >> new_position.x >> new_position.y >> sent_time >> object_name_enum >> passability_enum;
                 object_name = static_cast<Object::ObjectName>(object_name_enum);
                 passability = static_cast<Object::Passability>(passability_enum);
-                addObject(ObjectData(new_position, sent_time, object_name, passability));
+                addObject(ObjectData(std::move(new_position), std::move(sent_time), std::move(object_name), std::move(passability)));
                 break;
 
             case DataType::Player:
@@ -205,7 +205,7 @@ namespace Multiplayer
                     sf::Uint32 object_num_uint32;
                     data >> object_name_enum >> object_num_uint32;
                     size_t object_num = static_cast<size_t>(object_num_uint32);
-                    inventory[static_cast<Object::ObjectName>(object_name_enum)] = object_num;
+                    inventory[static_cast<Object::ObjectName>(object_name_enum)] = std::move(object_num);
                 }
                 //if (msg_ip == my_ip.toInteger() && msg_local_ip == my_local_ip.toInteger())
                 //    continue;
@@ -224,7 +224,7 @@ namespace Multiplayer
                     if (ping > MAX_PING)
                         return status;
                     else
-                        player_data_pool[id] = PlayerData(new_position, msg_ip, msg_local_ip, sent_time, inventory);
+                        player_data_pool[id] = PlayerData(std::move(new_position), std::move(msg_ip), std::move(msg_local_ip), std::move(sent_time), std::move(inventory));
                 break;
         }
         return status;
@@ -296,7 +296,7 @@ namespace Multiplayer
         auto position = object_data.getPosition() * static_cast<float>(PIXEL_SIZE);
         auto name = object_data.getName();
         auto passability = object_data.getPassability();
-        object = Object::Object(Object::Object::NameToTextureMap[name], position, passability);
+        object = Object::Object(name, position, passability);
         return object;
     }
 }

@@ -9,7 +9,7 @@ bool Controls::left = 0,
      Controls::draw_menu = 0;
 sf::Uint32 Controls::last_action_timepoint;
 sf::RenderWindow Controls::window(sf::VideoMode().getFullscreenModes().at(0), "SFML window", sf::Style::Fullscreen);
-Actor::User Controls::user(Actor::load_textures("textures/actors/Guy_16x32"), user.getView().getCenter() - sf::Vector2f(16, 32) * static_cast<float>(PIXEL_SIZE) / 2.f);
+Actor::User Controls::user(user.getView().getCenter() - sf::Vector2f(16, 32) * static_cast<float>(PIXEL_SIZE) / 2.f);
 sf::RectangleShape Controls::menu = sf::RectangleShape(sf::Vector2f(Controls::window.getSize()) * .1f);
 
 
@@ -35,51 +35,64 @@ void Controls::handleEvents()
 
 void Controls::addEvent(sf::Event event)
 {
-    if (event.type == sf::Event::KeyPressed)
-        switch (event.key.code)
-        {
-            case (sf::Keyboard::A):
-                left = 1;
-                break;
-            case (sf::Keyboard::D):
-                right = 1;
-                break;
-            case (sf::Keyboard::W):
-                up = 1;
-                break;
-            case (sf::Keyboard::S):
-                down = 1;
-                break;
-            case (sf::Keyboard::Escape):
-                // open menu
-                draw_menu = !draw_menu;
-                break;
-            default:
-                break;
-        }
-    else if (event.type == sf::Event::KeyReleased)
-        switch (event.key.code)
-        {
-            case (sf::Keyboard::A):
-                left = 0;
-                break;
-            case (sf::Keyboard::D):
-                right = 0;
-                break;
-            case (sf::Keyboard::W):
-                up = 0;
-                break;
-            case (sf::Keyboard::S):
-                down = 0;
-                break;
-            default:
-                break;
-        }
-    else if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
-        {
-            if (draw_menu && menu.getGlobalBounds().contains(window.mapPixelToCoords(sf::Mouse::getPosition())))
-                window.close();
-        }
+    switch (event.type)
+    {
+        case sf::Event::KeyPressed:
+            switch (event.key.code)
+            {
+                case (sf::Keyboard::A):
+                    left = 1;
+                    break;
+                case (sf::Keyboard::D):
+                    right = 1;
+                    break;
+                case (sf::Keyboard::W):
+                    up = 1;
+                    break;
+                case (sf::Keyboard::S):
+                    down = 1;
+                    break;
+                case (sf::Keyboard::Escape):
+                    // open menu
+                    draw_menu = !draw_menu;
+                    break;
+                default:
+                    break;
+            }
+            break;
+        case sf::Event::KeyReleased:
+            switch (event.key.code)
+            {
+                case (sf::Keyboard::A):
+                    left = 0;
+                    break;
+                case (sf::Keyboard::D):
+                    right = 0;
+                    break;
+                case (sf::Keyboard::W):
+                    up = 0;
+                    break;
+                case (sf::Keyboard::S):
+                    down = 0;
+                    break;
+                default:
+                    break;
+            }
+            break;
+        case sf::Event::MouseButtonReleased:
+            switch (event.mouseButton.button)
+            {
+                case sf::Mouse::Left:
+                    if (draw_menu && menu.getGlobalBounds().contains(window.mapPixelToCoords(sf::Mouse::getPosition())))
+                        window.close();
+                    else
+                    {
+                        // handle object selection
+                    }
+                    break;
+            }
+            break;
+    }
 }
 
 

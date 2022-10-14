@@ -3,11 +3,14 @@
 
 namespace Object
 {
-    std::map<ObjectName, std::string> Object::NameToTextureMap
+    std::unordered_map<ObjectName, sf::Texture> Object::NameToTextureMap{};
+
+
+    const std::unordered_map<ObjectName, std::string> Object::NameToTextureAddressMap
     {
-        {ObjectName::apple, "textures/objects/apple"},
-        {ObjectName::grass, "textures/objects/grass"},
-        {ObjectName::wooden_wall, "textures/objects/wooden_wall"}
+        std::make_pair(ObjectName::apple, "textures/objects/apple/texture.png"),
+        std::make_pair(ObjectName::wooden_wall, "textures/objects/wooden_wall/texture.png"),
+        std::make_pair(ObjectName::grass, "textures/objects/grass/texture.png")
     };
 
 
@@ -17,38 +20,37 @@ namespace Object
     }
 
 
-    Object::Object(const std::string& texture_address, const sf::Vector2f& new_position, const Passability& new_passability)
+    Object::Object(const ObjectName& name, const sf::Vector2f& new_position, const Passability& new_passability)
     {
-        if (!this->texture.loadFromFile(texture_address + "/texture.png"))
-            delete this;
+        this->name = name;
+        if (!NameToTextureMap.count(name))
+        {
+            auto new_texture = sf::Texture();
+            new_texture.loadFromFile(NameToTextureAddressMap.at(name));
+            NameToTextureMap[name] = std::move(new_texture);
+        }
         position = new_position;
         passability = new_passability;
         sprite.setScale(TILE_SIZE, TILE_SIZE);
-        sprite.setTexture(texture);
+        sprite.setTexture(NameToTextureMap.at(name));
         sprite.setPosition(position);
         // need a fix
     }
 
 
-    Object::Object(const sf::Texture& new_texture, const sf::Vector2f& new_position, const Passability& new_passability)
+    Object::Object(ObjectName&& name, sf::Vector2f&& new_position, Passability&& new_passability)
     {
-        texture = new_texture;
-        position = new_position;
-        passability = new_passability;
-        sprite.setScale(TILE_SIZE, TILE_SIZE);
-        sprite.setTexture(texture);
-        sprite.setPosition(position);
-        // need a fix
-    }
-
-
-    Object::Object(sf::Texture&& new_texture, sf::Vector2f&& new_position, Passability&& new_passability)
-    {
-        texture = std::move(new_texture);
+        this->name = std::move(name);
+        if (!NameToTextureMap.count(name))
+        {
+            auto new_texture = sf::Texture();
+            new_texture.loadFromFile(NameToTextureAddressMap.at(name));
+            NameToTextureMap[name] = std::move(new_texture);
+        }
         position = std::move(new_position);
         passability = std::move(new_passability);
         sprite.setScale(TILE_SIZE, TILE_SIZE);
-        sprite.setTexture(texture);
+        sprite.setTexture(NameToTextureMap.at(name));
         sprite.setPosition(position);
         // need a fix
     }
@@ -60,7 +62,7 @@ namespace Object
         states.transform *= getTransform();
 
         // apply the tileset texture
-        states.texture = &texture;
+        states.texture = &NameToTextureMap.at(name);
 
         // draw the vertex array
         target.draw(sprite, states);
@@ -70,12 +72,6 @@ namespace Object
     const Passability& Object::getPassability() const
     {
         return passability;
-    }
-
-
-    const sf::Texture& Object::getTexture() const
-    {
-        return texture;
     }
     
     
