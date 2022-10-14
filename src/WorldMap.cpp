@@ -120,6 +120,7 @@ namespace WorldMap
 
             default:
                 throw;
+                break;
         }
     }
 
@@ -133,22 +134,16 @@ namespace WorldMap
         {
             case Object::Passability::background:
                 if (!background_objects.count(point) || background_objects[point].getName() != object.getName())
-                {
                     background_objects[point] = object;
-                    break;
-                }
+                break;
             case Object::Passability::foreground:
                 if (!foreground_objects.count(point) || foreground_objects[point].getName() != object.getName())
-                {
                     foreground_objects[point] = object;
-                    break;
-                }
+                break;
             case Object::Passability::impassible:
                 if (!impassible_objects.count(point) || impassible_objects[point].getName() != object.getName())
-                {
                     impassible_objects[point] = object;
-                    break;
-                }
+                break;
         }
     }
 } // namespace WorldMap

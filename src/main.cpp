@@ -18,9 +18,7 @@ int main()
     Controls::window.setView(Controls::user.getView());
 
     // create objects
-    WorldMap::ObjectMap ObjectMap;
-    //auto apple = WorldMap::Object("textures/objects/apple", sf::Vector2f(100, 100), WorldMap::Passability::background);
-    
+    WorldMap::ObjectMap ObjectMap;    
     /*
     // Create a graphical text to display
     sf::Font font;
