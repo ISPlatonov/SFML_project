@@ -251,7 +251,7 @@ namespace Multiplayer
             case DataType::Event:
             {
                 // event handling
-                size_t event_type_enum;
+                sf::Uint32 event_type_enum;
                 data >> event_type_enum;
                 EventType event_type = static_cast<EventType>(event_type_enum);
                 switch (event_type)
