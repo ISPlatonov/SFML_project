@@ -8,6 +8,7 @@
 //#include "Actor.hpp"
 #include "Constants.hpp"
 #include "Object.hpp"
+#include "Hash.hpp"
 
 
 namespace Multiplayer
@@ -76,10 +77,10 @@ namespace Multiplayer
         UdpManager(const sf::IpAddress& address_receive, const sf::IpAddress& address_send);
         sf::Socket::Status receive();
         void send(sf::Packet& packet, const sf::IpAddress& dest_ip = sf::IpAddress());
-        const std::map<std::string, PlayerData>& getPlayerDataPool() const;
-        const std::map<std::pair<float, float>, ObjectData>& getObjectDataPool() const;
-        std::map<std::string, PlayerData>::iterator removePlayerById(const std::string& id);
-        std::map<std::pair<float, float>, ObjectData>::iterator removeObjectByPoint(const std::pair<float, float>& point);
+        const std::unordered_map<std::string, PlayerData>& getPlayerDataPool() const;
+        const std::unordered_map<sf::Vector2f, ObjectData>& getObjectDataPool() const;
+        std::unordered_map<std::string, PlayerData>::iterator removePlayerById(const std::string& id);
+        std::unordered_map<sf::Vector2f, ObjectData>::iterator removeObjectByPoint(const sf::Vector2f& point);
         void addObject(const Object::Object& object);
         void addObject(const Multiplayer::ObjectData& object_data);
 
@@ -91,8 +92,8 @@ namespace Multiplayer
         /*static*/ sf::IpAddress ip, local_ip;
         /*static*/ unsigned short port;
         /*static*/ unsigned short port_send;
-        /*static*/ std::map<std::string, PlayerData> player_data_pool;
-        /*static*/ std::map<std::pair<float, float>, ObjectData> object_data_pool;
+        /*static*/ std::unordered_map<std::string, PlayerData> player_data_pool;
+        /*static*/ std::unordered_map<sf::Vector2f, ObjectData> object_data_pool;
     };
 
 

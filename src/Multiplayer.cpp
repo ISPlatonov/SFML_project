@@ -231,31 +231,31 @@ namespace Multiplayer
     }
 
 
-    const std::map<std::string, PlayerData>& UdpManager::getPlayerDataPool() const
+    const std::unordered_map<std::string, PlayerData>& UdpManager::getPlayerDataPool() const
     {
         return player_data_pool;
     }
 
 
-    const std::map<std::pair<float, float>, ObjectData>& UdpManager::getObjectDataPool() const
+    const std::unordered_map<sf::Vector2f, ObjectData>& UdpManager::getObjectDataPool() const
     {
         return object_data_pool;
     }
 
 
-    std::map<std::string, PlayerData>::iterator UdpManager::removePlayerById(const std::string& id)
+    std::unordered_map<std::string, PlayerData>::iterator UdpManager::removePlayerById(const std::string& id)
     {
         if (!player_data_pool.count(id))
-            return std::map<std::string, PlayerData>::iterator();
+            return std::unordered_map<std::string, PlayerData>::iterator();
         else
             return player_data_pool.erase(player_data_pool.find(id));
     }
 
 
-    std::map<std::pair<float, float>, ObjectData>::iterator UdpManager::removeObjectByPoint(const std::pair<float, float>& point)
+    std::unordered_map<sf::Vector2f, ObjectData>::iterator UdpManager::removeObjectByPoint(const sf::Vector2f& point)
     {
         if (!object_data_pool.count(point))
-            return std::map<std::pair<float, float>, ObjectData>::iterator();
+            return std::unordered_map<sf::Vector2f, ObjectData>::iterator();
         else
             return object_data_pool.erase(object_data_pool.find(point));
     }
@@ -264,13 +264,13 @@ namespace Multiplayer
     void UdpManager::addObject(const Object::Object& object)
     {
         ObjectData object_data(object.getPosition() / static_cast<float>(PIXEL_SIZE), static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()), object.getName(), object.getPassability());
-        object_data_pool[std::pair<float, float>(object_data.getPosition().x, object_data.getPosition().y)] = object_data;
+        object_data_pool[object_data.getPosition()] = object_data;
     }
 
 
     void UdpManager::addObject(const Multiplayer::ObjectData& object_data)
     {
-        object_data_pool[std::pair<float, float>(object_data.getPosition().x, object_data.getPosition().y)] = object_data;
+        object_data_pool[object_data.getPosition()] = object_data;
     }
 
 

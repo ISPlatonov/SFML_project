@@ -9,7 +9,7 @@ bool Controls::left = 0,
      Controls::draw_menu = 0;
 sf::Uint32 Controls::last_action_timepoint;
 sf::RenderWindow Controls::window(sf::VideoMode().getFullscreenModes().at(0), "SFML window", sf::Style::Fullscreen);
-Actor::User Controls::user(user.getView().getCenter() - sf::Vector2f(16, 32) * static_cast<float>(PIXEL_SIZE) / 2.f);
+Actor::User Controls::user(sf::Vector2f(0, 0));
 sf::RectangleShape Controls::menu = sf::RectangleShape(sf::Vector2f(Controls::window.getSize()) * .1f);
 
 
