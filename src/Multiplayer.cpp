@@ -24,7 +24,7 @@ namespace Multiplayer
 {
     Transportable::Transportable()
     {
-
+        sent_time = 0;
     }
 
 
@@ -295,6 +295,8 @@ namespace Multiplayer
                                 player_data_pool[id].setTime(sent_time);
                                 player_data_pool[id].addObject(object_name);
                                 removeObjectByPoint(object.getPosition());
+                                data.clear();
+                                data << DataType::Event << EventType::removeObject << object.getPosition().x << object.getPosition().y << object.getTime() << object.getName() << object.getPassability();
                             }
                         else
                             if (ping > MAX_PING)
@@ -304,13 +306,28 @@ namespace Multiplayer
                                 player_data_pool[id] = PlayerData(std::move(new_position), std::move(msg_ip), std::move(msg_local_ip), std::move(sent_time), std::move(inventory));
                                 player_data_pool[id].addObject(object.getName());
                                 removeObjectByPoint(object.getPosition());
+                                data.clear();
+                                data << DataType::Event << EventType::removeObject << object.getPosition().x << object.getPosition().y << object.getTime() << object.getName() << object.getPassability();
                             }
                         break;
                     }
                     case EventType::ejectObjectFromInventory:
                         //
                         break;
-
+                    
+                    case EventType::removeObject:
+                    {
+                        // receive object
+                        Object::ObjectName object_name;
+                        Object::Passability passability;
+                        sf::Uint32 object_name_enum;
+                        sf::Uint32 passability_enum;
+                        data >> new_position.x >> new_position.y >> sent_time >> object_name_enum >> passability_enum;
+                        object_name = static_cast<Object::ObjectName>(object_name_enum);
+                        passability = static_cast<Object::Passability>(passability_enum);
+                        removeObjectByPoint(new_position);
+                        break;
+                    }
                     default:
                         throw; // ???
                         break;
@@ -351,7 +368,10 @@ namespace Multiplayer
         if (!object_data_pool.count(point))
             return std::unordered_map<sf::Vector2f, ObjectData>::iterator();
         else
+        {
+            removed_object_data_list.push_back((*object_data_pool.find(point)).second);
             return object_data_pool.erase(object_data_pool.find(point));
+        }
     }
 
 
@@ -365,6 +385,22 @@ namespace Multiplayer
     void UdpManager::addObject(const Multiplayer::ObjectData& object_data)
     {
         object_data_pool[object_data.getPosition()] = object_data;
+    }
+
+
+    ObjectData&& UdpManager::getRemovedObjectData()
+    {
+        if (removed_object_data_list.empty())
+        {
+            ObjectData* object_data = new ObjectData();
+            return std::move(*object_data);
+        }
+        else
+        {
+            ObjectData& object_data = removed_object_data_list.back();
+            removed_object_data_list.pop_back();
+            return std::move(object_data);
+        }
     }
 
 

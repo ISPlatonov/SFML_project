@@ -196,6 +196,8 @@ void Controls::handleFrameStep()
     }
     for (auto iter = udp_manager.getObjectDataPool().begin(); iter != udp_manager.getObjectDataPool().end(); ++iter)
         Controls::object_map.addObject((*iter).second);
+    for (auto object_data = udp_manager.getRemovedObjectData(); object_data.getTime() != 0; object_data = udp_manager.getRemovedObjectData())
+        Controls::object_map.removeObject(object_data);
     sf::Packet data;
     data << Multiplayer::DataType::Player << Controls::user;
     udp_manager.send(data);

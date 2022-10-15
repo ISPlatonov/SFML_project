@@ -24,7 +24,8 @@ namespace Multiplayer
     enum EventType
     {
         takeObjectToInventory,
-        ejectObjectFromInventory
+        ejectObjectFromInventory,
+        removeObject
     };
 
 
@@ -91,6 +92,7 @@ namespace Multiplayer
         std::unordered_map<sf::Vector2f, ObjectData>::iterator removeObjectByPoint(const sf::Vector2f& point);
         void addObject(const Object::Object& object);
         void addObject(const Multiplayer::ObjectData& object_data);
+        ObjectData&& getRemovedObjectData();
 
     private:
         sf::UdpSocket socket;
@@ -102,6 +104,7 @@ namespace Multiplayer
         /*static*/ unsigned short port_send;
         /*static*/ std::unordered_map<std::string, PlayerData> player_data_pool;
         /*static*/ std::unordered_map<sf::Vector2f, ObjectData> object_data_pool;
+        /*static*/ std::vector<ObjectData> removed_object_data_list;
     };
 }
 
