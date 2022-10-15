@@ -16,7 +16,15 @@ namespace Multiplayer
     enum DataType
     {
         Player,
-        Object
+        Object,
+        Event
+    };
+
+
+    enum EventType
+    {
+        takeObjectToInventory,
+        ejectObjectFromInventory
     };
 
 
@@ -95,8 +103,8 @@ namespace Multiplayer
         /*static*/ std::unordered_map<std::string, PlayerData> player_data_pool;
         /*static*/ std::unordered_map<sf::Vector2f, ObjectData> object_data_pool;
     };
-
-
-    sf::Packet& operator <<(sf::Packet& packet, const Object::Object& object);
-    Object::Object& operator <<(Object::Object& object, const ObjectData& object_data);
 }
+
+
+sf::Packet& operator <<(sf::Packet& packet, const Object::Object& object);
+Object::Object& operator <<(Object::Object& object, const Multiplayer::ObjectData& object_data);

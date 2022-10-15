@@ -1,6 +1,25 @@
 #include "Multiplayer.hpp"
 
 
+sf::Packet& operator <<(sf::Packet& packet, const Object::Object& object)
+{
+    auto position = object.getPosition() / static_cast<float>(PIXEL_SIZE);
+    sf::Uint32 time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+    packet << position.x << position.y << time << object.getName() << object.getPassability();
+    return packet;
+}
+
+
+Object::Object& operator <<(Object::Object& object, const Multiplayer::ObjectData& object_data)
+{
+    auto position = object_data.getPosition() * static_cast<float>(PIXEL_SIZE);
+    auto name = object_data.getName();
+    auto passability = object_data.getPassability();
+    object = Object::Object(name, position, passability);
+    return object;
+}
+
+
 namespace Multiplayer
 {
     Transportable::Transportable()
@@ -181,6 +200,7 @@ namespace Multiplayer
         switch (data_type)
         {
             case DataType::Object:
+            {
                 // receive object
                 Object::ObjectName object_name;
                 Object::Passability passability;
@@ -191,8 +211,9 @@ namespace Multiplayer
                 passability = static_cast<Object::Passability>(passability_enum);
                 addObject(ObjectData(std::move(new_position), std::move(sent_time), std::move(object_name), std::move(passability)));
                 break;
-
+            }
             case DataType::Player:
+            {
                 int msg_local_ip, msg_ip;
                 data >> new_position.x >> new_position.y >> msg_ip >> msg_local_ip >> sent_time;
                 sf::Uint32 inventory_size_uint32;
@@ -225,6 +246,77 @@ namespace Multiplayer
                         return status;
                     else
                         player_data_pool[id] = PlayerData(std::move(new_position), std::move(msg_ip), std::move(msg_local_ip), std::move(sent_time), std::move(inventory));
+                break;
+            }
+            case DataType::Event:
+            {
+                // event handling
+                size_t event_type_enum;
+                data >> event_type_enum;
+                EventType event_type = static_cast<EventType>(event_type_enum);
+                switch (event_type)
+                {
+                    case EventType::takeObjectToInventory:
+                    {
+                        // data >> object_data >> user
+                        // receive object
+                        Object::ObjectName object_name;
+                        Object::Passability passability;
+                        sf::Uint32 object_name_enum;
+                        sf::Uint32 passability_enum;
+                        data >> new_position.x >> new_position.y >> sent_time >> object_name_enum >> passability_enum;
+                        object_name = static_cast<Object::ObjectName>(object_name_enum);
+                        passability = static_cast<Object::Passability>(passability_enum);
+                        //auto object = ObjectData(std::move(new_position), std::move(sent_time), std::move(object_name), std::move(passability));
+                        // receive user
+                        int msg_local_ip, msg_ip;
+                        data >> new_position.x >> new_position.y >> msg_ip >> msg_local_ip >> sent_time;
+                        sf::Uint32 inventory_size_uint32;
+                        data >> inventory_size_uint32;
+                        size_t inventory_size = static_cast<size_t>(inventory_size_uint32);
+                        std::unordered_map<Object::ObjectName, size_t> inventory;
+                        for (size_t i = 0; i < inventory_size; ++i)
+                        {
+                            sf::Uint32 object_name_enum;
+                            sf::Uint32 object_num_uint32;
+                            data >> object_name_enum >> object_num_uint32;
+                            size_t object_num = static_cast<size_t>(object_num_uint32);
+                            inventory[static_cast<Object::ObjectName>(object_name_enum)] = std::move(object_num);
+                        }
+                        auto id = sf::IpAddress(msg_ip).toString() + sf::IpAddress(msg_local_ip).toString();
+                        sf::Uint32 time_now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+                        int ping = static_cast<int>(time_now) - static_cast<int>(sent_time);
+                        if (player_data_pool.count(id))
+                            if (ping > MAX_PING)
+                                player_data_pool.erase(id);
+                            else
+                            {
+                                player_data_pool[id].setPosition(new_position);
+                                player_data_pool[id].setTime(sent_time);
+                                player_data_pool[id].addObject(object_name);
+                            }
+                        else
+                            if (ping > MAX_PING)
+                                return status;
+                            else
+                            {
+                                player_data_pool[id] = PlayerData(std::move(new_position), std::move(msg_ip), std::move(msg_local_ip), std::move(sent_time), std::move(inventory));
+                                player_data_pool[id].addObject(object_name);
+                            }
+                        break;
+                    }
+                    case EventType::ejectObjectFromInventory:
+                        //
+                        break;
+
+                    default:
+                        throw; // ???
+                        break;
+                }
+                break;
+            }
+            default:
+                throw; // ???
                 break;
         }
         return status;
@@ -279,24 +371,5 @@ namespace Multiplayer
         if (dest_ip == sf::IpAddress())
             socket_send.send(packet, address_send, port);
         socket_send.send(packet, dest_ip, port);
-    }
-
-
-    sf::Packet& operator <<(sf::Packet& packet, const Object::Object& object)
-    {
-        auto position = object.getPosition() / static_cast<float>(PIXEL_SIZE);
-        sf::Uint32 time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-        packet << position.x << position.y << time << object.getName() << object.getPassability();
-        return packet;
-    }
-
-
-    Object::Object& operator <<(Object::Object& object, const ObjectData& object_data)
-    {
-        auto position = object_data.getPosition() * static_cast<float>(PIXEL_SIZE);
-        auto name = object_data.getName();
-        auto passability = object_data.getPassability();
-        object = Object::Object(name, position, passability);
-        return object;
     }
 }

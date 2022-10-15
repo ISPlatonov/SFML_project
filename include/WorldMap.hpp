@@ -32,7 +32,9 @@ namespace WorldMap
     public:
         ObjectMap();
         const std::map<std::pair<float, float>, Object::Object>& getObjectMap(Object::Passability) const;
-        void addObject(Multiplayer::ObjectData);
+        void addObject(const Multiplayer::ObjectData&);
+        void removeObject(const Multiplayer::ObjectData&);
+        void removeObject(const Object::Object&);
 
     private:
         std::map<std::pair<float, float>, Object::Object> background_objects;
