@@ -95,9 +95,11 @@ void Controls::addEvent(sf::Event event)
                             {
                                 sf::Packet data;
                                 data << Multiplayer::DataType::Event;
+                                data << Multiplayer::EventType::takeObjectToInventory;
                                 data << iter.second;
                                 data << user;
                                 udp_manager.send(data);
+                                break;
                             }
                         }
                     }

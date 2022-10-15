@@ -267,7 +267,7 @@ namespace Multiplayer
                         data >> new_position.x >> new_position.y >> sent_time >> object_name_enum >> passability_enum;
                         object_name = static_cast<Object::ObjectName>(object_name_enum);
                         passability = static_cast<Object::Passability>(passability_enum);
-                        //auto object = ObjectData(std::move(new_position), std::move(sent_time), std::move(object_name), std::move(passability));
+                        auto object = ObjectData(std::move(new_position), std::move(sent_time), std::move(object_name), std::move(passability));
                         // receive user
                         int msg_local_ip, msg_ip;
                         data >> new_position.x >> new_position.y >> msg_ip >> msg_local_ip >> sent_time;
@@ -294,6 +294,7 @@ namespace Multiplayer
                                 player_data_pool[id].setPosition(new_position);
                                 player_data_pool[id].setTime(sent_time);
                                 player_data_pool[id].addObject(object_name);
+                                removeObjectByPoint(object.getPosition());
                             }
                         else
                             if (ping > MAX_PING)
@@ -301,7 +302,8 @@ namespace Multiplayer
                             else
                             {
                                 player_data_pool[id] = PlayerData(std::move(new_position), std::move(msg_ip), std::move(msg_local_ip), std::move(sent_time), std::move(inventory));
-                                player_data_pool[id].addObject(object_name);
+                                player_data_pool[id].addObject(object.getName());
+                                removeObjectByPoint(object.getPosition());
                             }
                         break;
                     }
