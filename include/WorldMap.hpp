@@ -5,11 +5,11 @@
 #include "Constants.hpp"
 #include "Multiplayer.hpp"
 #include "Object.hpp"
+#include "Hash.hpp"
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include <random>
 #include <chrono>
-#include <iostream>
 
 
 namespace WorldMap
@@ -31,15 +31,15 @@ namespace WorldMap
     {
     public:
         ObjectMap();
-        const std::map<std::pair<float, float>, Object::Object>& getObjectMap(Object::Passability) const;
+        const std::unordered_map<sf::Vector2f, Object::Object>& getObjectMap(Object::Passability) const;
         void addObject(const Multiplayer::ObjectData&);
         void removeObject(const Multiplayer::ObjectData&);
         void removeObject(const Object::Object&);
 
     private:
-        std::map<std::pair<float, float>, Object::Object> background_objects;
-        std::map<std::pair<float, float>, Object::Object> foreground_objects;
-        std::map<std::pair<float, float>, Object::Object> impassible_objects;
+        std::unordered_map<sf::Vector2f, Object::Object> background_objects;
+        std::unordered_map<sf::Vector2f, Object::Object> foreground_objects;
+        std::unordered_map<sf::Vector2f, Object::Object> impassible_objects;
     };
 
 

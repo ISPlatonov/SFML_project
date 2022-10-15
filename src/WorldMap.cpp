@@ -102,7 +102,7 @@ namespace WorldMap
     }
 
 
-    const std::map<std::pair<float, float>, Object::Object>& ObjectMap::getObjectMap(Object::Passability passability) const
+    const std::unordered_map<sf::Vector2f, Object::Object>& ObjectMap::getObjectMap(Object::Passability passability) const
     {
         switch (passability)
         {
@@ -129,7 +129,7 @@ namespace WorldMap
     {
         Object::Object object;
         object << object_data;
-        auto point = std::pair<float, float>(object.getPosition().x * static_cast<float>(PIXEL_SIZE), object.getPosition().y * static_cast<float>(PIXEL_SIZE));
+        auto point = object.getPosition();
         switch (object.getPassability())
         {
             case Object::Passability::background:
@@ -150,27 +150,32 @@ namespace WorldMap
 
     void ObjectMap::removeObject(const Multiplayer::ObjectData& object_data)
     {
-        auto point = std::pair<float, float>(object_data.getPosition().x * static_cast<float>(PIXEL_SIZE), object_data.getPosition().y * static_cast<float>(PIXEL_SIZE));
+        auto point = object_data.getPosition() * static_cast<float>(PIXEL_SIZE);
         switch (object_data.getPassability())
         {
             case Object::Passability::background:
-                if (!background_objects.count(point) || background_objects[point].getName() != object_data.getName())
+            {
+                if (background_objects.count(point) && background_objects[point].getName() == object_data.getName())
                     background_objects.erase(point);
                 break;
+            }
             case Object::Passability::foreground:
-                if (!foreground_objects.count(point) || foreground_objects[point].getName() != object_data.getName())
+            {
+                if (foreground_objects.count(point) && foreground_objects[point].getName() == object_data.getName())
                     foreground_objects.erase(point);
                 break;
+            }
             case Object::Passability::impassible:
-                if (!impassible_objects.count(point) || impassible_objects[point].getName() != object_data.getName())
+            {
+                if (impassible_objects.count(point) && impassible_objects[point].getName() == object_data.getName())
                     impassible_objects.erase(point);
                 break;
+            }
             default:
+            {
                 throw; // ???
                 break;
+            }
         }
     }
-
-
-    void removeObject(Object::Object);
 } // namespace WorldMap
