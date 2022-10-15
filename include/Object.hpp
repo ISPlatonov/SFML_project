@@ -22,7 +22,9 @@ namespace Object
     {
         apple,
         wooden_wall,
-        grass
+        grass,
+        dirt,
+        stone
     };
 
 

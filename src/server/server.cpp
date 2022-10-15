@@ -80,14 +80,14 @@ int main()
                 Multiplayer::ObjectData(sf::Vector2f(100, 100),
                                         static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()),
                                         Object::ObjectName::apple,
-                                        Object::Passability::background)
+                                        Object::Passability::foreground)
             },
             {
                 std::pair<float, float>(20, 20),
                 Multiplayer::ObjectData(sf::Vector2f(20, 20),
                                         static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()),
                                         Object::ObjectName::grass,
-                                        Object::Passability::foreground)
+                                        Object::Passability::background)
             },
             {
                 std::pair<float, float>(40, 40),
@@ -95,6 +95,20 @@ int main()
                                         static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()),
                                         Object::ObjectName::wooden_wall,
                                         Object::Passability::impassible)
+            },
+            {
+                std::pair<float, float>(0, 50),
+                Multiplayer::ObjectData(sf::Vector2f(0, 50),
+                                        static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()),
+                                        Object::ObjectName::dirt,
+                                        Object::Passability::background)
+            },
+            {
+                std::pair<float, float>(70, 0),
+                Multiplayer::ObjectData(sf::Vector2f(70, 0),
+                                        static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()),
+                                        Object::ObjectName::stone,
+                                        Object::Passability::background)
             }
         });
         for (auto object : object_data_pool_init)
