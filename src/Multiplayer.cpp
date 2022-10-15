@@ -297,6 +297,8 @@ namespace Multiplayer
                                 removeObjectByPoint(object.getPosition());
                                 data.clear();
                                 data << DataType::Event << EventType::removeObject << object.getPosition().x << object.getPosition().y << object.getTime() << object.getName() << object.getPassability();
+                                for (auto iter = getPlayerDataPool().begin(); iter != getPlayerDataPool().end(); ++iter)
+                                    send(data, sf::IpAddress((*iter).second.getLocalIp()));
                             }
                         else
                             if (ping > MAX_PING)
@@ -308,6 +310,8 @@ namespace Multiplayer
                                 removeObjectByPoint(object.getPosition());
                                 data.clear();
                                 data << DataType::Event << EventType::removeObject << object.getPosition().x << object.getPosition().y << object.getTime() << object.getName() << object.getPassability();
+                                for (auto iter = getPlayerDataPool().begin(); iter != getPlayerDataPool().end(); ++iter)
+                                    send(data, sf::IpAddress((*iter).second.getLocalIp()));
                             }
                         break;
                     }
