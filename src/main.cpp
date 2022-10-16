@@ -1,20 +1,17 @@
 //#include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
-#include <map>
-#include "Mob.hpp"
+#include <chrono>
 #include "Constants.hpp"
+#include "Mob.hpp"
 #include "WorldMap.hpp"
 #include "Controls.hpp"
 #include "Multiplayer.hpp"
-
-#include <chrono>
 
 
 int main()
 {
     Controls::applyWindowSettings();
-
     Controls::window.setView(Controls::user.getView());
    
     /*

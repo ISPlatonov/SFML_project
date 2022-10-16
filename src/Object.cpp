@@ -34,7 +34,7 @@ namespace Object
         }
         position = new_position;
         passability = new_passability;
-        sprite.setScale(TILE_SIZE, TILE_SIZE);
+        sprite.setScale(Constants::getTILE_SIZE(), Constants::getTILE_SIZE());
         sprite.setTexture(NameToTextureMap.at(name));
         sprite.setPosition(position);
         // need a fix
@@ -52,7 +52,7 @@ namespace Object
         }
         position = std::move(new_position);
         passability = std::move(new_passability);
-        sprite.setScale(TILE_SIZE, TILE_SIZE);
+        sprite.setScale(Constants::getTILE_SIZE(), Constants::getTILE_SIZE());
         sprite.setTexture(NameToTextureMap.at(name));
         sprite.setPosition(position);
         // need a fix
@@ -110,21 +110,21 @@ namespace Object
         {
             if (!this->intersection(sf::FloatRect(rect.getPosition() + sf::Vector2f(vector.x, 0), rect.getSize())))
             {
-                if (depth < MAX_RECURSION_DEPTH)
+                if (depth < Constants::getMAX_RECURSION_DEPTH())
                     vector.y /= 2;
                 else
                     vector.y = 0;
             }
             else if (!this->intersection(sf::FloatRect(rect.getPosition() + sf::Vector2f(0, vector.y), rect.getSize())))
             {
-                if (depth < MAX_RECURSION_DEPTH)
+                if (depth < Constants::getMAX_RECURSION_DEPTH())
                     vector.x /= 2;
                 else
                     vector.x = 0;
             }
             else
             {
-                if (depth < MAX_RECURSION_DEPTH)
+                if (depth < Constants::getMAX_RECURSION_DEPTH())
                 {
                     vector.x /= 2;
                     vector.y /= 2;

@@ -3,7 +3,7 @@
 
 sf::Packet& operator <<(sf::Packet& packet, const Object::Object& object)
 {
-    auto position = object.getPosition() / static_cast<float>(PIXEL_SIZE);
+    auto position = object.getPosition() / static_cast<float>(Constants::getPIXEL_SIZE());
     sf::Uint32 time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
     packet << position.x << position.y << time << object.getName() << object.getPassability();
     return packet;
@@ -12,7 +12,7 @@ sf::Packet& operator <<(sf::Packet& packet, const Object::Object& object)
 
 Object::Object& operator <<(Object::Object& object, const Multiplayer::ObjectData& object_data)
 {
-    auto position = object_data.getPosition() * static_cast<float>(PIXEL_SIZE);
+    auto position = object_data.getPosition() * static_cast<float>(Constants::getPIXEL_SIZE());
     auto name = object_data.getName();
     auto passability = object_data.getPassability();
     object = Object::Object(name, position, passability);
@@ -167,13 +167,13 @@ namespace Multiplayer
     {
         this->address_receive = sf::IpAddress(address_receive);
         this->address_send = sf::IpAddress(address_send);
-        port = PORT_LISTEN;
-        port_send = PORT_SEND;
+        port = Constants::getPORT_LISTEN();
+        port_send = Constants::getPORT_SEND();
 
-        unsigned short port = PORT_LISTEN;
-        unsigned short port_send = PORT_SEND;
-        auto broadcast_ip = SERVER_IP;
-        ip = sf::IpAddress::getPublicAddress(sf::seconds(MAX_PING));
+        unsigned short port = Constants::getPORT_LISTEN();
+        unsigned short port_send = Constants::getPORT_SEND();
+        auto broadcast_ip = Constants::getSERVER_IP();
+        ip = sf::IpAddress::getPublicAddress(sf::seconds(Constants::getMAX_PING()));
         local_ip = sf::IpAddress::getLocalAddress();
         socket.setBlocking(false);
         // bind the socket to a port
@@ -234,7 +234,7 @@ namespace Multiplayer
                 sf::Uint32 time_now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
                 int ping = static_cast<int>(time_now) - static_cast<int>(sent_time);
                 if (player_data_pool.count(id))
-                    if (ping > MAX_PING)
+                    if (ping > Constants::getMAX_PING())
                         player_data_pool.erase(id);
                     else
                     {
@@ -242,7 +242,7 @@ namespace Multiplayer
                         player_data_pool[id].setTime(sent_time);
                     }
                 else
-                    if (ping > MAX_PING)
+                    if (ping > Constants::getMAX_PING())
                         return status;
                     else
                         player_data_pool[id] = PlayerData(std::move(new_position), std::move(msg_ip), std::move(msg_local_ip), std::move(sent_time), std::move(inventory));
@@ -287,7 +287,7 @@ namespace Multiplayer
                         sf::Uint32 time_now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
                         int ping = static_cast<int>(time_now) - static_cast<int>(sent_time);
                         if (player_data_pool.count(id))
-                            if (ping > MAX_PING)
+                            if (ping > Constants::getMAX_PING())
                                 player_data_pool.erase(id);
                             else
                             {
@@ -301,7 +301,7 @@ namespace Multiplayer
                                     send(data, sf::IpAddress((*iter).second.getLocalIp()));
                             }
                         else
-                            if (ping > MAX_PING)
+                            if (ping > Constants::getMAX_PING())
                                 return status;
                             else
                             {
@@ -381,7 +381,7 @@ namespace Multiplayer
 
     void UdpManager::addObject(const Object::Object& object)
     {
-        ObjectData object_data(object.getPosition() / static_cast<float>(PIXEL_SIZE), static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()), object.getName(), object.getPassability());
+        ObjectData object_data(object.getPosition() / static_cast<float>(Constants::getPIXEL_SIZE()), static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()), object.getName(), object.getPassability());
         object_data_pool[object_data.getPosition()] = object_data;
     }
 

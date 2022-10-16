@@ -34,7 +34,7 @@ namespace WorldMap
             delete this;
 
         // resize the tileset texture
-        this->setScale(TILE_SIZE, TILE_SIZE);
+        this->setScale(Constants::getTILE_SIZE(), Constants::getTILE_SIZE());
 
         // resize the vertex array to fit the level size
         m_vertices.setPrimitiveType(sf::Quads);
@@ -150,7 +150,7 @@ namespace WorldMap
 
     void ObjectMap::removeObject(const Multiplayer::ObjectData& object_data)
     {
-        auto point = object_data.getPosition() * static_cast<float>(PIXEL_SIZE);
+        auto point = object_data.getPosition() * static_cast<float>(Constants::getPIXEL_SIZE());
         switch (object_data.getPassability())
         {
             case Object::Passability::background:

@@ -2,22 +2,141 @@
 
 #include <SFML/Window.hpp>
 #include <string>
+#include <fstream>
 
-#define PIXEL_SIZE size_t(10)
-#define WINDOW_SIZE_X size_t(sf::VideoMode::getDesktopMode().width / PIXEL_SIZE)
-#define WINDOW_SIZE_Y size_t(sf::VideoMode::getDesktopMode().height / PIXEL_SIZE)
-#define WINDOW_SIZE sf::Vector2f(WINDOW_SIZE_X, WINDOW_SIZE_Y)
-//#define WORK_SPACE sf::Rect(16, 8, 96, 48)
-#define FRAMERATE_LIMIT size_t(60)
-#define ENABLE_VSYNC bool(true)
-#define STEP_SIZE_MULTIPLIER float(.05)
-#define MAX_RECURSION_DEPTH size_t(15)
 
-#define TILE_SIZE PIXEL_SIZE
+class Constants
+{
+public:
+    static inline void load_constants()
+    {
+        std::ifstream infile("textures/constants.txt");
+        if (!infile.is_open())
+            throw;
+        infile >> PIXEL_SIZE;
+        TILE_SIZE = PIXEL_SIZE;
+        WINDOW_SIZE_X = sf::VideoMode::getDesktopMode().width / PIXEL_SIZE;
+        WINDOW_SIZE_Y = sf::VideoMode::getDesktopMode().height / PIXEL_SIZE;
+        WINDOW_SIZE = sf::Vector2f(WINDOW_SIZE_X, WINDOW_SIZE_Y);
+        infile >> FRAMERATE_LIMIT;
+        infile >> std::boolalpha >> ENABLE_VSYNC;
+        infile >> MAX_RECURSION_DEPTH;
+        infile >> PORT_LISTEN;
+        infile >> PORT_SEND;
+        infile >> SERVER_IP;
+        infile >> MAX_PING;
+        infile >> UDP_PACKETS_GAP;
+        loaded = true;
+    }
+    static inline const size_t& getPIXEL_SIZE()
+    {
+        while (!loaded)
+            load_constants();
+        return PIXEL_SIZE; 
+    }
+    static inline const bool& getFULLSCREEN()
+    {
+        while (!loaded)
+            load_constants();
+        return FULLSCREEN;
+    }
+    static inline const size_t& getWINDOW_SIZE_X()
+    {
+        while (!loaded)
+            load_constants();
+        return WINDOW_SIZE_X;
+    }
+    static inline const size_t& getWINDOW_SIZE_Y()
+    {
+        while (!loaded)
+            load_constants();
+        return WINDOW_SIZE_Y;
+    }
+    static inline const sf::Vector2f& getWINDOW_SIZE()
+    {
+        while (!loaded)
+            load_constants();
+        return WINDOW_SIZE;
+    }
+    static inline const size_t& getFRAMERATE_LIMIT()
+    {
+        while (!loaded)
+            load_constants();
+        return FRAMERATE_LIMIT;
+    }
+    static inline const bool& getENABLE_VSYNC()
+    {
+        while (!loaded)
+            load_constants();
+        return ENABLE_VSYNC;
+    }
+    static inline const float& getSTEP_SIZE_MULTIPLIER()
+    {
+        while (!loaded)
+            load_constants();
+        return STEP_SIZE_MULTIPLIER;
+    }
+    static inline const size_t& getMAX_RECURSION_DEPTH()
+    {
+        while (!loaded)
+            load_constants();
+        return MAX_RECURSION_DEPTH;
+    }
+    static inline const size_t& getTILE_SIZE()
+    {
+        while (!loaded)
+            load_constants();
+        return TILE_SIZE;
+    }
+    static inline const size_t& getPORT_LISTEN()
+    {
+        while (!loaded)
+            load_constants();
+        return PORT_LISTEN;
+    }
+    static inline const size_t& getPORT_SEND()
+    {
+        while (!loaded)
+            load_constants();
+        return PORT_SEND;
+    }
+    static inline const std::string& getSERVER_IP()
+    {
+        while (!loaded)
+            load_constants();
+        return SERVER_IP;
+    }
+    static inline const int& getMAX_PING()
+    {
+        while (!loaded)
+            load_constants();
+        return MAX_PING;
+    }
+    static inline const size_t& getUDP_PACKETS_GAP()
+    {
+        while (!loaded)
+            load_constants();
+        return UDP_PACKETS_GAP;
+    }
 
-// Network
-#define PORT_LISTEN size_t(55000)
-#define PORT_SEND size_t(55001)
-#define SERVER_IP std::string("77.73.71.158")
-#define MAX_PING int(5000)
-#define UDP_PACKETS_GAP size_t(1000)
+private:
+    Constants();
+
+    static inline bool loaded = false;
+    static inline size_t PIXEL_SIZE = 10;
+    static inline bool FULLSCREEN = true;
+    static inline size_t WINDOW_SIZE_X = sf::VideoMode::getDesktopMode().width / PIXEL_SIZE;
+    static inline size_t WINDOW_SIZE_Y = sf::VideoMode::getDesktopMode().height / PIXEL_SIZE;
+    static inline sf::Vector2f WINDOW_SIZE = sf::Vector2f(WINDOW_SIZE_X, WINDOW_SIZE_Y);
+    static inline size_t FRAMERATE_LIMIT = 60;
+    static inline bool ENABLE_VSYNC = true;
+    static inline float STEP_SIZE_MULTIPLIER = .05;
+    static inline size_t MAX_RECURSION_DEPTH = 15;
+    static inline size_t TILE_SIZE = PIXEL_SIZE;
+    // Network
+    static inline size_t PORT_LISTEN = 55000;
+    static inline size_t PORT_SEND = 55001;
+    static inline std::string SERVER_IP = "77.73.71.158";
+    static inline int MAX_PING = 5000;
+    static inline size_t UDP_PACKETS_GAP = 1000;
+};

@@ -12,14 +12,17 @@ sf::RenderWindow Controls::window(sf::VideoMode().getFullscreenModes().at(0), "S
 Actor::User Controls::user(sf::Vector2f(0, 0));
 sf::RectangleShape Controls::menu = sf::RectangleShape(sf::Vector2f(Controls::window.getSize()) * .1f);
 WorldMap::ObjectMap Controls::object_map{};
-Multiplayer::UdpManager Controls::udp_manager(sf::IpAddress::getLocalAddress(), sf::IpAddress(SERVER_IP));
+Multiplayer::UdpManager Controls::udp_manager(sf::IpAddress::getLocalAddress(), sf::IpAddress(Constants::getSERVER_IP()));
 std::map<std::string, Actor::Player> Controls::player_pool{};
+sf::Font Controls::font;
 
 
 void Controls::applyWindowSettings()
 {
-    window.setFramerateLimit(FRAMERATE_LIMIT);
-    window.setVerticalSyncEnabled(ENABLE_VSYNC);
+    window.setFramerateLimit(Constants::getFRAMERATE_LIMIT());
+    window.setVerticalSyncEnabled(Constants::getENABLE_VSYNC());
+    // load font
+    font.loadFromFile("textures/fonts/font.ttf");
 }
 
 
@@ -146,8 +149,6 @@ void Controls::drawMenu()
     if (draw_menu)
     {
         auto center = user.getView().getCenter();
-        auto font = sf::Font();
-        font.loadFromFile("textures/font.ttf");
         auto text = sf::Text("Exit", font);
         text.setFillColor(sf::Color::Black);
         menu.setPosition(center - menu.getSize() / 2.f);
@@ -165,7 +166,7 @@ void Controls::handleFrameStep()
 {
     // needs another thread
     // receiving
-    for (size_t i = 0; i < Controls::player_pool.size() + UDP_PACKETS_GAP; ++i)
+    for (size_t i = 0; i < Controls::player_pool.size() + Constants::getUDP_PACKETS_GAP(); ++i)
     {
         udp_manager.receive();
     }
@@ -181,7 +182,7 @@ void Controls::handleFrameStep()
             ++iter;
             continue;
         }
-        else if (ping > MAX_PING)
+        else if (ping > Constants::getMAX_PING())
         {
             player_pool.erase((*iter).first);
             udp_manager.removePlayerById((*iter++).first);

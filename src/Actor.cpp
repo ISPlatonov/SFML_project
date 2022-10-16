@@ -16,7 +16,7 @@ namespace Actor
         direction_x = "right";
         sprite.setPosition(position);
         sprite.setTexture(Actor::textures.at(direction_x));
-        sprite.setScale(PIXEL_SIZE, PIXEL_SIZE);
+        sprite.setScale(Constants::getPIXEL_SIZE(), Constants::getPIXEL_SIZE());
         setInventory(new_inventory);
     }
 
@@ -28,7 +28,7 @@ namespace Actor
         direction_x = "right";
         sprite.setPosition(position);
         sprite.setTexture(Actor::textures.at(direction_x));
-        sprite.setScale(PIXEL_SIZE, PIXEL_SIZE);
+        sprite.setScale(Constants::getPIXEL_SIZE(), Constants::getPIXEL_SIZE());
         inventory = new_inventory;
     }
 
@@ -54,7 +54,7 @@ namespace Actor
     sf::Vector2f&& Actor::move_dt(const sf::Vector2f& direction, const sf::Uint32& dt, const WorldMap::ObjectMap& ObjectMap)
     {
         check_direction(direction); 
-        auto v = new sf::Vector2f(linalg::normalize(direction) * static_cast<float>(dt) * STEP_SIZE_MULTIPLIER * static_cast<float>(PIXEL_SIZE));
+        auto v = new sf::Vector2f(linalg::normalize(direction) * static_cast<float>(dt) * Constants::getSTEP_SIZE_MULTIPLIER() * static_cast<float>(Constants::getPIXEL_SIZE()));
         for (const auto& object : ObjectMap.getObjectMap(Object::Passability::impassible))
         {
             object.second.check_collision(*v, this->getSprite().getGlobalBounds());
@@ -120,7 +120,7 @@ namespace Actor
     User::User(const sf::Vector2f& position, const std::unordered_map<Object::ObjectName, size_t>& new_inventory) : Actor(position, new_inventory)
     {
         // make it static...
-        view = sf::View(position + (getSprite().getLocalBounds().getSize() / 2.f * static_cast<float>(PIXEL_SIZE)), static_cast<sf::Vector2f>(WINDOW_SIZE * static_cast<float>(PIXEL_SIZE)));
+        view = sf::View(position + (getSprite().getLocalBounds().getSize() / 2.f * static_cast<float>(Constants::getPIXEL_SIZE())), static_cast<sf::Vector2f>(Constants::getWINDOW_SIZE() * static_cast<float>(Constants::getPIXEL_SIZE())));
         int_ip = sf::IpAddress::getPublicAddress(sf::seconds(5.f)).toInteger();
         int_local_ip = sf::IpAddress::getLocalAddress().toInteger();
     }
@@ -128,7 +128,7 @@ namespace Actor
 
     User::User(sf::Vector2f&& position, std::unordered_map<Object::ObjectName, size_t>&& new_inventory) : Actor(position, new_inventory)
     {
-        view = std::move(sf::View(position + (getSprite().getLocalBounds().getSize() / 2.f * static_cast<float>(PIXEL_SIZE)), static_cast<sf::Vector2f>(WINDOW_SIZE * static_cast<float>(PIXEL_SIZE))));
+        view = std::move(sf::View(position + (getSprite().getLocalBounds().getSize() / 2.f * static_cast<float>(Constants::getPIXEL_SIZE())), static_cast<sf::Vector2f>(Constants::getWINDOW_SIZE() * static_cast<float>(Constants::getPIXEL_SIZE()))));
         int_ip = std::move(sf::IpAddress::getPublicAddress(sf::seconds(5.f)).toInteger());
         int_local_ip = std::move(sf::IpAddress::getLocalAddress().toInteger());
     }
@@ -229,7 +229,7 @@ namespace Actor
 
     sf::Packet& operator <<(sf::Packet& packet, const User& user)
     {
-        auto position = user.getPosition() / static_cast<float>(PIXEL_SIZE);
+        auto position = user.getPosition() / static_cast<float>(Constants::getPIXEL_SIZE());
         sf::Uint32 time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
         packet << position.x << position.y << user.getIp() << user.getLocalIp() << time;
         packet << static_cast<sf::Uint32>(user.getInventory().size());
@@ -268,7 +268,7 @@ namespace Actor
     // ip and local_ip won't be changed
     Player& operator <<(Player& player, const Multiplayer::PlayerData& player_data)
     {
-        player.setPosition(player_data.getPosition() * static_cast<float>(PIXEL_SIZE));
+        player.setPosition(player_data.getPosition() * static_cast<float>(Constants::getPIXEL_SIZE()));
         player.setTime(player_data.getTime());
         player.setInventory(player_data.getInventory());
         return player;
@@ -276,7 +276,7 @@ namespace Actor
 
 
     // !!! rewrite PlayerData!!!
-    Player::Player(const Multiplayer::PlayerData& player_data) : Player(player_data.getPosition() * static_cast<float>(PIXEL_SIZE), player_data.getIp(), player_data.getLocalIp(), player_data.getTime(), player_data.getInventory())
+    Player::Player(const Multiplayer::PlayerData& player_data) : Player(player_data.getPosition() * static_cast<float>(Constants::getPIXEL_SIZE()), player_data.getIp(), player_data.getLocalIp(), player_data.getTime(), player_data.getInventory())
     {
 
     }

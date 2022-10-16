@@ -15,7 +15,7 @@
 
 void UdpWorker(Multiplayer::UdpManager& UdpManager)
 {
-    for (size_t i = 0; i < UdpManager.getPlayerDataPool().size() + UDP_PACKETS_GAP; ++i)
+    for (size_t i = 0; i < UdpManager.getPlayerDataPool().size() + Constants::getUDP_PACKETS_GAP(); ++i)
     {
         UdpManager.receive();
     }
@@ -32,7 +32,7 @@ void UdpWorker(Multiplayer::UdpManager& UdpManager)
         int ping = static_cast<int>(time_now) - static_cast<int>(time);
         std::cout << "id: " << (*iter).first << ", last timepoint: " << std::to_string(time) << std::endl;
 
-        if (ping > MAX_PING)
+        if (ping > Constants::getMAX_PING())
         {
             std::cout << "reached MAX_PING" << std::endl;
             UdpManager.removePlayerById((*iter++).first);
@@ -97,7 +97,7 @@ int main()
     std::cout << std::flush << std::endl;
     Multiplayer::UdpManager UdpManager(sf::IpAddress::getLocalAddress(), sf::IpAddress::Any);
     {
-        auto init_terrain = load_terrain("textures/terrain.txt");
+        auto init_terrain = load_terrain("textures/terrain/terrain.txt");
         for (auto object : init_terrain)
             UdpManager.addObject(object);
     }
@@ -109,7 +109,7 @@ int main()
         UdpWorker(UdpManager);
  
         auto dt = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count() - last_timepoint;
-        sf::sleep(((1000 / FRAMERATE_LIMIT) >= dt ? sf::milliseconds((1000 / FRAMERATE_LIMIT) - dt) : sf::Time()));
+        sf::sleep(((1000 / Constants::getFRAMERATE_LIMIT()) >= dt ? sf::milliseconds((1000 / Constants::getFRAMERATE_LIMIT()) - dt) : sf::Time()));
     }
     return EXIT_SUCCESS;
 }

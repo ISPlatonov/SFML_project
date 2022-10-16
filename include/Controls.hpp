@@ -38,4 +38,5 @@ private:
     static sf::RectangleShape menu;
     static Object::Object selected_object;
     static std::map<std::string, Actor::Player> player_pool;
+    static sf::Font font;
 };
