@@ -164,12 +164,20 @@ void Controls::drawInterfaces()
         
         window.draw(inventory_rect);
         window.draw(text);
+        sf::Vector2f shift(5, 5);
+        shift *= static_cast<float>(Constants::getPIXEL_SIZE());
+        shift.y += text.getGlobalBounds().getSize().y;
         for (auto iter : user.getInventory())
         {
             auto sprite = sf::Sprite(Object::Object::NameToTextureMap.at(iter.first));
             sprite.setScale(Constants::getPIXEL_SIZE(), Constants::getPIXEL_SIZE());
-            sprite.setPosition(inventory_rect.getGlobalBounds().getPosition());
+            sprite.setPosition(inventory_rect.getGlobalBounds().getPosition() + shift);
+            auto text = sf::Text(std::to_string(iter.second), font);
+            text.setFillColor(sf::Color::White);
+            text.setPosition(inventory_rect.getGlobalBounds().getPosition() + shift);
+            shift += sf::Vector2f(17, 0) * static_cast<float>(Constants::getPIXEL_SIZE());
             window.draw(sprite);
+            window.draw(text);
         }
     }
     if (draw_menu)
@@ -178,7 +186,7 @@ void Controls::drawInterfaces()
         auto text = sf::Text("Exit", font);
         text.setFillColor(sf::Color::White);
         menu.setPosition(center - menu.getSize() / 2.f);
-        text.setPosition(center - menu.getSize() / 2.f);
+        text.setPosition(center - text.getGlobalBounds().getSize() / 2.f);
         menu.setOutlineColor(sf::Color::Cyan);
         menu.setOutlineThickness(5);
         menu.setFillColor(sf::Color(0, 0, 0, 127));

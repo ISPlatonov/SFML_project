@@ -35,7 +35,7 @@ void UdpWorker(Multiplayer::UdpManager& UdpManager)
         if (ping > Constants::getMAX_PING())
         {
             std::cout << "reached MAX_PING" << std::endl;
-            UdpManager.removePlayerById((*iter++).first);
+            //UdpManager.removePlayerById((*iter++).first);
             continue;
         }
         for (auto dest_iter = UdpManager.getPlayerDataPool().begin(); dest_iter != UdpManager.getPlayerDataPool().end();)
