@@ -24,7 +24,8 @@ namespace Object
         wooden_wall,
         grass,
         dirt,
-        stone
+        stone,
+        dirty_grass
     };
 
 

@@ -12,7 +12,8 @@ namespace Object
         std::make_pair(ObjectName::wooden_wall, "textures/objects/wooden_wall/texture.png"),
         std::make_pair(ObjectName::grass, "textures/objects/grass/texture.png"),
         std::make_pair(ObjectName::dirt, "textures/objects/dirt/texture.png"),
-        std::make_pair(ObjectName::stone, "textures/objects/stone/texture.png")
+        std::make_pair(ObjectName::stone, "textures/objects/stone/texture.png"),
+        std::make_pair(ObjectName::dirty_grass, "textures/objects/dirty_grass/texture.png")
     };
 
 
