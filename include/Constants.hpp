@@ -15,9 +15,11 @@ public:
             throw;
         infile >> PIXEL_SIZE;
         TILE_SIZE = PIXEL_SIZE;
-        WINDOW_SIZE_X = sf::VideoMode::getDesktopMode().width / PIXEL_SIZE;
-        WINDOW_SIZE_Y = sf::VideoMode::getDesktopMode().height / PIXEL_SIZE;
-        WINDOW_SIZE = sf::Vector2f(WINDOW_SIZE_X, WINDOW_SIZE_Y);
+        #ifdef CLIENT
+            WINDOW_SIZE_X = sf::VideoMode::getDesktopMode().width / PIXEL_SIZE;
+            WINDOW_SIZE_Y = sf::VideoMode::getDesktopMode().height / PIXEL_SIZE;
+            WINDOW_SIZE = sf::Vector2f(WINDOW_SIZE_X, WINDOW_SIZE_Y);
+        #endif
         infile >> FRAMERATE_LIMIT;
         infile >> std::boolalpha >> ENABLE_VSYNC;
         infile >> MAX_RECURSION_DEPTH;

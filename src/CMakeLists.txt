@@ -14,6 +14,7 @@ if (BUILD_SERVER_ONLY)
 
 else()
     add_executable(SFML_project ${SOURCE_FILES})
+    target_compile_definitions(SFML_project PUBLIC CLIENT)
     add_executable(server ${SERVER_SOURCE_FILES})
 
     target_include_directories(SFML_project PUBLIC include)
