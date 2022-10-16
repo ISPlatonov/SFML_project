@@ -42,24 +42,26 @@ public:
             load_constants();
         return FULLSCREEN;
     }
-    static inline const size_t& getWINDOW_SIZE_X()
-    {
-        while (!loaded)
-            load_constants();
-        return WINDOW_SIZE_X;
-    }
-    static inline const size_t& getWINDOW_SIZE_Y()
-    {
-        while (!loaded)
-            load_constants();
-        return WINDOW_SIZE_Y;
-    }
-    static inline const sf::Vector2f& getWINDOW_SIZE()
-    {
-        while (!loaded)
-            load_constants();
-        return WINDOW_SIZE;
-    }
+    #ifdef CLIENT
+        static inline const size_t& getWINDOW_SIZE_X()
+        {
+            while (!loaded)
+                load_constants();
+            return WINDOW_SIZE_X;
+        }
+        static inline const size_t& getWINDOW_SIZE_Y()
+        {
+            while (!loaded)
+                load_constants();
+            return WINDOW_SIZE_Y;
+        }
+        static inline const sf::Vector2f& getWINDOW_SIZE()
+        {
+            while (!loaded)
+                load_constants();
+            return WINDOW_SIZE;
+        }
+    #endif
     static inline const size_t& getFRAMERATE_LIMIT()
     {
         while (!loaded)
@@ -127,9 +129,11 @@ private:
     static inline bool loaded = false;
     static inline size_t PIXEL_SIZE = 10;
     static inline bool FULLSCREEN = true;
-    static inline size_t WINDOW_SIZE_X = sf::VideoMode::getDesktopMode().width / PIXEL_SIZE;
-    static inline size_t WINDOW_SIZE_Y = sf::VideoMode::getDesktopMode().height / PIXEL_SIZE;
-    static inline sf::Vector2f WINDOW_SIZE = sf::Vector2f(WINDOW_SIZE_X, WINDOW_SIZE_Y);
+    #ifdef CLIENT
+        static inline size_t WINDOW_SIZE_X = sf::VideoMode::getDesktopMode().width / PIXEL_SIZE;
+        static inline size_t WINDOW_SIZE_Y = sf::VideoMode::getDesktopMode().height / PIXEL_SIZE;
+        static inline sf::Vector2f WINDOW_SIZE = sf::Vector2f(WINDOW_SIZE_X, WINDOW_SIZE_Y);
+    #endif
     static inline size_t FRAMERATE_LIMIT = 60;
     static inline bool ENABLE_VSYNC = true;
     static inline float STEP_SIZE_MULTIPLIER = .05;
