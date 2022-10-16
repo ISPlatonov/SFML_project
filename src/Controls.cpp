@@ -6,11 +6,13 @@ bool Controls::left = 0,
      Controls::right = 0,
      Controls::up = 0,
      Controls::down = 0,
-     Controls::draw_menu = 0;
+     Controls::draw_menu = 0,
+     Controls::draw_inventory = 0;
 sf::Uint32 Controls::last_action_timepoint;
 sf::RenderWindow Controls::window(sf::VideoMode().getFullscreenModes().at(0), "SFML window", sf::Style::Fullscreen);
 Actor::User Controls::user(sf::Vector2f(0, 0));
 sf::RectangleShape Controls::menu = sf::RectangleShape(sf::Vector2f(Controls::window.getSize()) * .1f);
+sf::RectangleShape Controls::inventory_rect = sf::RectangleShape(sf::Vector2f(Controls::window.getSize()) * .5f);
 WorldMap::ObjectMap Controls::object_map{};
 Multiplayer::UdpManager Controls::udp_manager(sf::IpAddress::getLocalAddress(), sf::IpAddress(Constants::getSERVER_IP()));
 std::map<std::string, Actor::Player> Controls::player_pool{};
@@ -59,6 +61,9 @@ void Controls::addEvent(sf::Event event)
                 case (sf::Keyboard::Escape):
                     // open menu
                     draw_menu = !draw_menu;
+                    break;
+                case (sf::Keyboard::Tab):
+                    draw_inventory = !draw_inventory;
                     break;
                 default:
                     break;
@@ -144,17 +149,39 @@ sf::Uint32 Controls::getDeltaTime()
 }
 
 
-void Controls::drawMenu()
+void Controls::drawInterfaces()
 {
+    if (draw_inventory)
+    {
+        auto center = user.getView().getCenter();
+        auto text = sf::Text("Inventory", font);
+        text.setFillColor(sf::Color::White);
+        inventory_rect.setPosition(center - inventory_rect.getSize() / 2.f);
+        text.setPosition(center - inventory_rect.getSize() / 2.f);
+        inventory_rect.setOutlineColor(sf::Color::Cyan);
+        inventory_rect.setOutlineThickness(5);
+        inventory_rect.setFillColor(sf::Color(0, 0, 0, 127));
+        
+        window.draw(inventory_rect);
+        window.draw(text);
+        for (auto iter : user.getInventory())
+        {
+            auto sprite = sf::Sprite(Object::Object::NameToTextureMap.at(iter.first));
+            sprite.setScale(Constants::getPIXEL_SIZE(), Constants::getPIXEL_SIZE());
+            sprite.setPosition(inventory_rect.getGlobalBounds().getPosition());
+            window.draw(sprite);
+        }
+    }
     if (draw_menu)
     {
         auto center = user.getView().getCenter();
         auto text = sf::Text("Exit", font);
-        text.setFillColor(sf::Color::Black);
+        text.setFillColor(sf::Color::White);
         menu.setPosition(center - menu.getSize() / 2.f);
         text.setPosition(center - menu.getSize() / 2.f);
         menu.setOutlineColor(sf::Color::Cyan);
         menu.setOutlineThickness(5);
+        menu.setFillColor(sf::Color(0, 0, 0, 127));
         
         window.draw(menu);
         window.draw(text);
@@ -199,6 +226,8 @@ void Controls::handleFrameStep()
         Controls::object_map.addObject((*iter).second);
     for (auto object_data = udp_manager.getRemovedObjectData(); object_data.getTime() != 0; object_data = udp_manager.getRemovedObjectData())
         Controls::object_map.removeObject(object_data);
+    for (auto object_data = udp_manager.getObjectToInventoryData(); object_data.getTime() != 0; object_data = udp_manager.getObjectToInventoryData())
+        Controls::user.addObject(object_data.getName());
     sf::Packet data;
     data << Multiplayer::DataType::Player << Controls::user;
     udp_manager.send(data);
@@ -223,7 +252,7 @@ void Controls::handleFrameStep()
     // Draw the string
     //window.draw(text);
     window.setView(user.getView());
-    drawMenu();
+    drawInterfaces();
     // Update the window
     window.display();
 }

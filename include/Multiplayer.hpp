@@ -25,7 +25,8 @@ namespace Multiplayer
     {
         takeObjectToInventory,
         ejectObjectFromInventory,
-        removeObject
+        removeObject,
+        addObjectToInvectory
     };
 
 
@@ -93,6 +94,7 @@ namespace Multiplayer
         void addObject(const Object::Object& object);
         void addObject(const Multiplayer::ObjectData& object_data);
         ObjectData&& getRemovedObjectData();
+        ObjectData&& getObjectToInventoryData();
 
     private:
         sf::UdpSocket socket;
@@ -105,6 +107,7 @@ namespace Multiplayer
         /*static*/ std::unordered_map<std::string, PlayerData> player_data_pool;
         /*static*/ std::unordered_map<sf::Vector2f, ObjectData> object_data_pool;
         /*static*/ std::vector<ObjectData> removed_object_data_list;
+        /*static*/ std::vector<ObjectData> objects_to_inventory_list;
     };
 }
 

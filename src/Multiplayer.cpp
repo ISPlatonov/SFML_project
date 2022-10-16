@@ -229,7 +229,7 @@ namespace Multiplayer
                     inventory[static_cast<Object::ObjectName>(object_name_enum)] = std::move(object_num);
                 }
                 //if (msg_ip == my_ip.toInteger() && msg_local_ip == my_local_ip.toInteger())
-                //    continue;
+                //    std::cout << "aboba" << std::endl;
                 auto id = sf::IpAddress(msg_ip).toString() + sf::IpAddress(msg_local_ip).toString();
                 sf::Uint32 time_now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
                 int ping = static_cast<int>(time_now) - static_cast<int>(sent_time);
@@ -299,6 +299,9 @@ namespace Multiplayer
                                 data << DataType::Event << EventType::removeObject << object.getPosition().x << object.getPosition().y << object.getTime() << object.getName() << object.getPassability();
                                 for (auto iter = getPlayerDataPool().begin(); iter != getPlayerDataPool().end(); ++iter)
                                     send(data, sf::IpAddress((*iter).second.getLocalIp()));
+                                data.clear();
+                                data << DataType::Event << EventType::addObjectToInvectory << object.getPosition().x << object.getPosition().y << object.getTime() << object.getName() << object.getPassability();
+                                send(data, sf::IpAddress(msg_local_ip));
                             }
                         else
                             if (ping > Constants::getMAX_PING())
@@ -312,6 +315,8 @@ namespace Multiplayer
                                 data << DataType::Event << EventType::removeObject << object.getPosition().x << object.getPosition().y << object.getTime() << object.getName() << object.getPassability();
                                 for (auto iter = getPlayerDataPool().begin(); iter != getPlayerDataPool().end(); ++iter)
                                     send(data, sf::IpAddress((*iter).second.getLocalIp()));
+                                data << DataType::Event << EventType::addObjectToInvectory << object.getPosition().x << object.getPosition().y << object.getTime() << object.getName() << object.getPassability();
+                                send(data, sf::IpAddress(msg_local_ip));
                             }
                         break;
                     }
@@ -319,6 +324,19 @@ namespace Multiplayer
                         //
                         break;
                     
+                    case EventType::addObjectToInvectory:
+                    {
+                        // receive object
+                        Object::ObjectName object_name;
+                        Object::Passability passability;
+                        sf::Uint32 object_name_enum;
+                        sf::Uint32 passability_enum;
+                        data >> new_position.x >> new_position.y >> sent_time >> object_name_enum >> passability_enum;
+                        object_name = static_cast<Object::ObjectName>(object_name_enum);
+                        passability = static_cast<Object::Passability>(passability_enum);
+                        objects_to_inventory_list.push_back(ObjectData(std::move(new_position), std::move(sent_time), std::move(object_name), std::move(passability)));
+                        break;
+                    }
                     case EventType::removeObject:
                     {
                         // receive object
@@ -403,6 +421,22 @@ namespace Multiplayer
         {
             ObjectData& object_data = removed_object_data_list.back();
             removed_object_data_list.pop_back();
+            return std::move(object_data);
+        }
+    }
+
+
+    ObjectData&& UdpManager::getObjectToInventoryData()
+    {
+        if (objects_to_inventory_list.empty())
+        {
+            ObjectData* object_data = new ObjectData();
+            return std::move(*object_data);
+        }
+        else
+        {
+            ObjectData& object_data = objects_to_inventory_list.back();
+            objects_to_inventory_list.pop_back();
             return std::move(object_data);
         }
     }
