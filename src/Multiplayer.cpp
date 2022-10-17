@@ -252,39 +252,40 @@ namespace Multiplayer
                     {
                         #ifdef CLIENT
                             player_data_pool.erase(id);
+                        #else
+                            if (player_data_pool[id].getTime() > Constants::getMAX_PING())
+                            {
+                                if (inventory.empty() && !player_data_pool[id].getInventory().empty())
+                                {
+                                    // send all inventory
+                                    for (auto iter : player_data_pool[id].getInventory())
+                                    {
+                                        for (size_t i = 0; i < iter.second; ++i)
+                                        {
+                                            data.clear();
+                                            auto object_data = ObjectData(sf::Vector2f(), 0, iter.first, Object::Passability::foreground);
+                                            data << DataType::Event << EventType::addObjectToInvectory << object_data;
+                                            send(data, sf::IpAddress(msg_local_ip));
+                                        }
+                                    }
+                                }
+                                else
+                                    for (auto iter : player_data_pool[id].getInventory())
+                                    {
+                                        size_t msg_number;
+                                        if (inventory.count(iter.first) && inventory.at(iter.first) >= iter.second)
+                                        {
+                                            // now it does nothing,
+                                            // but it has to send
+                                            // every losed object
+                                            // in inventory
+                                        }
+                                    }
+                            }
                         #endif
                     }
                     else
                     {
-                        if (player_data_pool[id].getTime() > Constants::getMAX_PING())
-                        {
-                            if (inventory.empty() && !player_data_pool[id].getInventory().empty())
-                            {
-                                // send all inventory
-                                for (auto iter : player_data_pool[id].getInventory())
-                                {
-                                    for (size_t i = 0; i < iter.second; ++i)
-                                    {
-                                        data.clear();
-                                        auto object_data = ObjectData(sf::Vector2f(), 0, iter.first, Object::Passability::foreground);
-                                        data << DataType::Event << EventType::addObjectToInvectory << object_data;
-                                        send(data, sf::IpAddress(msg_local_ip));
-                                    }
-                                }
-                            }
-                            else
-                                for (auto iter : player_data_pool[id].getInventory())
-                                {
-                                    size_t msg_number;
-                                    if (inventory.count(iter.first) && inventory.at(iter.first) >= iter.second)
-                                    {
-                                        // now it does nothing,
-                                        // but it has to send
-                                        // every losed object
-                                        // in inventory
-                                    }
-                                }
-                        }
                         player_data_pool[id].setPosition(new_position);
                         player_data_pool[id].setTime(sent_time);
                     }
@@ -336,22 +337,6 @@ namespace Multiplayer
                             {
                                 player_data_pool[id].setPosition(new_position);
                                 player_data_pool[id].setTime(sent_time);
-                                player_data_pool[id].addObject(object_data.getName());
-                                removeObjectByPoint(object_data.getPosition());
-                                data.clear();
-                                data << DataType::Event << EventType::removeObject << object_data;
-                                for (auto iter = getPlayerDataPool().begin(); iter != getPlayerDataPool().end(); ++iter)
-                                    send(data, sf::IpAddress((*iter).second.getLocalIp()));
-                                data.clear();
-                                data << DataType::Event << EventType::addObjectToInvectory << object_data;
-                                send(data, sf::IpAddress(msg_local_ip));
-                            }
-                        else
-                            if (ping > Constants::getMAX_PING())
-                                return status;
-                            else
-                            {
-                                player_data_pool[id] = PlayerData(std::move(new_position), std::move(msg_ip), std::move(msg_local_ip), std::move(sent_time), std::move(inventory));
                                 player_data_pool[id].addObject(object_data.getName());
                                 removeObjectByPoint(object_data.getPosition());
                                 data.clear();

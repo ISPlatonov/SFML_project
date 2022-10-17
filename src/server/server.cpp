@@ -9,7 +9,7 @@
 #include <chrono>
 #include <vector>
 #include <set>
-#include <iostream>
+//#include <iostream>
 #include <fstream>
 
 
@@ -22,7 +22,7 @@ void UdpWorker(Multiplayer::UdpManager& UdpManager)
 
     for (auto iter = UdpManager.getPlayerDataPool().begin(); iter != UdpManager.getPlayerDataPool().end(); ++iter)
     {
-        std::cout << "unpacking player from pool: " << (*iter).first << std::endl;
+        //std::cout << "unpacking player from pool: " << (*iter).first << std::endl;
         auto x = (*iter).second.getPosition().x;
         auto y = (*iter).second.getPosition().y;
         auto ip = (*iter).second.getIp();
@@ -30,22 +30,22 @@ void UdpWorker(Multiplayer::UdpManager& UdpManager)
         auto time = (*iter).second.getTime();
         sf::Uint32 time_now = static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count());
         int ping = static_cast<int>(time_now) - static_cast<int>(time);
-        std::cout << "id: " << (*iter).first << ", last timepoint: " << std::to_string(time) << std::endl;
+        //std::cout << "id: " << (*iter).first << ", last timepoint: " << std::to_string(time) << std::endl;
 
         if (ping > Constants::getMAX_PING())
         {
-            std::cout << "reached MAX_PING" << std::endl;
+            //std::cout << "reached MAX_PING" << std::endl;
             //UdpManager.removePlayerById((*iter++).first);
             continue;
         }
         for (auto dest_iter = UdpManager.getPlayerDataPool().begin(); dest_iter != UdpManager.getPlayerDataPool().end();)
         {
-            std::cout << "sending " << (*iter).first << " data to " << (*dest_iter).first << std::endl;
+            //std::cout << "sending " << (*iter).first << " data to " << (*dest_iter).first << std::endl;
             if ((*dest_iter).first == (*iter).first)
             {
-                std::cout << "*dest_iter == *iter" << std::endl;
+                //std::cout << "*dest_iter == *iter" << std::endl;
                 ++dest_iter;
-                std::cout << "made ++dest_iter" << std::endl;
+                //std::cout << "made ++dest_iter" << std::endl;
                 continue;
             }
             sf::Packet data;
@@ -56,7 +56,7 @@ void UdpWorker(Multiplayer::UdpManager& UdpManager)
                 data << pair.first << static_cast<sf::Uint32>(pair.second);
             }
             UdpManager.send(data, sf::IpAddress((*dest_iter++).second.getLocalIp()));
-            std::cout << "sent" << std::endl;
+            //std::cout << "sent" << std::endl;
         }
         for (auto object_iter = UdpManager.getObjectDataPool().begin(); object_iter != UdpManager.getObjectDataPool().end(); ++object_iter)
         {
@@ -93,7 +93,7 @@ std::vector<Multiplayer::ObjectData> load_terrain(const std::string& path)
 
 int main()
 {
-    std::cout << std::flush << std::endl;
+    //std::cout << std::flush << std::endl;
     Multiplayer::UdpManager UdpManager(sf::IpAddress::getLocalAddress(), sf::IpAddress::Any);
     {
         auto init_terrain = load_terrain("textures/terrain/terrain.txt");
