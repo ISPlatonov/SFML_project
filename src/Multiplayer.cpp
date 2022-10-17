@@ -258,7 +258,7 @@ namespace Multiplayer
                     {
                         if (player_data_pool[id].getTime() > Constants::getMAX_PING())
                         {
-                            if (inventory.empty())
+                            if (inventory.empty() && !player_data_pool[id].getInventory().empty())
                             {
                                 // send all inventory
                                 for (auto iter : player_data_pool[id].getInventory())
