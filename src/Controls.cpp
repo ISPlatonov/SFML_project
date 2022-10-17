@@ -171,6 +171,12 @@ void Controls::drawInterfaces()
         shift.y += text.getGlobalBounds().getSize().y;
         for (auto iter : user.getInventory())
         {
+            if (!Object::Object::NameToTextureMap.count(iter.first))
+            {
+                auto new_texture = sf::Texture();
+                new_texture.loadFromFile(Object::Object::NameToTextureAddressMap.at(iter.first));
+                Object::Object::NameToTextureMap[iter.first] = std::move(new_texture);
+            }
             auto sprite = sf::Sprite(Object::Object::NameToTextureMap.at(iter.first));
             sprite.setScale(Constants::getPIXEL_SIZE(), Constants::getPIXEL_SIZE());
             sprite.setPosition(inventory_rect.getGlobalBounds().getPosition() + shift);

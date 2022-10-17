@@ -91,7 +91,6 @@ namespace Multiplayer
     {
         this->object_name = name;
         this->passability = passability;
-        setTime(time);
     }
 
 
