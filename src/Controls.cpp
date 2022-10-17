@@ -104,7 +104,8 @@ void Controls::addEvent(sf::Event event)
                                 sf::Packet data;
                                 data << Multiplayer::DataType::Event;
                                 data << Multiplayer::EventType::takeObjectToInventory;
-                                auto object_data = Multiplayer::ObjectData(iter.second.getPosition(), std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count(), iter.second.getName(), iter.second.getPassability());
+                                sf::Vector2f object_position(iter.second.getPosition().x / Constants::getPIXEL_SIZE(), iter.second.getPosition().y / Constants::getPIXEL_SIZE());
+                                auto object_data = Multiplayer::ObjectData(object_position, std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count(), iter.second.getName(), iter.second.getPassability());
                                 data << object_data;
                                 data << user;
                                 udp_manager.send(data);

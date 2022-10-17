@@ -329,7 +329,9 @@ namespace Multiplayer
                         int ping = static_cast<int>(time_now) - static_cast<int>(sent_time);
                         if (player_data_pool.count(id))
                             if (ping > Constants::getMAX_PING())
-                                player_data_pool.erase(id);
+                            {
+                                //player_data_pool.erase(id);
+                            }
                             else
                             {
                                 player_data_pool[id].setPosition(new_position);
@@ -337,7 +339,7 @@ namespace Multiplayer
                                 player_data_pool[id].addObject(object_data.getName());
                                 removeObjectByPoint(object_data.getPosition());
                                 data.clear();
-                                data << DataType::Event << EventType::removeObject << object_data.getPosition().x << object_data.getPosition().y << object_data.getTime() << object_data.getName() << object_data.getPassability();
+                                data << DataType::Event << EventType::removeObject << object_data;
                                 for (auto iter = getPlayerDataPool().begin(); iter != getPlayerDataPool().end(); ++iter)
                                     send(data, sf::IpAddress((*iter).second.getLocalIp()));
                                 data.clear();
@@ -356,6 +358,7 @@ namespace Multiplayer
                                 data << DataType::Event << EventType::removeObject << object_data;
                                 for (auto iter = getPlayerDataPool().begin(); iter != getPlayerDataPool().end(); ++iter)
                                     send(data, sf::IpAddress((*iter).second.getLocalIp()));
+                                data.clear();
                                 data << DataType::Event << EventType::addObjectToInvectory << object_data;
                                 send(data, sf::IpAddress(msg_local_ip));
                             }
@@ -368,27 +371,17 @@ namespace Multiplayer
                     case EventType::addObjectToInvectory:
                     {
                         // receive object
-                        Object::ObjectName object_name;
-                        Object::Passability passability;
-                        sf::Uint32 object_name_enum;
-                        sf::Uint32 passability_enum;
-                        data >> new_position.x >> new_position.y >> sent_time >> object_name_enum >> passability_enum;
-                        object_name = static_cast<Object::ObjectName>(object_name_enum);
-                        passability = static_cast<Object::Passability>(passability_enum);
-                        objects_to_inventory_list.push_back(ObjectData(std::move(new_position), std::move(sent_time), std::move(object_name), std::move(passability)));
+                        ObjectData object_data;
+                        data >> object_data;
+                        objects_to_inventory_list.push_back(object_data);
                         break;
                     }
                     case EventType::removeObject:
                     {
                         // receive object
-                        Object::ObjectName object_name;
-                        Object::Passability passability;
-                        sf::Uint32 object_name_enum;
-                        sf::Uint32 passability_enum;
-                        data >> new_position.x >> new_position.y >> sent_time >> object_name_enum >> passability_enum;
-                        object_name = static_cast<Object::ObjectName>(object_name_enum);
-                        passability = static_cast<Object::Passability>(passability_enum);
-                        removeObjectByPoint(new_position);
+                        ObjectData object_data;
+                        data >> object_data;
+                        removeObjectByPoint(object_data.getPosition());
                         break;
                     }
                     default:
