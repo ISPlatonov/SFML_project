@@ -91,6 +91,7 @@ namespace Multiplayer
     {
         this->object_name = name;
         this->passability = passability;
+        setTime(time);
     }
 
 
@@ -313,7 +314,7 @@ namespace Multiplayer
                     {
                         // data >> object_data >> user
                         // receive object
-                        Multiplayer::ObjectData object_data;
+                        ObjectData object_data;
                         data >> object_data;
                         // receive user
                         int msg_local_ip, msg_ip;
