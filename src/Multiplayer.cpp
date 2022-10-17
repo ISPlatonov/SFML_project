@@ -1,11 +1,12 @@
 #include "Multiplayer.hpp"
 
 
-sf::Packet& operator <<(sf::Packet& packet, const Object::Object& object)
+sf::Packet& operator <<(sf::Packet& packet, Multiplayer::ObjectData& object_data)
 {
-    auto position = object.getPosition() / static_cast<float>(Constants::getPIXEL_SIZE());
-    sf::Uint32 time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-    packet << position.x << position.y << time << object.getName() << object.getPassability();
+    #ifndef CLIENT
+        object_data.setTime(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count());
+    #endif
+    packet << object_data.getPosition().x << object_data.getPosition().y << time << object_data.getName() << object_data.getPassability();
     return packet;
 }
 
@@ -17,6 +18,22 @@ Object::Object& operator <<(Object::Object& object, const Multiplayer::ObjectDat
     auto passability = object_data.getPassability();
     object = Object::Object(name, position, passability);
     return object;
+}
+
+
+sf::Packet& operator >>(sf::Packet& data, Multiplayer::ObjectData& object_data)
+{
+    sf::Vector2f position;
+    Object::ObjectName object_name;
+    Object::Passability passability;
+    sf::Uint32 object_name_enum;
+    sf::Uint32 passability_enum;
+    sf::Uint32 sent_time;
+    data >> position.x >> position.y >> sent_time >> object_name_enum >> passability_enum;
+    object_name = static_cast<Object::ObjectName>(object_name_enum);
+    passability = static_cast<Object::Passability>(passability_enum);
+    object_data = Multiplayer::ObjectData(std::move(position), std::move(sent_time), std::move(object_name), std::move(passability));
+    return data;
 }
 
 
@@ -202,14 +219,9 @@ namespace Multiplayer
             case DataType::Object:
             {
                 // receive object
-                Object::ObjectName object_name;
-                Object::Passability passability;
-                sf::Uint32 object_name_enum;
-                sf::Uint32 passability_enum;
-                data >> new_position.x >> new_position.y >> sent_time >> object_name_enum >> passability_enum;
-                object_name = static_cast<Object::ObjectName>(object_name_enum);
-                passability = static_cast<Object::Passability>(passability_enum);
-                addObject(ObjectData(std::move(new_position), std::move(sent_time), std::move(object_name), std::move(passability)));
+                Multiplayer::ObjectData object_data;
+                data >> object_data;
+                addObject(object_data);
                 break;
             }
             case DataType::Player:
@@ -228,16 +240,51 @@ namespace Multiplayer
                     size_t object_num = static_cast<size_t>(object_num_uint32);
                     inventory[static_cast<Object::ObjectName>(object_name_enum)] = std::move(object_num);
                 }
-                //if (msg_ip == my_ip.toInteger() && msg_local_ip == my_local_ip.toInteger())
-                //    std::cout << "aboba" << std::endl;
+                //if (msg_local_ip == local_ip.toInteger())
+                //{
+                //    std::cout << "its me" << std::endl;
+                //}
                 auto id = sf::IpAddress(msg_ip).toString() + sf::IpAddress(msg_local_ip).toString();
                 sf::Uint32 time_now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
                 int ping = static_cast<int>(time_now) - static_cast<int>(sent_time);
                 if (player_data_pool.count(id))
                     if (ping > Constants::getMAX_PING())
-                        player_data_pool.erase(id);
+                    {
+                        #ifdef CLIENT
+                            player_data_pool.erase(id);
+                        #endif
+                    }
                     else
                     {
+                        if (player_data_pool[id].getTime() > Constants::getMAX_PING())
+                        {
+                            if (inventory.empty())
+                            {
+                                // send all inventory
+                                for (auto iter : player_data_pool[id].getInventory())
+                                {
+                                    for (size_t i = 0; i < iter.second; ++i)
+                                    {
+                                        data.clear();
+                                        auto object_data = ObjectData(sf::Vector2f(), 0, iter.first, Object::Passability::foreground);
+                                        data << DataType::Event << EventType::addObjectToInvectory << object_data;
+                                        send(data, sf::IpAddress(msg_local_ip));
+                                    }
+                                }
+                            }
+                            else
+                                for (auto iter : player_data_pool[id].getInventory())
+                                {
+                                    size_t msg_number;
+                                    if (inventory.count(iter.first) && inventory.at(iter.first) >= iter.second)
+                                    {
+                                        // now it does nothing,
+                                        // but it has to send
+                                        // every losed object
+                                        // in inventory
+                                    }
+                                }
+                        }
                         player_data_pool[id].setPosition(new_position);
                         player_data_pool[id].setTime(sent_time);
                     }
@@ -260,14 +307,8 @@ namespace Multiplayer
                     {
                         // data >> object_data >> user
                         // receive object
-                        Object::ObjectName object_name;
-                        Object::Passability passability;
-                        sf::Uint32 object_name_enum;
-                        sf::Uint32 passability_enum;
-                        data >> new_position.x >> new_position.y >> sent_time >> object_name_enum >> passability_enum;
-                        object_name = static_cast<Object::ObjectName>(object_name_enum);
-                        passability = static_cast<Object::Passability>(passability_enum);
-                        auto object = ObjectData(std::move(new_position), std::move(sent_time), std::move(object_name), std::move(passability));
+                        Multiplayer::ObjectData object_data;
+                        data >> object_data;
                         // receive user
                         int msg_local_ip, msg_ip;
                         data >> new_position.x >> new_position.y >> msg_ip >> msg_local_ip >> sent_time;
@@ -293,14 +334,14 @@ namespace Multiplayer
                             {
                                 player_data_pool[id].setPosition(new_position);
                                 player_data_pool[id].setTime(sent_time);
-                                player_data_pool[id].addObject(object_name);
-                                removeObjectByPoint(object.getPosition());
+                                player_data_pool[id].addObject(object_data.getName());
+                                removeObjectByPoint(object_data.getPosition());
                                 data.clear();
-                                data << DataType::Event << EventType::removeObject << object.getPosition().x << object.getPosition().y << object.getTime() << object.getName() << object.getPassability();
+                                data << DataType::Event << EventType::removeObject << object_data.getPosition().x << object_data.getPosition().y << object_data.getTime() << object_data.getName() << object_data.getPassability();
                                 for (auto iter = getPlayerDataPool().begin(); iter != getPlayerDataPool().end(); ++iter)
                                     send(data, sf::IpAddress((*iter).second.getLocalIp()));
                                 data.clear();
-                                data << DataType::Event << EventType::addObjectToInvectory << object.getPosition().x << object.getPosition().y << object.getTime() << object.getName() << object.getPassability();
+                                data << DataType::Event << EventType::addObjectToInvectory << object_data;
                                 send(data, sf::IpAddress(msg_local_ip));
                             }
                         else
@@ -309,13 +350,13 @@ namespace Multiplayer
                             else
                             {
                                 player_data_pool[id] = PlayerData(std::move(new_position), std::move(msg_ip), std::move(msg_local_ip), std::move(sent_time), std::move(inventory));
-                                player_data_pool[id].addObject(object.getName());
-                                removeObjectByPoint(object.getPosition());
+                                player_data_pool[id].addObject(object_data.getName());
+                                removeObjectByPoint(object_data.getPosition());
                                 data.clear();
-                                data << DataType::Event << EventType::removeObject << object.getPosition().x << object.getPosition().y << object.getTime() << object.getName() << object.getPassability();
+                                data << DataType::Event << EventType::removeObject << object_data;
                                 for (auto iter = getPlayerDataPool().begin(); iter != getPlayerDataPool().end(); ++iter)
                                     send(data, sf::IpAddress((*iter).second.getLocalIp()));
-                                data << DataType::Event << EventType::addObjectToInvectory << object.getPosition().x << object.getPosition().y << object.getTime() << object.getName() << object.getPassability();
+                                data << DataType::Event << EventType::addObjectToInvectory << object_data;
                                 send(data, sf::IpAddress(msg_local_ip));
                             }
                         break;

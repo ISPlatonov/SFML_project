@@ -112,5 +112,6 @@ namespace Multiplayer
 }
 
 
-sf::Packet& operator <<(sf::Packet& packet, const Object::Object& object);
+sf::Packet& operator <<(sf::Packet& packet, Multiplayer::ObjectData& object_data);
 Object::Object& operator <<(Object::Object& object, const Multiplayer::ObjectData& object_data);
+sf::Packet& operator >>(sf::Packet&, Multiplayer::ObjectData&);
