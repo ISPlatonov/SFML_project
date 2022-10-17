@@ -37,6 +37,41 @@ sf::Packet& operator >>(sf::Packet& data, Multiplayer::ObjectData& object_data)
 }
 
 
+sf::Packet& operator <<(sf::Packet& packet, const Multiplayer::PlayerData& player_data)
+{
+    packet << player_data.getPosition().x << player_data.getPosition().y << player_data.getIp() << player_data.getLocalIp() << player_data.getTime();
+    packet << static_cast<sf::Uint32>(player_data.getInventory().size());
+    for (auto pair : player_data.getInventory())
+    {
+        packet << pair.first << static_cast<sf::Uint32>(pair.second);
+    }
+    return packet;
+}
+
+
+sf::Packet& operator >>(sf::Packet& packet, Multiplayer::PlayerData& player_data)
+{
+    int msg_local_ip, msg_ip;
+    sf::Vector2f position;
+    sf::Uint32 sent_time;
+    packet >> position.x >> position.y >> msg_ip >> msg_local_ip >> sent_time;
+    sf::Uint32 inventory_size_uint32;
+    packet >> inventory_size_uint32;
+    size_t inventory_size = static_cast<size_t>(inventory_size_uint32);
+    std::unordered_map<Object::ObjectName, size_t> inventory;
+    for (size_t i = 0; i < inventory_size; ++i)
+    {
+        sf::Uint32 object_name_enum;
+        sf::Uint32 object_num_uint32;
+        packet >> object_name_enum >> object_num_uint32;
+        size_t object_num = static_cast<size_t>(object_num_uint32);
+        inventory[static_cast<Object::ObjectName>(object_name_enum)] = std::move(object_num);
+    }
+    player_data = Multiplayer::PlayerData(std::move(position), std::move(msg_ip), std::move(msg_local_ip), std::move(sent_time), std::move(inventory)); // no inventory needed!
+    return packet;
+}
+
+
 namespace Multiplayer
 {
     Transportable::Transportable()
@@ -204,8 +239,6 @@ namespace Multiplayer
     sf::Socket::Status UdpManager::receive()
     {
         sf::Packet data;
-        sf::Uint32 sent_time;
-        sf::Vector2f new_position;
         auto status = socket.receive(data, address_receive, port_send);
         if (status != sf::Socket::Status::Done)
             return status;
@@ -226,27 +259,15 @@ namespace Multiplayer
             }
             case DataType::Player:
             {
-                int msg_local_ip, msg_ip;
-                data >> new_position.x >> new_position.y >> msg_ip >> msg_local_ip >> sent_time;
-                sf::Uint32 inventory_size_uint32;
-                data >> inventory_size_uint32;
-                size_t inventory_size = static_cast<size_t>(inventory_size_uint32);
-                std::unordered_map<Object::ObjectName, size_t> inventory;
-                for (size_t i = 0; i < inventory_size; ++i)
-                {
-                    sf::Uint32 object_name_enum;
-                    sf::Uint32 object_num_uint32;
-                    data >> object_name_enum >> object_num_uint32;
-                    size_t object_num = static_cast<size_t>(object_num_uint32);
-                    inventory[static_cast<Object::ObjectName>(object_name_enum)] = std::move(object_num);
-                }
+                PlayerData player_data;
+                data >> player_data;
                 //if (msg_local_ip == local_ip.toInteger())
                 //{
                 //    std::cout << "its me" << std::endl;
                 //}
-                auto id = sf::IpAddress(msg_ip).toString() + sf::IpAddress(msg_local_ip).toString();
+                auto id = sf::IpAddress(player_data.getIp()).toString() + sf::IpAddress(player_data.getLocalIp()).toString();
                 sf::Uint32 time_now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-                int ping = static_cast<int>(time_now) - static_cast<int>(sent_time);
+                int ping = static_cast<int>(time_now) - static_cast<int>(player_data.getTime());
                 if (player_data_pool.count(id))
                 {
                     #ifndef CLIENT
@@ -254,7 +275,7 @@ namespace Multiplayer
                         int old_ping = static_cast<int>(time_now) - static_cast<int>(old_time);
                         if (old_ping > Constants::getMAX_PING())
                         {
-                            if (inventory.empty() && !player_data_pool[id].getInventory().empty())
+                            if (player_data.getInventory().empty() && !player_data_pool[id].getInventory().empty())
                             {
                                 // send all inventory
                                 for (auto iter : player_data_pool[id].getInventory())
@@ -264,7 +285,7 @@ namespace Multiplayer
                                         data.clear();
                                         auto object_data = ObjectData(sf::Vector2f(0, 0), old_time, iter.first, Object::Passability::foreground);
                                         data << DataType::Event << EventType::addObjectToInvectory << object_data;
-                                        send(data, sf::IpAddress(msg_local_ip));
+                                        send(data, sf::IpAddress(player_data.getLocalIp()));
                                     }
                                 }
                             }
@@ -272,7 +293,7 @@ namespace Multiplayer
                                 for (auto iter : player_data_pool[id].getInventory())
                                 {
                                     size_t msg_number;
-                                    if (inventory.count(iter.first) && inventory.at(iter.first) >= iter.second)
+                                    if (player_data.getInventory().count(iter.first) && player_data.getInventory().at(iter.first) >= iter.second)
                                     {
                                         // now it does nothing,
                                         // but it has to send
@@ -290,15 +311,15 @@ namespace Multiplayer
                     }
                     else
                     {
-                        player_data_pool[id].setPosition(new_position);
-                        player_data_pool[id].setTime(sent_time);
+                        player_data_pool[id].setPosition(player_data.getPosition());
+                        player_data_pool[id].setTime(player_data.getTime());
                     }
                 }
                 else
                     if (ping > Constants::getMAX_PING())
                         return status;
                     else
-                        player_data_pool[id] = PlayerData(std::move(new_position), std::move(msg_ip), std::move(msg_local_ip), std::move(sent_time), std::move(inventory)); // no inventory needed!
+                        player_data_pool[id] = std::move(player_data);
                 break;
             }
             case DataType::Event:
@@ -316,23 +337,11 @@ namespace Multiplayer
                         ObjectData object_data;
                         data >> object_data;
                         // receive user
-                        int msg_local_ip, msg_ip;
-                        data >> new_position.x >> new_position.y >> msg_ip >> msg_local_ip >> sent_time;
-                        sf::Uint32 inventory_size_uint32;
-                        data >> inventory_size_uint32;
-                        size_t inventory_size = static_cast<size_t>(inventory_size_uint32);
-                        std::unordered_map<Object::ObjectName, size_t> inventory;
-                        for (size_t i = 0; i < inventory_size; ++i)
-                        {
-                            sf::Uint32 object_name_enum;
-                            sf::Uint32 object_num_uint32;
-                            data >> object_name_enum >> object_num_uint32;
-                            size_t object_num = static_cast<size_t>(object_num_uint32);
-                            inventory[static_cast<Object::ObjectName>(object_name_enum)] = std::move(object_num);
-                        }
-                        auto id = sf::IpAddress(msg_ip).toString() + sf::IpAddress(msg_local_ip).toString();
+                        PlayerData player_data;
+                        data >> player_data;
+                        auto id = sf::IpAddress(player_data.getIp()).toString() + sf::IpAddress(player_data.getLocalIp()).toString();
                         sf::Uint32 time_now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-                        int ping = static_cast<int>(time_now) - static_cast<int>(sent_time);
+                        int ping = static_cast<int>(time_now) - static_cast<int>(player_data.getTime());
                         if (player_data_pool.count(id))
                             if (ping > Constants::getMAX_PING())
                             {
@@ -340,8 +349,8 @@ namespace Multiplayer
                             }
                             else
                             {
-                                player_data_pool[id].setPosition(new_position);
-                                player_data_pool[id].setTime(sent_time);
+                                player_data_pool[id].setPosition(player_data.getPosition());
+                                player_data_pool[id].setTime(player_data.getTime());
                                 player_data_pool[id].addObject(object_data.getName());
                                 removeObjectByPoint(object_data.getPosition());
                                 data.clear();
@@ -350,7 +359,7 @@ namespace Multiplayer
                                     send(data, sf::IpAddress((*iter).second.getLocalIp()));
                                 data.clear();
                                 data << DataType::Event << EventType::addObjectToInvectory << object_data;
-                                send(data, sf::IpAddress(msg_local_ip));
+                                send(data, sf::IpAddress(player_data.getLocalIp()));
                             }
                         break;
                     }
