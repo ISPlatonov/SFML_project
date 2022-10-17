@@ -250,36 +250,37 @@ namespace Multiplayer
                 if (player_data_pool.count(id))
                 {
                     #ifndef CLIENT
-                        int old_ping = static_cast<int>(time_now) - static_cast<int>(player_data_pool[id].getTime());
+                        auto old_time = player_data_pool[id].getTime();
+                        int old_ping = static_cast<int>(time_now) - static_cast<int>(old_time);
                         if (old_ping > Constants::getMAX_PING())
-                    {
-                        if (inventory.empty() && !player_data_pool[id].getInventory().empty())
                         {
-                            // send all inventory
-                            for (auto iter : player_data_pool[id].getInventory())
+                            if (inventory.empty() && !player_data_pool[id].getInventory().empty())
                             {
-                                for (size_t i = 0; i < iter.second; ++i)
+                                // send all inventory
+                                for (auto iter : player_data_pool[id].getInventory())
                                 {
-                                    data.clear();
-                                    auto object_data = ObjectData(sf::Vector2f(), 0, iter.first, Object::Passability::foreground);
-                                    data << DataType::Event << EventType::addObjectToInvectory << object_data;
-                                    send(data, sf::IpAddress(msg_local_ip));
+                                    for (size_t i = 0; i < iter.second; ++i)
+                                    {
+                                        data.clear();
+                                        auto object_data = ObjectData(sf::Vector2f(0, 0), old_time, iter.first, Object::Passability::foreground);
+                                        data << DataType::Event << EventType::addObjectToInvectory << object_data;
+                                        send(data, sf::IpAddress(msg_local_ip));
+                                    }
                                 }
                             }
+                            else
+                                for (auto iter : player_data_pool[id].getInventory())
+                                {
+                                    size_t msg_number;
+                                    if (inventory.count(iter.first) && inventory.at(iter.first) >= iter.second)
+                                    {
+                                        // now it does nothing,
+                                        // but it has to send
+                                        // every losed object
+                                        // in inventory
+                                    }
+                                }
                         }
-                        else
-                            for (auto iter : player_data_pool[id].getInventory())
-                            {
-                                size_t msg_number;
-                                if (inventory.count(iter.first) && inventory.at(iter.first) >= iter.second)
-                                {
-                                    // now it does nothing,
-                                    // but it has to send
-                                    // every losed object
-                                    // in inventory
-                                }
-                            }
-                    }
                     #endif
                     if (ping > Constants::getMAX_PING())
                     {
