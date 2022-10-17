@@ -250,7 +250,8 @@ namespace Multiplayer
                 if (player_data_pool.count(id))
                 {
                     #ifndef CLIENT
-                    if (player_data_pool[id].getTime() > Constants::getMAX_PING())
+                        int old_ping = static_cast<int>(time_now) - static_cast<int>(player_data_pool[id].getTime());
+                        if (old_ping > Constants::getMAX_PING())
                     {
                         if (inventory.empty() && !player_data_pool[id].getInventory().empty())
                         {
