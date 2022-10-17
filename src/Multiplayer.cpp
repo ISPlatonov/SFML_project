@@ -3,10 +3,10 @@
 
 sf::Packet& operator <<(sf::Packet& packet, Multiplayer::ObjectData& object_data)
 {
-    #ifndef CLIENT
+    //#ifndef CLIENT
         object_data.setTime(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count());
-    #endif
-    packet << object_data.getPosition().x << object_data.getPosition().y << time << object_data.getName() << object_data.getPassability();
+    //#endif
+    packet << object_data.getPosition().x << object_data.getPosition().y << static_cast<sf::Uint32>(object_data.getTime()) << object_data.getName() << object_data.getPassability();
     return packet;
 }
 
