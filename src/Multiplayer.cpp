@@ -481,4 +481,44 @@ namespace Multiplayer
             socket_send.send(packet, address_send, port);
         socket_send.send(packet, dest_ip, port);
     }
+
+
+    #ifndef CLIENT
+        void UdpManager::addObjectByNoise(const sf::Vector2f& position)
+        {
+            sf::Vector2f point (position.x - std::fmod(position.x, 16.f), position.y - std::fmod(position.y, 16.f));
+            if (!object_data_pool.count(point))
+            {
+                auto noise = perlin.octave2D_01((point.x * 0.01), (point.y * 0.01), 4);
+                Object::ObjectName object_name;
+                sf::Uint32 time_now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+                if (noise > .8)
+                {
+                    object_name = Object::ObjectName::stone;
+                }
+                else if (noise > .5)
+                {
+                    object_name = Object::ObjectName::dirty_grass;
+                }
+                else
+                {
+                    object_name = Object::ObjectName::dirt;
+                }
+                addObject(Multiplayer::ObjectData(point, time_now, object_name, Object::Passability::background));
+            }
+        }
+
+
+        void UdpManager::checkSector(const sf::Vector2f& position)
+        {
+            sf::Vector2f point (position.x - std::fmod(position.x, 16.), position.y - std::fmod(position.y, 16.));
+            for (auto y = -8; y < 8; ++y)
+            {
+                for (auto x = -8; x < 8; ++x)
+                {
+                    addObjectByNoise(point + sf::Vector2f(x * 16., y * 16.));
+                }
+            }
+        }
+    #endif
 }

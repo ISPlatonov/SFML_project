@@ -6,9 +6,11 @@
 #include "Constants.hpp"
 #include "Object.hpp"
 #include "Hash.hpp"
+#include "PerlinNoise.hpp"
 #include <string>
 #include <chrono>
 #include <unordered_map>
+#include <cmath>
 
 
 namespace Multiplayer
@@ -95,6 +97,7 @@ namespace Multiplayer
         void addObject(const Multiplayer::ObjectData& object_data);
         ObjectData&& getRemovedObjectData();
         ObjectData&& getObjectToInventoryData();
+        void checkSector(const sf::Vector2f&);
 
     private:
         sf::UdpSocket socket;
@@ -108,6 +111,10 @@ namespace Multiplayer
         /*static*/ std::unordered_map<sf::Vector2f, ObjectData> object_data_pool;
         /*static*/ std::vector<ObjectData> removed_object_data_list;
         /*static*/ std::vector<ObjectData> objects_to_inventory_list;
+        #ifndef CLIENT
+            static inline const siv::PerlinNoise perlin{ 0 };
+            void addObjectByNoise(const sf::Vector2f&);
+        #endif
     };
 }
 
