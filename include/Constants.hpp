@@ -89,7 +89,7 @@ public:
             load_constants();
         return MAX_RECURSION_DEPTH;
     }
-    static inline const size_t& getVIEW_RADIUS()
+    static inline const int& getVIEW_RADIUS()
     {
         while (!loaded)
             load_constants();
@@ -148,7 +148,7 @@ private:
     static inline float STEP_SIZE_MULTIPLIER = .05;
     static inline size_t MAX_RECURSION_DEPTH = 15;
     static inline size_t TILE_SIZE = PIXEL_SIZE;
-    static inline size_t VIEW_RADIUS = 10;
+    static inline int VIEW_RADIUS = 10;
     // Network
     static inline size_t PORT_LISTEN = 55000;
     static inline size_t PORT_SEND = 55001;
