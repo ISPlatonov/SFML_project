@@ -2,9 +2,13 @@
 
 Multiplatform minigame that demonstrates SFML library potential.
 
+![](https://img.shields.io/github/workflow/status/ISPlatonov/SFML_project/CI)
+![](https://img.shields.io/tokei/lines/github/ISPlatonov/SFML_project)
+![](https://img.shields.io/github/languages/code-size/ISPlatonov/SFML_project)
+
 ## Configuring
 
-In file `include/Constants.hpp` you can set pixel and window size up. Keep in mind that real window size is `window size` * `pixel size`.
+In file `textures/constants.txt` you can set up the game settings: server ip, ports, pixel size, VSYNC, framerate limit, etc.
 
 ## Installation
 
@@ -40,16 +44,13 @@ cmake --build build --config Release --target install
     You can use `w`, `a`, `s` and `d` buttons for moving across the map.
 
 - `server` - game server executable
-- `textures` - dir with all textures
+- `textures` - dir with all textures and configuration files
 
 ## Architecture
 
 ```mermaid
 flowchart LR
     main{{main}} --> Controls
-    main --> WM(World Map)
-    main --> Mob
-    main --> UdpManager(UdpManager)
     server{{server}} --> UdpManager
     subgraph Multiplayer class
         UdpManager --> PDP(Player Data Pool)
@@ -57,19 +58,16 @@ flowchart LR
         UdpManager --> UdpSocket
         PDP -.- Transportable[[Transportable]]
         ODP -.- Transportable
-    end
-    subgraph World Map class
-        WM --> OM(Object Map)
-        WM --> TileMap(TileMap)
-    end
-    subgraph Mob class
-        Mob --> PP(Player Pool)
-        Mob --> MobPool(MobPool)
+        UdpManager -- for server only --> PerlinNoise
+        PerlinNoise --> ODP
     end
     subgraph Controls class
         Controls --> user{{user}}
         Controls --> Window(Window)
         Controls --> Events
+        Controls --> OM(Object Map)
+        Controls --> PP(Player Pool)
+        Controls --> UdpManager(UdpManager)
     end
     subgraph Object class
         Object
@@ -84,5 +82,4 @@ flowchart LR
     user --> User
     PDP --> Player
     PP --> Player
-    MobPool --> Bot
 ```
