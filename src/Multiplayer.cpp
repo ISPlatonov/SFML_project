@@ -288,6 +288,13 @@ namespace Multiplayer
                                         send(data, sf::IpAddress(player_data.getLocalIp()));
                                     }
                                 }
+                                // send all objects on map
+                                for (auto iter : object_data_pool)
+                                {
+                                    data.clear();
+                                    data << DataType::Object << iter.second;
+                                    send(data, sf::IpAddress(player_data.getLocalIp()));
+                                }
                             }
                             else
                                 for (auto iter : player_data_pool[id].getInventory())
@@ -319,7 +326,16 @@ namespace Multiplayer
                     if (ping > Constants::getMAX_PING())
                         return status;
                     else
+                    {
                         player_data_pool[id] = std::move(player_data);
+                        // send all objects
+                        for (auto iter : object_data_pool)
+                        {
+                            data.clear();
+                            data << DataType::Object << iter.second;
+                            send(data, sf::IpAddress(player_data_pool[id].getLocalIp()));
+                        }
+                    }
                 break;
             }
             case DataType::Event:
@@ -517,6 +533,12 @@ namespace Multiplayer
                 for (auto x = -8; x < 8; ++x)
                 {
                     addObjectByNoise(point + sf::Vector2f(x * 16., y * 16.));
+                    for (auto iter : player_data_pool)
+                    {
+                        sf::Packet data;
+                        data << DataType::Object << getObjectDataPool().at(point + sf::Vector2f(x * 16., y * 16.));
+                        send(data, iter.second.getLocalIp());
+                    }
                 }
             }
         }

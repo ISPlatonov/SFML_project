@@ -51,12 +51,6 @@ void UdpWorker(Multiplayer::UdpManager& UdpManager)
             UdpManager.send(data, sf::IpAddress((*dest_iter++).second.getLocalIp()));
             //std::cout << "sent" << std::endl;
         }
-        for (auto object_iter = UdpManager.getObjectDataPool().begin(); object_iter != UdpManager.getObjectDataPool().end(); ++object_iter)
-        {
-            sf::Packet data;
-            data << static_cast<sf::Uint32>(Multiplayer::DataType::Object) << (*object_iter).second.getPosition().x << (*object_iter).second.getPosition().y << (*object_iter).second.getTime() << (*object_iter).second.getName() << (*object_iter).second.getPassability();
-            UdpManager.send(data, sf::IpAddress(iter.second.getLocalIp()));
-        }
     }
 }
 

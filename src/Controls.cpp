@@ -255,7 +255,7 @@ void Controls::handleFrameStep()
      // Clear screen
     window.clear();
     // Draw the sprite
-    window.draw(WorldMap::WorldMap::map);
+    //window.draw(WorldMap::WorldMap::map);
     for (auto iter : object_map.getObjectMap(Object::Passability::background))
         window.draw(iter.second);
     for (auto iter : object_map.getObjectMap(Object::Passability::impassible))
