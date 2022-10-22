@@ -536,8 +536,8 @@ namespace Multiplayer
                     for (auto iter : player_data_pool)
                     {
                         sf::Packet data;
-                        data << DataType::Object << getObjectDataPool().at(point + sf::Vector2f(x * 16., y * 16.));
-                        send(data, iter.second.getLocalIp());
+                        data << DataType::Object << object_data_pool.at(point + sf::Vector2f(x * 16., y * 16.));
+                        send(data, sf::IpAddress(iter.second.getLocalIp()));
                     }
                 }
             }
