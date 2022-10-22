@@ -19,7 +19,8 @@ namespace Multiplayer
     {
         Player,
         Object,
-        Event
+        Event,
+        Sector
     };
 
 
@@ -97,7 +98,7 @@ namespace Multiplayer
         void addObject(const Multiplayer::ObjectData& object_data);
         ObjectData&& getRemovedObjectData();
         ObjectData&& getObjectToInventoryData();
-        void checkSector(const sf::Vector2f&);
+        const sf::Packet&& checkSector(const sf::Vector2f&);
 
     private:
         sf::UdpSocket socket;

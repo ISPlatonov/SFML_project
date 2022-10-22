@@ -275,9 +275,11 @@ namespace Multiplayer
                         int old_ping = static_cast<int>(time_now) - static_cast<int>(old_time);
                         if (old_ping > Constants::getMAX_PING())
                         {
-                            // send all objects on map
+                            // send foreground objects on map
                             for (auto iter : object_data_pool)
                             {
+                                if (iter.second.getPassability() != Object::Passability::foreground)
+                                    continue;
                                 data.clear();
                                 data << DataType::Object << iter.second;
                                 send(data, sf::IpAddress(player_data.getLocalIp()));
@@ -329,9 +331,11 @@ namespace Multiplayer
                     else
                     {
                         player_data_pool[id] = std::move(player_data);
-                        // send all objects
+                        // send foreground objects
                         for (auto iter : object_data_pool)
                         {
+                            if (iter.second.getPassability() != Object::Passability::foreground)
+                                continue;
                             data.clear();
                             data << DataType::Object << iter.second;
                             send(data, sf::IpAddress(player_data_pool[id].getLocalIp()));
@@ -404,6 +408,19 @@ namespace Multiplayer
                     default:
                         throw; // ???
                         break;
+                }
+                break;
+            }
+            case DataType::Sector:
+            {
+                // data >> objects_num >> objects >> ...
+                sf::Uint32 objects_number;
+                data >> objects_number;
+                for (size_t i = 0; i < objects_number; ++i)
+                {
+                    ObjectData object_data;
+                    data >> object_data;
+                    addObject(object_data);
                 }
                 break;
             }
@@ -526,26 +543,31 @@ namespace Multiplayer
                     object_name = Object::ObjectName::dirt;
                 }
                 addObject(Multiplayer::ObjectData(point, time_now, object_name, passability));
-                for (auto iter : player_data_pool)
-                {
-                    sf::Packet data;
-                    data << DataType::Object << object_data_pool.at(point);
-                    while (send(data, sf::IpAddress(iter.second.getLocalIp())) != sf::Socket::Status::Done);
-                }
+                //for (auto iter : player_data_pool)
+                //{
+                //    sf::Packet data;
+                //    data << DataType::Object << object_data_pool.at(point);
+                //    while (send(data, sf::IpAddress(iter.second.getLocalIp())) != sf::Socket::Status::Done);
+                //}
             }
         }
 
 
-        void UdpManager::checkSector(const sf::Vector2f& position)
+        const sf::Packet&& UdpManager::checkSector(const sf::Vector2f& position)
         {
+            sf::Packet* data = new sf::Packet();
+            *data << DataType::Sector;
+            *data << static_cast<sf::Uint32>(16 * 16);
             sf::Vector2f point (position.x - std::fmod(position.x, 16.), position.y - std::fmod(position.y, 16.));
             for (auto y = -8; y < 8; ++y)
             {
                 for (auto x = -8; x < 8; ++x)
                 {
                     addObjectByNoise(point + sf::Vector2f(x * 16., y * 16.));
+                    *data << object_data_pool.at(point + sf::Vector2f(x * 16., y * 16.));
                 }
             }
+            return std::move(*data);
         }
     #endif
 }
