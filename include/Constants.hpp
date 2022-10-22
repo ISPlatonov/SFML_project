@@ -1,6 +1,8 @@
 #pragma once
 
-#include <SFML/Window.hpp>
+#ifdef CLIENT
+    #include <SFML/Window.hpp>
+#endif
 #include <string>
 #include <fstream>
 
@@ -23,6 +25,7 @@ public:
         infile >> FRAMERATE_LIMIT;
         infile >> std::boolalpha >> ENABLE_VSYNC;
         infile >> MAX_RECURSION_DEPTH;
+        infile >> VIEW_RADIUS;
         infile >> PORT_LISTEN;
         infile >> PORT_SEND;
         infile >> SERVER_IP;
@@ -86,6 +89,12 @@ public:
             load_constants();
         return MAX_RECURSION_DEPTH;
     }
+    static inline const size_t& getVIEW_RADIUS()
+    {
+        while (!loaded)
+            load_constants();
+        return VIEW_RADIUS;
+    }
     static inline const size_t& getTILE_SIZE()
     {
         while (!loaded)
@@ -139,6 +148,7 @@ private:
     static inline float STEP_SIZE_MULTIPLIER = .05;
     static inline size_t MAX_RECURSION_DEPTH = 15;
     static inline size_t TILE_SIZE = PIXEL_SIZE;
+    static inline size_t VIEW_RADIUS = 10;
     // Network
     static inline size_t PORT_LISTEN = 55000;
     static inline size_t PORT_SEND = 55001;

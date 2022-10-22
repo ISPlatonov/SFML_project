@@ -557,11 +557,11 @@ namespace Multiplayer
         {
             sf::Packet* data = new sf::Packet();
             *data << DataType::Sector;
-            *data << static_cast<sf::Uint32>(16 * 16);
+            *data << static_cast<sf::Uint32>(Constants::getVIEW_RADIUS() * 2 * Constants::getVIEW_RADIUS() * 2);
             sf::Vector2f point (position.x - std::fmod(position.x, 16.), position.y - std::fmod(position.y, 16.));
-            for (auto y = -8; y < 8; ++y)
+            for (auto y = -Constants::getVIEW_RADIUS(); y < Constants::getVIEW_RADIUS(); ++y)
             {
-                for (auto x = -8; x < 8; ++x)
+                for (auto x = -Constants::getVIEW_RADIUS(); x < Constants::getVIEW_RADIUS(); ++x)
                 {
                     addObjectByNoise(point + sf::Vector2f(x * 16., y * 16.));
                     *data << object_data_pool.at(point + sf::Vector2f(x * 16., y * 16.));
