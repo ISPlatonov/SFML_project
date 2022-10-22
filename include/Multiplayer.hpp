@@ -88,7 +88,7 @@ namespace Multiplayer
     public:
         UdpManager(const sf::IpAddress& address_receive, const sf::IpAddress& address_send);
         sf::Socket::Status receive();
-        void send(sf::Packet& packet, const sf::IpAddress& dest_ip = sf::IpAddress());
+        sf::Socket::Status send(sf::Packet& packet, const sf::IpAddress& dest_ip = sf::IpAddress());
         const std::unordered_map<std::string, PlayerData>& getPlayerDataPool() const;
         const std::unordered_map<sf::Vector2f, ObjectData>& getObjectDataPool() const;
         std::unordered_map<std::string, PlayerData>::iterator removePlayerById(const std::string& id);
@@ -112,7 +112,7 @@ namespace Multiplayer
         /*static*/ std::vector<ObjectData> removed_object_data_list;
         /*static*/ std::vector<ObjectData> objects_to_inventory_list;
         #ifndef CLIENT
-            static inline const siv::PerlinNoise perlin{ 0 };
+            static inline const siv::PerlinNoise perlin{ 8u };
             void addObjectByNoise(const sf::Vector2f&);
         #endif
     };

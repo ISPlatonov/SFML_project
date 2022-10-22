@@ -275,6 +275,14 @@ namespace Multiplayer
                         int old_ping = static_cast<int>(time_now) - static_cast<int>(old_time);
                         if (old_ping > Constants::getMAX_PING())
                         {
+                            // send all objects on map
+                            for (auto iter : object_data_pool)
+                            {
+                                data.clear();
+                                data << DataType::Object << iter.second;
+                                send(data, sf::IpAddress(player_data.getLocalIp()));
+                                sf::sleep(sf::milliseconds(1));
+                            }
                             if (player_data.getInventory().empty() && !player_data_pool[id].getInventory().empty())
                             {
                                 // send all inventory
@@ -287,13 +295,6 @@ namespace Multiplayer
                                         data << DataType::Event << EventType::addObjectToInvectory << object_data;
                                         send(data, sf::IpAddress(player_data.getLocalIp()));
                                     }
-                                }
-                                // send all objects on map
-                                for (auto iter : object_data_pool)
-                                {
-                                    data.clear();
-                                    data << DataType::Object << iter.second;
-                                    send(data, sf::IpAddress(player_data.getLocalIp()));
                                 }
                             }
                             else
@@ -334,6 +335,7 @@ namespace Multiplayer
                             data.clear();
                             data << DataType::Object << iter.second;
                             send(data, sf::IpAddress(player_data_pool[id].getLocalIp()));
+                            sf::sleep(sf::milliseconds(1));
                         }
                     }
                 break;
@@ -491,11 +493,12 @@ namespace Multiplayer
     }
 
 
-    void UdpManager::send(sf::Packet& packet, const sf::IpAddress& dest_ip)
+    sf::Socket::Status UdpManager::send(sf::Packet& packet, const sf::IpAddress& dest_ip)
     {
         if (dest_ip == sf::IpAddress())
-            socket_send.send(packet, address_send, port);
-        socket_send.send(packet, dest_ip, port);
+            return socket_send.send(packet, address_send, port);
+        else
+            return socket_send.send(packet, dest_ip, port); // ?
     }
 
 
@@ -507,10 +510,12 @@ namespace Multiplayer
             {
                 auto noise = perlin.octave2D_01((point.x * 0.01), (point.y * 0.01), 4);
                 Object::ObjectName object_name;
+                Object::Passability passability = Object::Passability::background;
                 sf::Uint32 time_now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
                 if (noise > .8)
                 {
                     object_name = Object::ObjectName::stone;
+                    passability = Object::Passability::impassible;
                 }
                 else if (noise > .5)
                 {
@@ -520,7 +525,13 @@ namespace Multiplayer
                 {
                     object_name = Object::ObjectName::dirt;
                 }
-                addObject(Multiplayer::ObjectData(point, time_now, object_name, Object::Passability::background));
+                addObject(Multiplayer::ObjectData(point, time_now, object_name, passability));
+                for (auto iter : player_data_pool)
+                {
+                    sf::Packet data;
+                    data << DataType::Object << object_data_pool.at(point);
+                    while (send(data, sf::IpAddress(iter.second.getLocalIp())) != sf::Socket::Status::Done);
+                }
             }
         }
 
@@ -533,12 +544,6 @@ namespace Multiplayer
                 for (auto x = -8; x < 8; ++x)
                 {
                     addObjectByNoise(point + sf::Vector2f(x * 16., y * 16.));
-                    for (auto iter : player_data_pool)
-                    {
-                        sf::Packet data;
-                        data << DataType::Object << object_data_pool.at(point + sf::Vector2f(x * 16., y * 16.));
-                        send(data, sf::IpAddress(iter.second.getLocalIp()));
-                    }
                 }
             }
         }
