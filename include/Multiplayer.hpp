@@ -96,9 +96,9 @@ namespace Multiplayer
         std::unordered_map<sf::Vector2f, ObjectData>::iterator removeObjectByPoint(const sf::Vector2f& point);
         void addObject(const Object::Object& object);
         void addObject(const Multiplayer::ObjectData& object_data);
-        ObjectData&& getRemovedObjectData();
-        ObjectData&& getObjectToInventoryData();
-        const sf::Packet&& checkSector(const sf::Vector2f&);
+        ObjectData getRemovedObjectData();
+        ObjectData getObjectToInventoryData();
+        sf::Packet checkSector(const sf::Vector2f&);
 
     private:
         sf::UdpSocket socket;

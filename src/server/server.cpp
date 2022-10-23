@@ -34,8 +34,8 @@ void UdpWorker(Multiplayer::UdpManager& UdpManager)
             //UdpManager.removePlayerById((*iter++).first);
             continue;
         }
-        auto data = std::move(UdpManager.checkSector(iter.second.getPosition()));
-        UdpManager.send(data, sf::IpAddress(iter.second.getLocalIp()));
+        auto sector_data = UdpManager.checkSector(iter.second.getPosition());
+        UdpManager.send(sector_data, sf::IpAddress(iter.second.getLocalIp()));
         for (auto dest_iter = UdpManager.getPlayerDataPool().begin(); dest_iter != UdpManager.getPlayerDataPool().end();)
         {
             //std::cout << "sending " << (*iter).first << " data to " << (*dest_iter).first << std::endl;

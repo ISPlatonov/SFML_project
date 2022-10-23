@@ -478,34 +478,32 @@ namespace Multiplayer
     }
 
 
-    ObjectData&& UdpManager::getRemovedObjectData()
+    ObjectData UdpManager::getRemovedObjectData()
     {
         if (removed_object_data_list.empty())
         {
-            ObjectData* object_data = new ObjectData();
-            return std::move(*object_data);
+            return ObjectData();
         }
         else
         {
             ObjectData& object_data = removed_object_data_list.back();
             removed_object_data_list.pop_back();
-            return std::move(object_data);
+            return object_data;
         }
     }
 
 
-    ObjectData&& UdpManager::getObjectToInventoryData()
+    ObjectData UdpManager::getObjectToInventoryData()
     {
         if (objects_to_inventory_list.empty())
         {
-            ObjectData* object_data = new ObjectData();
-            return std::move(*object_data);
+            return ObjectData();
         }
         else
         {
             ObjectData& object_data = objects_to_inventory_list.back();
             objects_to_inventory_list.pop_back();
-            return std::move(object_data);
+            return object_data;
         }
     }
 
@@ -553,21 +551,21 @@ namespace Multiplayer
         }
 
 
-        const sf::Packet&& UdpManager::checkSector(const sf::Vector2f& position)
+        sf::Packet UdpManager::checkSector(const sf::Vector2f& position)
         {
-            sf::Packet* data = new sf::Packet();
-            *data << DataType::Sector;
-            *data << static_cast<sf::Uint32>(Constants::getVIEW_RADIUS() * 2 * Constants::getVIEW_RADIUS() * 2);
+            sf::Packet data;
+            data << DataType::Sector;
+            data << static_cast<sf::Uint32>(Constants::getVIEW_RADIUS() * 2 * Constants::getVIEW_RADIUS() * 2);
             sf::Vector2f point (position.x - std::fmod(position.x, 16.), position.y - std::fmod(position.y, 16.));
             for (auto y = -Constants::getVIEW_RADIUS(); y < Constants::getVIEW_RADIUS(); ++y)
             {
                 for (auto x = -Constants::getVIEW_RADIUS(); x < Constants::getVIEW_RADIUS(); ++x)
                 {
                     addObjectByNoise(point + sf::Vector2f(x * 16., y * 16.));
-                    *data << object_data_pool.at(point + sf::Vector2f(x * 16., y * 16.));
+                    data << object_data_pool.at(point + sf::Vector2f(x * 16., y * 16.));
                 }
             }
-            return std::move(*data);
+            return data;
         }
     #endif
 }
