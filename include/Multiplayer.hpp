@@ -33,6 +33,9 @@ namespace Multiplayer
     };
 
 
+    /**
+     * @brief Class for trasferral data between server and client
+    */
     class Transportable
     {
     public:
@@ -49,6 +52,10 @@ namespace Multiplayer
     };
 
 
+    /**
+     * @brief Class for trasferral player data
+     * @details Player data is a data about player's position, inventory and time of sending
+    */
     class PlayerData : virtual public Transportable
     {
     public:
@@ -69,6 +76,10 @@ namespace Multiplayer
     };
 
 
+    /**
+     * @brief Class for trasferral object data
+     * @details Object data is a data about object's position, type and time of sending
+    */
     class ObjectData : virtual public Transportable
     {
     public:
@@ -84,6 +95,9 @@ namespace Multiplayer
     };
 
 
+    /**
+     * @brief Class for managing multiplayer
+    */
     class UdpManager
     {
     public:

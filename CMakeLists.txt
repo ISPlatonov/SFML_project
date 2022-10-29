@@ -5,15 +5,7 @@ set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if(IOS)
-    set(BUILD_SHARED_LIBS FALSE)
-elseif(ANDROID)
-    set(BUILD_SHARED_LIBS TRUE)
-endif()
-
 # Request static SFML libraries when building statically
-if(NOT BUILD_SHARED_LIBS)
-	set(SFML_STATIC_LIBRARIES true)
-endif()
+set(SFML_STATIC_LIBRARIES BUILD_SHARED_LIBS)
 
 add_subdirectory(src)

@@ -10,8 +10,6 @@ if (BUILD_SERVER_ONLY)
     target_link_libraries(server sfml-graphics sfml-window sfml-network sfml-system)
 
     install(TARGETS server DESTINATION ${CMAKE_SOURCE_DIR}/bin)
-
-
 else()
     add_executable(SFML_project ${SOURCE_FILES})
     target_compile_definitions(SFML_project PUBLIC CLIENT)
@@ -29,5 +27,4 @@ else()
 
     install(TARGETS SFML_project server DESTINATION ${CMAKE_SOURCE_DIR}/bin)
     install(DIRECTORY ${CMAKE_SOURCE_DIR}/textures DESTINATION ${CMAKE_SOURCE_DIR}/bin)
-
 endif()

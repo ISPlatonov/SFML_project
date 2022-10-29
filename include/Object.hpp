@@ -29,6 +29,10 @@ namespace Object
     };
 
 
+    /**
+     * @brief Class for storing object data
+     * @details Stores object data, such as name, texture, passability, etc.
+    */
     class Object : public sf::Drawable, public sf::Transformable
     {
     public:

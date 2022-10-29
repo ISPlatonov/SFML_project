@@ -6,6 +6,9 @@
 template <class T>
 struct std::hash<sf::Vector2<T>>
 {
+    /**
+     * @brief Hash function for sf::Vector2
+    */
     inline size_t operator()(const sf::Vector2<T>& v) const
     {
         // Compute individual hash values for first

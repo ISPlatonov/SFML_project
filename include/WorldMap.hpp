@@ -14,6 +14,10 @@
 
 namespace WorldMap
 {
+    /**
+     * @brief Class for storing tiles
+     * @todo get rid of this class
+    */
     class TileMap : public sf::Drawable, public sf::Transformable
     {
     public:
@@ -27,6 +31,10 @@ namespace WorldMap
     };
 
 
+    /**
+     * @brief Class for storing map data
+     * @details Stores map data, such as objects, sectors, etc.
+    */
     class ObjectMap
     {
     public:

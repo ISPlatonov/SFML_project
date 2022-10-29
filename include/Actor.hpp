@@ -13,6 +13,9 @@
 
 namespace Actor
 {
+    /**
+     * @brief Base class for all actors
+    */
     class Actor : public sf::Drawable, public sf::Transformable
     {
     public:
@@ -21,7 +24,6 @@ namespace Actor
         Actor(const sf::Vector2f& position, const std::unordered_map<Object::ObjectName, size_t>& inventory);
         Actor(sf::Vector2f&& position, std::unordered_map<Object::ObjectName, size_t>&& inventory);
         sf::Vector2f&& move_dt(const sf::Vector2f& direction, const sf::Uint32& dt, const WorldMap::ObjectMap& ObjectMap = {});
-        //void setPosition(sf::Vector2f p);
         void check_direction(const sf::Vector2f&);
         const sf::Vector2f& getPosition() const;
         const sf::Sprite& getSprite() const;
@@ -44,6 +46,10 @@ namespace Actor
     };
 
 
+    /**
+     * @brief Class for bot
+     * @details Bot is an actor that can be controlled by AI
+    */
     class Bot : public virtual Actor
     {
     public:
@@ -55,6 +61,10 @@ namespace Actor
     };
 
 
+    /**
+     * @brief Class for user
+     * @details User is an actor that can be controlled by user
+    */
     class User : public virtual Actor
     {
     public:
@@ -71,10 +81,13 @@ namespace Actor
     };
 
 
+    /**
+     * @brief Class for player
+     * @details Player is an actor that can be controlled by another user in multiplayer
+    */
     class Player : public virtual Actor
     {
     public:
-        // data << x << y << my_ip.toInteger() << my_local_ip.toInteger() << std::chrono::high_resolution_clock::now().time_since_epoch().count()
         Player(const sf::Vector2f& position, const int& ip, const int& local_ip, const sf::Uint32& creation_time, const std::unordered_map<Object::ObjectName, size_t>& inventory);
         Player(const Player&);
         Player(const Multiplayer::PlayerData&);

@@ -7,6 +7,9 @@
 #include <fstream>
 
 
+/**
+ * @brief This class is used to read settings from file
+*/
 class Constants
 {
 public:

@@ -1,18 +1,17 @@
 #include <SFML/Network.hpp>
 #include <SFML/System.hpp>
-#include <map>
 #include <string>
-#include <cstdlib>
-//#include "LinearAlgebra.hpp"
 #include "Multiplayer.hpp"
 #include <Constants.hpp>
 #include <chrono>
 #include <vector>
-#include <set>
 //#include <iostream>
 #include <fstream>
 
 
+/**
+ * @brief Class for handling client-server connection on server side
+*/
 void UdpWorker(Multiplayer::UdpManager& UdpManager)
 {
     for (size_t i = 0; i < UdpManager.getPlayerDataPool().size() + Constants::getUDP_PACKETS_GAP(); ++i)
@@ -56,6 +55,12 @@ void UdpWorker(Multiplayer::UdpManager& UdpManager)
 }
 
 
+/**
+ * loads terrain from file
+ * 
+ * @param path: path to file
+ * @return vector of ObjectData
+*/
 std::vector<Multiplayer::ObjectData> load_terrain(const std::string& path)
 {
     std::vector<Multiplayer::ObjectData> object_data_pool_init;

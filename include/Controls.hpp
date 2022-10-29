@@ -10,6 +10,10 @@
 #include <chrono>
 
 
+/**
+ * @brief Class for controlling the game
+ * @details Controls the game, handles user input, draws the game
+*/
 class Controls
 {
 public:
