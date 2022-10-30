@@ -32,7 +32,7 @@ public:
 
 private:
     Controls();
-    static void addEvent(sf::Event);
+    static void addEvent(const sf::Event&);
 
     static Multiplayer::UdpManager udp_manager;
     static sf::Vector2f direction;

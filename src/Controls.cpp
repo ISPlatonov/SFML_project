@@ -34,7 +34,7 @@ void Controls::handleEvents()
 }
 
 
-void Controls::addEvent(sf::Event event)
+void Controls::addEvent(const sf::Event& event)
 {
     switch (event.type)
     {
@@ -134,16 +134,7 @@ void Controls::addEvent(sf::Event event)
 
 sf::Vector2f Controls::getDirection()
 {
-    float x, y;
-
-    x = right * 1.f - left * 1.f;
-    y = down * 1.f - up * 1.f;
-
-    auto vector = sf::Vector2f(x, y);
-    linalg::normalize(vector);
-
-    // rewrite!
-    return vector;
+    return linalg::normalize(sf::Vector2f(right * 1.f - left * 1.f, down * 1.f - up * 1.f));
 }
 
 
@@ -155,11 +146,7 @@ void Controls::setLastActionTimepoint(const sf::Uint32& t)
 
 sf::Uint32 Controls::getDeltaTime()
 {
-    sf::Uint32 t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-    sf::Uint32 dt = t - last_action_timepoint;
-    //setLastActionTimepoint(t);
-
-    return dt;
+    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count() - last_action_timepoint;
 }
 
 

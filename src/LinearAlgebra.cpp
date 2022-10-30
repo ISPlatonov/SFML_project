@@ -1,16 +1,14 @@
 #include "LinearAlgebra.hpp"
 
 
-sf::Vector2f linalg::normalize(sf::Vector2f v)
+sf::Vector2f linalg::normalize(const sf::Vector2f& v)
 {
     float m = magnitude(v);
     if (m == 0)
         return v;
     m = (1.f / m);
-    v.x *= m;
-    v.y *= m;
 
-    return v;
+    return v * m;
 }
 
 
