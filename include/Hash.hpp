@@ -21,3 +21,33 @@ struct std::hash<sf::Vector2<T>>
         return tmp0;
     }
 };
+
+
+template <class T>
+struct std::hash<sf::Rect<T>>
+{
+    /**
+     * @brief Hash function for sf::Rect
+    */
+    inline size_t operator()(const sf::Rect<T>& r) const
+    {
+        size_t tmp0 = std::hash<sf::Vector2f>()(r.getPosition());
+        size_t tmp1 = std::hash<sf::Vector2f>()(r.getSize());
+
+        tmp0 ^= tmp1 + 0x9e3779b9 + (tmp0 << 6) + (tmp0 >> 2);
+        return tmp0;
+    }
+};
+
+
+template <>
+struct std::hash<sf::Sprite>
+{
+    /**
+     * @brief Hash function for sf::Sprite
+    */
+    inline size_t operator()(const sf::Sprite& s) const
+    {
+        return std::hash<sf::FloatRect>()(s.getGlobalBounds());
+    }
+};

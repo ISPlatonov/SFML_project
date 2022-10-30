@@ -8,7 +8,6 @@ bool Controls::left = 0,
      Controls::down = 0,
      Controls::draw_menu = 0,
      Controls::draw_inventory = 0;
-sf::Uint32 Controls::last_action_timepoint;
 sf::RenderWindow Controls::window(sf::VideoMode().getFullscreenModes().at(0), "SFML window", sf::Style::Fullscreen);
 Actor::User Controls::user(sf::Vector2f(0, 0));
 sf::RectangleShape Controls::menu = sf::RectangleShape(sf::Vector2f(Controls::window.getSize()) * .1f);
@@ -16,7 +15,6 @@ sf::RectangleShape Controls::inventory_rect = sf::RectangleShape(sf::Vector2f(Co
 WorldMap::ObjectMap Controls::object_map{};
 Multiplayer::UdpManager Controls::udp_manager(sf::IpAddress::getLocalAddress(), sf::IpAddress(Constants::getSERVER_IP()));
 std::map<std::string, Actor::Player> Controls::player_pool{};
-sf::Font Controls::font;
 
 
 void Controls::applyWindowSettings()
@@ -64,6 +62,7 @@ void Controls::addEvent(sf::Event event)
                     break;
                 case (sf::Keyboard::Tab):
                     draw_inventory = !draw_inventory;
+                    selected_object = Object::Object();
                     break;
                 default:
                     break;
@@ -94,6 +93,19 @@ void Controls::addEvent(sf::Event event)
                 case sf::Mouse::Left:
                     if (draw_menu && menu.getGlobalBounds().contains(window.mapPixelToCoords(sf::Mouse::getPosition())))
                         window.close();
+                    else if (draw_inventory && inventory_rect.getGlobalBounds().contains(window.mapPixelToCoords(sf::Mouse::getPosition())))
+                    {
+                        // select object
+                        sf::Vector2f mouse_pos = window.mapPixelToCoords(sf::Mouse::getPosition());
+                        for (auto& [rect, object_name] : inventory)
+                        {
+                            if (rect.contains(mouse_pos))
+                            {
+                                selected_object = Object::Object(object_name, rect.getPosition() - user.getPosition(), Object::Passability::foreground);
+                                break;
+                            }
+                        }
+                    }
                     else
                     {
                         // handle object selection
@@ -135,7 +147,7 @@ sf::Vector2f Controls::getDirection()
 }
 
 
-void Controls::setLastActionTimepoint(sf::Uint32 t)
+void Controls::setLastActionTimepoint(const sf::Uint32& t)
 {
     last_action_timepoint = t;
 }
@@ -155,13 +167,14 @@ void Controls::drawInterfaces()
 {
     if (draw_inventory)
     {
+        inventory.clear();
         auto center = user.getView().getCenter();
         auto text = sf::Text("Inventory", font);
         text.setFillColor(sf::Color::White);
         inventory_rect.setPosition(center - inventory_rect.getSize() / 2.f);
         text.setPosition(center - inventory_rect.getSize() / 2.f);
         inventory_rect.setOutlineColor(sf::Color::Cyan);
-        inventory_rect.setOutlineThickness(5);
+        inventory_rect.setOutlineThickness(static_cast<float>(Constants::getPIXEL_SIZE()) / 2.f);
         inventory_rect.setFillColor(sf::Color(0, 0, 0, 127));
         
         window.draw(inventory_rect);
@@ -180,12 +193,26 @@ void Controls::drawInterfaces()
             auto sprite = sf::Sprite(Object::Object::NameToTextureMap.at(iter.first));
             sprite.setScale(Constants::getPIXEL_SIZE(), Constants::getPIXEL_SIZE());
             sprite.setPosition(inventory_rect.getGlobalBounds().getPosition() + shift);
+            inventory[sprite.getGlobalBounds()] = iter.first;
             auto text = sf::Text(std::to_string(iter.second), font);
             text.setFillColor(sf::Color::White);
             text.setPosition(inventory_rect.getGlobalBounds().getPosition() + shift);
             shift += sf::Vector2f(17, 0) * static_cast<float>(Constants::getPIXEL_SIZE());
             window.draw(sprite);
             window.draw(text);
+        }
+        if (selected_object.getPassability() == Object::Passability::foreground)
+        {
+            // draw rectangle around selected object
+            // and set position related on window bounds
+            auto rect = sf::RectangleShape(selected_object.getSprite().getGlobalBounds().getSize() + sf::Vector2f(2, 2) * static_cast<float>(Constants::getPIXEL_SIZE()));
+            rect.setFillColor(sf::Color(0, 0, 0, 0));
+            auto color = sf::Color::Green;
+            color.a /= 2;
+            rect.setOutlineColor(color);
+            rect.setOutlineThickness(static_cast<float>(Constants::getPIXEL_SIZE()) / 2.f);
+            rect.setPosition(selected_object.getSprite().getGlobalBounds().getPosition() + user.getPosition() - sf::Vector2f(1, 1) * static_cast<float>(Constants::getPIXEL_SIZE()));
+            window.draw(rect);
         }
     }
     if (draw_menu)
@@ -196,7 +223,7 @@ void Controls::drawInterfaces()
         menu.setPosition(center - menu.getSize() / 2.f);
         text.setPosition(center - text.getGlobalBounds().getSize() / 2.f);
         menu.setOutlineColor(sf::Color::Cyan);
-        menu.setOutlineThickness(5);
+        menu.setOutlineThickness(static_cast<float>(Constants::getPIXEL_SIZE()) / 2.f);
         menu.setFillColor(sf::Color(0, 0, 0, 127));
         
         window.draw(menu);

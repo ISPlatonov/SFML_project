@@ -8,6 +8,7 @@
 #include "Constants.hpp"
 #include "Multiplayer.hpp"
 #include <chrono>
+#include <unordered_map>
 
 
 /**
@@ -19,7 +20,7 @@ class Controls
 public:
     static void applyWindowSettings();
     static void drawInterfaces();
-    static void setLastActionTimepoint(sf::Uint32 t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count());
+    static void setLastActionTimepoint(const sf::Uint32& t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count());
     static sf::Uint32 getDeltaTime();
     static void handleEvents();
     static sf::Vector2f getDirection();
@@ -37,11 +38,12 @@ private:
     static sf::Vector2f direction;
     //sf::Vector2f key_to_direction(sf::Keyboard::Key key);
     static bool left, right, up, down;
-    static sf::Uint32 last_action_timepoint;
+    static inline sf::Uint32 last_action_timepoint;
     static bool draw_menu, draw_inventory;
     static sf::RectangleShape menu;
     static sf::RectangleShape inventory_rect;
-    static Object::Object selected_object;
+    static inline std::unordered_map<sf::FloatRect, Object::ObjectName> inventory;
+    static inline Object::Object selected_object;
     static std::map<std::string, Actor::Player> player_pool;
-    static sf::Font font;
+    static inline sf::Font font;
 };
