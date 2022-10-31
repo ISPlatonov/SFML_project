@@ -31,7 +31,7 @@ cmake --build SFML/build --config Release --target install
 - install the game:
 
 ```bash
-cmake -B build -DCMAKE_INSTALL_PREFIX=install -DSFML_DIR=SFML/install/lib/cmake/SFML -DBUILD_SHARED_LIBS=FALSE
+cmake -B build -DCMAKE_INSTALL_PREFIX=install -DSFML_DIR=SFML/install/lib/cmake/SFML
 cmake --build build --config Release --target install
 ```
 
