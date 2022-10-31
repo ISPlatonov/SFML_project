@@ -102,7 +102,7 @@ namespace WorldMap
     }
 
 
-    const std::unordered_map<sf::Vector2f, Object::Object>& ObjectMap::getObjectMap(Object::Passability passability) const
+    const std::unordered_map<sf::Vector2f, Object::Object>& ObjectMap::getObjectMap(const Object::Passability& passability) const
     {
         switch (passability)
         {

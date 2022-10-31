@@ -17,14 +17,14 @@ jobs:
         - { name: Linux Clang,    os: ubuntu-latest, flags: -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++, gcovr_options: '--gcov-executable="llvm-cov-$CLANG_VERSION gcov"' }
         - { name: MacOS XCode,    os: macos-latest }
         config:
-        - { name: Shared, flags: -DBUILD_SHARED_LIBS=TRUE }
-        - { name: Static, flags: -DBUILD_SHARED_LIBS=FALSE }
+        - { name: Shared }
+        - { name: Static }
 
         include:
         - platform: { name: Windows VS2022, os: windows-2022 }
-          config: { name: Unity, flags: -DBUILD_SHARED_LIBS=TRUE -DCMAKE_UNITY_BUILD=ON }
+          config: { name: Unity, flags: -DCMAKE_UNITY_BUILD=ON }
         - platform: { name: Windows VS2019, os: windows-2019 }
-          config: { name: Unity, flags: -DBUILD_SHARED_LIBS=TRUE -DCMAKE_UNITY_BUILD=ON }
+          config: { name: Unity, flags: -DCMAKE_UNITY_BUILD=ON }
         #- platform: { name: MacOS XCode, os: macos-latest }
         #  config: { name: Frameworks, flags: -DSFML_BUILD_FRAMEWORKS=TRUE }
         #- platform: { name: MacOS XCode, os: macos-latest }
@@ -32,11 +32,11 @@ jobs:
         #- platform: { name: Android, os: ubuntu-latest }
         #  config: { name: x86, flags: -DCMAKE_ANDROID_ARCH_ABI=x86 -DCMAKE_SYSTEM_NAME=Android -DSFML_BUILD_TEST_SUITE=FALSE -DCMAKE_ANDROID_NDK=$GITHUB_WORKSPACE/android-ndk-r18b -DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=clang -DCMAKE_ANDROID_STL_TYPE=c++_shared -DCMAKE_ANDROID_API=26 }
         - platform: { name: Android, os: ubuntu-latest }
-          config: { name: armeabi-v7a, flags: -DCMAKE_ANDROID_ARCH_ABI=armeabi-v7a -DCMAKE_SYSTEM_NAME=Android -DSFML_BUILD_TEST_SUITE=FALSE -DCMAKE_ANDROID_NDK=$GITHUB_WORKSPACE/android-ndk-r18b -DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=clang -DCMAKE_ANDROID_STL_TYPE=c++_shared -DCMAKE_ANDROID_API=26 -DCMAKE_TOOLCHAIN_FILE=$GITHUB_WORKSPACE/android-ndk-r18b/build/cmake/android.toolchain.cmake -DSFML_DIR=$GITHUB_WORKSPACE/android-ndk-r18b/sources/third_party/sfml/lib/armeabi-v7a/cmake/SFML -DBUILD_SHARED_LIBS=TRUE }
+          config: { name: armeabi-v7a, flags: -DCMAKE_ANDROID_ARCH_ABI=armeabi-v7a -DCMAKE_SYSTEM_NAME=Android -DSFML_BUILD_TEST_SUITE=FALSE -DCMAKE_ANDROID_NDK=$GITHUB_WORKSPACE/android-ndk-r18b -DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=clang -DCMAKE_ANDROID_STL_TYPE=c++_shared -DCMAKE_ANDROID_API=26 -DCMAKE_TOOLCHAIN_FILE=$GITHUB_WORKSPACE/android-ndk-r18b/build/cmake/android.toolchain.cmake -DSFML_DIR=$GITHUB_WORKSPACE/android-ndk-r18b/sources/third_party/sfml/lib/armeabi-v7a/cmake/SFML }
         #- platform: { name: Linux GCC, os: ubuntu-latest  }
-        #  config: { name: Static DRM, flags: -DBUILD_SHARED_LIBS=FALSE -DSFML_USE_DRM=TRUE }
+        #  config: { name: Static DRM, flags: -DSFML_USE_DRM=TRUE }
         - platform: { name: Linux GCC, os: ubuntu-latest  }
-          config: { name: Shared DRM, flags: -DBUILD_SHARED_LIBS=TRUE -DSFML_USE_DRM=TRUE }
+          config: { name: Shared DRM, flags: -DSFML_USE_DRM=TRUE }
 
     steps:
     - name: Install Linux Dependencies
@@ -63,7 +63,7 @@ jobs:
 
     - name: SFML - Configure CMake
       shell: bash
-      run: cmake -S $GITHUB_WORKSPACE/SFML -B $GITHUB_WORKSPACE/SFML/build -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/SFML/install -DCMAKE_VERBOSE_MAKEFILE=ON ${{matrix.platform.flags}} ${{matrix.config.flags}}
+      run: cmake -S $GITHUB_WORKSPACE/SFML -B $GITHUB_WORKSPACE/SFML/build -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/SFML/install -DCMAKE_VERBOSE_MAKEFILE=ON ${{matrix.platform.flags}}
 
     - name: SFML - Build
       shell: bash
@@ -71,7 +71,7 @@ jobs:
 
     - name: SFML_project - Configure CMake
       shell: bash
-      run: cmake -S $GITHUB_WORKSPACE -B $GITHUB_WORKSPACE/build -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/install -DCMAKE_VERBOSE_MAKEFILE=ON -DSFML_DIR=$GITHUB_WORKSPACE/SFML/install/lib/cmake/SFML ${{matrix.platform.flags}} ${{matrix.config.flags}}
+      run: cmake -S $GITHUB_WORKSPACE -B $GITHUB_WORKSPACE/build -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/install -DCMAKE_VERBOSE_MAKEFILE=ON -DSFML_DIR=$GITHUB_WORKSPACE/SFML/install/lib/cmake/SFML ${{matrix.platform.flags}}
 
     - name: SFML_project - Build
       shell: bash

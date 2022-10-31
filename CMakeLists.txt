@@ -5,9 +5,12 @@ set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Request static SFML libraries when building statically
-if(NOT BUILD_SHARED_LIBS)
-	set(SFML_STATIC_LIBRARIES true)
+# Find SFML
+set(SFML_STATIC_LIBRARIES TRUE)
+find_package(SFML 2 REQUIRED COMPONENTS graphics window network system)
+if (NOT SFML_FOUND)
+    set(SFML_STATIC_LIBRARIES FALSE)
+    find_package(SFML 2 REQUIRED COMPONENTS graphics window network system)
 endif()
 
 add_subdirectory(src)

@@ -39,7 +39,7 @@ namespace WorldMap
     {
     public:
         ObjectMap();
-        const std::unordered_map<sf::Vector2f, Object::Object>& getObjectMap(Object::Passability) const;
+        const std::unordered_map<sf::Vector2f, Object::Object>& getObjectMap(const Object::Passability&) const;
         void addObject(const Multiplayer::ObjectData&);
         void removeObject(const Multiplayer::ObjectData&);
         void removeObject(const Object::Object&);
