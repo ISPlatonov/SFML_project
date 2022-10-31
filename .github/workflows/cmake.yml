@@ -17,8 +17,8 @@ jobs:
         - { name: Linux Clang,    os: ubuntu-latest, flags: -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++, gcovr_options: '--gcov-executable="llvm-cov-$CLANG_VERSION gcov"' }
         - { name: MacOS XCode,    os: macos-latest }
         config:
-        - { name: Shared, flags: -DBUILD_SHARED_LIBS=TRUE }
-        - { name: Static, flags: -DBUILD_SHARED_LIBS=FALSE }
+        - { name: Shared }
+        - { name: Static }
 
         include:
         - platform: { name: Windows VS2022, os: windows-2022 }
@@ -71,7 +71,7 @@ jobs:
 
     - name: SFML_project - Configure CMake
       shell: bash
-      run: cmake -S $GITHUB_WORKSPACE -B $GITHUB_WORKSPACE/build -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/install -DCMAKE_VERBOSE_MAKEFILE=ON -DSFML_DIR=$GITHUB_WORKSPACE/SFML/install/lib/cmake/SFML ${{matrix.platform.flags}}
+      run: cmake -S $GITHUB_WORKSPACE -B $GITHUB_WORKSPACE/build -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/install -DCMAKE_VERBOSE_MAKEFILE=ON -DSFML_DIR=$GITHUB_WORKSPACE/SFML/install/lib/cmake/SFML ${{matrix.platform.flags}} ${{matrix.config.flags}}
 
     - name: SFML_project - Build
       shell: bash
