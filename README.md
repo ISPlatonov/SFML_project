@@ -46,6 +46,15 @@ cmake --build build --config Release --target install
 - `server` - game server executable
 - `textures` - dir with all textures and configuration files
 
+### About server and multiplayer
+
+Server sends all the information about terrain, objects around and player's inventory to each client.
+
+At the moment, player can't connect to the global server defined in settings file without being in the same local network. So, player has 2 options:
+
+- message me in Telegram and ask OpenVPN configuration file for globally deployed server
+- run `server` on a dedicated device in the same local network you want to play in
+
 ## Architecture
 
 ```mermaid
