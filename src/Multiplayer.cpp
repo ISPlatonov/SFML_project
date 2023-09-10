@@ -1,4 +1,5 @@
 #include "Multiplayer.hpp"
+#include <iostream>
 
 
 sf::Packet& operator <<(sf::Packet& packet, Multiplayer::ObjectData& object_data)
@@ -335,7 +336,7 @@ namespace Multiplayer
                     {
                         player_data_pool[id] = std::move(player_data);
                         // send foreground objects
-                        for (auto iter : object_data_pool)
+                        /* for (auto iter : object_data_pool)
                         {
                             for (auto object_data : iter.second)
                             {
@@ -346,7 +347,7 @@ namespace Multiplayer
                                 send(data, sf::IpAddress(player_data.getLocalIp()));
                                 sf::sleep(sf::milliseconds(1));
                             }
-                        }
+                        } */
                     }
                 break;
             }
@@ -422,10 +423,8 @@ namespace Multiplayer
             }
             case DataType::Sector:
             {
-                // data >> objects_num >> objects >> ...
-                sf::Uint32 objects_number;
-                data >> objects_number;
-                for (size_t i = 0; i < objects_number; ++i)
+                // data >> objects >> ...
+                while (!data.endOfPacket())
                 {
                     ObjectData object_data;
                     data >> object_data;
@@ -558,7 +557,8 @@ namespace Multiplayer
         void UdpManager::addObjectByNoise(const sf::Vector2f& position)
         {
             sf::Vector2f point (position.x - std::fmod(position.x, 16.f), position.y - std::fmod(position.y, 16.f));
-            if (!object_data_pool.count(point))
+            auto iter = object_data_pool.find(point);
+            if (iter == object_data_pool.end() || find_if(iter->second.begin(), iter->second.end(), [](const ObjectData& obj_data){ const auto& pass = obj_data.getPassability(); return pass == Object::Passability::background || pass == Object::Passability::impassible; }) == iter->second.end())
             {
                 auto noise = perlin.octave2D_01((point.x * 0.01), (point.y * 0.01), 4);
                 Object::ObjectName object_name;
@@ -592,14 +592,15 @@ namespace Multiplayer
         {
             sf::Packet data;
             data << DataType::Sector;
-            data << static_cast<sf::Uint32>(Constants::getVIEW_RADIUS() * 2 * Constants::getVIEW_RADIUS() * 2);
+            //data << static_cast<sf::Uint32>(Constants::getVIEW_RADIUS() * 2 * Constants::getVIEW_RADIUS() * 2);
             sf::Vector2f point (position.x - std::fmod(position.x, 16.), position.y - std::fmod(position.y, 16.));
             for (auto y = -Constants::getVIEW_RADIUS(); y < Constants::getVIEW_RADIUS(); ++y)
             {
                 for (auto x = -Constants::getVIEW_RADIUS(); x < Constants::getVIEW_RADIUS(); ++x)
                 {
                     addObjectByNoise(point + sf::Vector2f(x * 16., y * 16.));
-                    for (auto object_data : object_data_pool.at(point + sf::Vector2f(x * 16., y * 16.))) {
+                    auto& vec = object_data_pool.at(point + sf::Vector2f(x * 16., y * 16.));
+                    for (auto object_data : vec) {
                         data << object_data;
                     }
                 }
