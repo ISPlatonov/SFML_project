@@ -462,23 +462,24 @@ namespace Multiplayer
 
     void UdpManager::removeObject(const ObjectData& obj_data)
     {
-        /* auto iter = object_data_pool.find(obj_data.getPosition() - sf::Vector2f(std::fmod(obj_data.getPosition().x, 16.f), std::fmod(obj_data.getPosition().y, 16.f)));
+        auto iter = object_data_pool.find(obj_data.getPosition() - sf::Vector2f(std::fmod(obj_data.getPosition().x, 16.f), std::fmod(obj_data.getPosition().y, 16.f)));
         if (iter == object_data_pool.end())
-        {
-            return std::unordered_map<sf::Vector2f, std::vector<ObjectData>>::iterator();
-        }
+            return;
+
         auto oiter = std::find(iter->second.begin(), iter->second.end(), obj_data);
         if (oiter == iter->second.end())
-            return std::unordered_map<sf::Vector2f, std::vector<ObjectData>>::iterator();
+            return;
         else
         {
             removed_object_data_list.push_back(*oiter);
             iter->second.erase(oiter);
-            if (iter->second.empty())
-                return object_data_pool.erase(iter);
+            if (iter->second.empty()) {
+                object_data_pool.erase(iter);
+                return;
+            }
             else
-                return iter;
-        } */
+                return;
+        }
         removed_object_data_list.push_back(obj_data);
     }
 
