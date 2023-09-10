@@ -380,11 +380,14 @@ namespace Multiplayer
                                 player_data_pool[id].setPosition(player_data.getPosition());
                                 player_data_pool[id].setTime(player_data.getTime());
                                 player_data_pool[id].addObject(object_data.getName());
-                                removeObject(object_data);
                                 data.clear();
+                                if (!removeObject(object_data)) {
+                                    // no such object in the world :|
+                                    break;
+                                }
                                 data << DataType::Event << EventType::removeObject << object_data;
                                 for (auto iter = getPlayerDataPool().begin(); iter != getPlayerDataPool().end(); ++iter)
-                                    send(data, sf::IpAddress((*iter).second.getLocalIp()));
+                                    send(data, sf::IpAddress(iter->second.getLocalIp()));
                                 data.clear();
                                 data << DataType::Event << EventType::addObjectToInvectory << object_data;
                                 send(data, sf::IpAddress(player_data.getLocalIp()));
@@ -460,25 +463,29 @@ namespace Multiplayer
     }
 
 
-    void UdpManager::removeObject(const ObjectData& obj_data)
+    /**
+     * @brief removes object from object_data_pool
+     * 
+     * @param obj_data: object to remove
+     * @return true if object was removed, false if there was no such object
+    */
+    bool UdpManager::removeObject(const ObjectData& obj_data)
     {
         auto iter = object_data_pool.find(obj_data.getPosition() - sf::Vector2f(std::fmod(obj_data.getPosition().x, 16.f), std::fmod(obj_data.getPosition().y, 16.f)));
         if (iter == object_data_pool.end())
-            return;
+            return false;
 
         auto oiter = std::find(iter->second.begin(), iter->second.end(), obj_data);
         if (oiter == iter->second.end())
-            return;
+            return false;
         else
         {
             removed_object_data_list.push_back(*oiter);
             iter->second.erase(oiter);
             if (iter->second.empty()) {
                 object_data_pool.erase(iter);
-                return;
             }
-            else
-                return;
+            return true;
         }
         removed_object_data_list.push_back(obj_data);
     }
