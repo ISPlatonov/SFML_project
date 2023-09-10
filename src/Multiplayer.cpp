@@ -380,7 +380,7 @@ namespace Multiplayer
                                 player_data_pool[id].setPosition(player_data.getPosition());
                                 player_data_pool[id].setTime(player_data.getTime());
                                 player_data_pool[id].addObject(object_data.getName());
-                                removeObjectByPoint(object_data);
+                                removeObject(object_data);
                                 data.clear();
                                 data << DataType::Event << EventType::removeObject << object_data;
                                 for (auto iter = getPlayerDataPool().begin(); iter != getPlayerDataPool().end(); ++iter)
@@ -408,7 +408,7 @@ namespace Multiplayer
                         // receive object
                         ObjectData object_data;
                         data >> object_data;
-                        removeObjectByPoint(object_data);
+                        removeObject(object_data);
                         break;
                     }
                     default:
@@ -460,9 +460,13 @@ namespace Multiplayer
     }
 
 
-    std::unordered_map<sf::Vector2f, std::vector<ObjectData>>::iterator UdpManager::removeObjectByPoint(const ObjectData& obj_data)
+    void UdpManager::removeObject(const ObjectData& obj_data)
     {
-        auto iter = object_data_pool.find(obj_data.getPosition() - sf::Vector2f(std::fmod(obj_data.getPosition().x, 16.f), std::fmod(obj_data.getPosition().y, 16.f)));
+        /* auto iter = object_data_pool.find(obj_data.getPosition() - sf::Vector2f(std::fmod(obj_data.getPosition().x, 16.f), std::fmod(obj_data.getPosition().y, 16.f)));
+        if (iter == object_data_pool.end())
+        {
+            return std::unordered_map<sf::Vector2f, std::vector<ObjectData>>::iterator();
+        }
         auto oiter = std::find(iter->second.begin(), iter->second.end(), obj_data);
         if (oiter == iter->second.end())
             return std::unordered_map<sf::Vector2f, std::vector<ObjectData>>::iterator();
@@ -474,7 +478,8 @@ namespace Multiplayer
                 return object_data_pool.erase(iter);
             else
                 return iter;
-        }
+        } */
+        removed_object_data_list.push_back(obj_data);
     }
 
 

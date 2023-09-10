@@ -110,7 +110,7 @@ namespace Multiplayer
         const std::unordered_map<sf::Vector2f, std::vector<ObjectData>>& getObjectDataPool() const;
         inline void clearObjectDataPool() { object_data_pool.clear();}
         std::unordered_map<std::string, PlayerData>::iterator removePlayerById(const std::string& id);
-        std::unordered_map<sf::Vector2f, std::vector<ObjectData>>::iterator removeObjectByPoint(const ObjectData& point);
+        void removeObject(const ObjectData&);
         void addObject(const Object::Object& object);
         void addObject(const Multiplayer::ObjectData& object_data);
         ObjectData getRemovedObjectData();
