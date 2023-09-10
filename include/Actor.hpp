@@ -23,7 +23,7 @@ namespace Actor
         Actor(const Actor&);
         Actor(const sf::Vector2f& position, const std::unordered_map<Object::ObjectName, size_t>& inventory);
         Actor(sf::Vector2f&& position, std::unordered_map<Object::ObjectName, size_t>&& inventory);
-        sf::Vector2f&& move_dt(const sf::Vector2f& direction, const sf::Uint32& dt, const WorldMap::ObjectMap& ObjectMap = {});
+        sf::Vector2f&& move_dt(const sf::Vector2f& direction, const sf::Uint32& dt, WorldMap::ObjectMap& ObjectMap);
         void check_direction(const sf::Vector2f&);
         const sf::Vector2f& getPosition() const;
         const sf::Sprite& getSprite() const;
@@ -54,7 +54,7 @@ namespace Actor
     {
     public:
         using Actor::Actor;
-        void make_step(const sf::Uint32& dt, const WorldMap::ObjectMap& ObjectMap = {});
+        void make_step(const sf::Uint32& dt, WorldMap::ObjectMap& ObjectMap);
 
     private:
         sf::Vector2f prev_move_direction = linalg::normalize(sf::Vector2f(std::rand() % 10 - 10 / 2, std::rand() % 10 - 10 / 2));
@@ -70,7 +70,7 @@ namespace Actor
     public:
         User(const sf::Vector2f& position, const std::unordered_map<Object::ObjectName, size_t>& inventory = {});
         User(sf::Vector2f&& position, std::unordered_map<Object::ObjectName, size_t>&& inventory = {});
-        sf::Vector2f&& move_dt(const sf::Vector2f& direction, const sf::Uint32& dt, const WorldMap::ObjectMap& ObjectMap = {});
+        sf::Vector2f&& move_dt(const sf::Vector2f& direction, const sf::Uint32& dt, WorldMap::ObjectMap& ObjectMap);
         const sf::View& getView() const;
         const int& getIp() const;
         const int& getLocalIp() const;        

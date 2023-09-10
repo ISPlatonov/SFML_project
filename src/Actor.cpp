@@ -51,11 +51,12 @@ namespace Actor
     }
 
 
-    sf::Vector2f&& Actor::move_dt(const sf::Vector2f& direction, const sf::Uint32& dt, const WorldMap::ObjectMap& ObjectMap)
+    sf::Vector2f&& Actor::move_dt(const sf::Vector2f& direction, const sf::Uint32& dt, WorldMap::ObjectMap& ObjectMap)
     {
         check_direction(direction); 
         auto v = new sf::Vector2f(linalg::normalize(direction) * static_cast<float>(dt) * Constants::getSTEP_SIZE_MULTIPLIER() * static_cast<float>(Constants::getPIXEL_SIZE()));
-        for (const auto& object : ObjectMap.getObjectMap(Object::Passability::impassible))
+        const auto& im = ObjectMap.getObjectMap(Object::Passability::impassible);
+        for (const auto& object : im)
         {
             object.second.check_collision(*v, this->getSprite().getGlobalBounds());
         }
@@ -109,7 +110,7 @@ namespace Actor
     }
 
 
-    sf::Vector2f&& User::move_dt(const sf::Vector2f& direction, const sf::Uint32& dt, const WorldMap::ObjectMap& ObjectMap)
+    sf::Vector2f&& User::move_dt(const sf::Vector2f& direction, const sf::Uint32& dt, WorldMap::ObjectMap& ObjectMap)
     {
         auto v = new sf::Vector2f(Actor::move_dt(direction, dt, ObjectMap));
         view.move(*v);
@@ -140,7 +141,7 @@ namespace Actor
     }
 
 
-    void Bot::make_step(const sf::Uint32& dt, const WorldMap::ObjectMap& ObjectMap)
+    void Bot::make_step(const sf::Uint32& dt, WorldMap::ObjectMap& ObjectMap)
     {
         prev_move_direction = linalg::normalize(linalg::normalize(sf::Vector2f(std::rand() % 11 - 11 / 2, std::rand() % 11 - 11 / 2)) * .2f + prev_move_direction * .8f);
         move_dt(prev_move_direction, dt, ObjectMap);

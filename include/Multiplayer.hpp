@@ -10,6 +10,7 @@
 #include <string>
 #include <chrono>
 #include <unordered_map>
+#include <vector>
 #include <cmath>
 
 
@@ -88,6 +89,7 @@ namespace Multiplayer
         ObjectData(sf::Vector2f position, sf::Uint32 time, Object::ObjectName object_name, Object::Passability passability);
         const Object::ObjectName& getName() const;
         const Object::Passability& getPassability() const;
+        inline bool operator ==(const ObjectData& object_data) const { return object_name == object_data.getName() && passability == object_data.getPassability(); }
 
     private:
         Object::ObjectName object_name;
@@ -105,9 +107,10 @@ namespace Multiplayer
         sf::Socket::Status receive();
         sf::Socket::Status send(sf::Packet& packet, const sf::IpAddress& dest_ip = sf::IpAddress());
         const std::unordered_map<std::string, PlayerData>& getPlayerDataPool() const;
-        const std::unordered_map<sf::Vector2f, ObjectData>& getObjectDataPool() const;
+        const std::unordered_map<sf::Vector2f, std::vector<ObjectData>>& getObjectDataPool() const;
+        inline void clearObjectDataPool() { object_data_pool.clear();}
         std::unordered_map<std::string, PlayerData>::iterator removePlayerById(const std::string& id);
-        std::unordered_map<sf::Vector2f, ObjectData>::iterator removeObjectByPoint(const sf::Vector2f& point);
+        std::unordered_map<sf::Vector2f, std::vector<ObjectData>>::iterator removeObjectByPoint(const ObjectData& point);
         void addObject(const Object::Object& object);
         void addObject(const Multiplayer::ObjectData& object_data);
         ObjectData getRemovedObjectData();
@@ -123,7 +126,8 @@ namespace Multiplayer
         /*static*/ unsigned short port;
         /*static*/ unsigned short port_send;
         /*static*/ std::unordered_map<std::string, PlayerData> player_data_pool;
-        /*static*/ std::unordered_map<sf::Vector2f, ObjectData> object_data_pool;
+        /*static*/ std::unordered_map<sf::Vector2f, std::vector<ObjectData>> object_data_pool;
+        /*static*/ /* std::unordered_map<sf::Vector2f, ObjectData> terrain_data_pool; */
         /*static*/ std::vector<ObjectData> removed_object_data_list;
         /*static*/ std::vector<ObjectData> objects_to_inventory_list;
         #ifndef CLIENT

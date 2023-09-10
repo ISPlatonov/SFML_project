@@ -38,7 +38,7 @@ void UdpWorker(Multiplayer::UdpManager& UdpManager)
         for (auto dest_iter = UdpManager.getPlayerDataPool().begin(); dest_iter != UdpManager.getPlayerDataPool().end();)
         {
             //std::cout << "sending " << (*iter).first << " data to " << (*dest_iter).first << std::endl;
-            if ((*dest_iter).first == iter.first)
+            if (dest_iter->first == iter.first)
             {
                 //std::cout << "*dest_iter == *iter" << std::endl;
                 ++dest_iter;
@@ -48,7 +48,7 @@ void UdpWorker(Multiplayer::UdpManager& UdpManager)
             sf::Packet data;
             data << Multiplayer::DataType::Player << iter.second;
             
-            UdpManager.send(data, sf::IpAddress((*dest_iter++).second.getLocalIp()));
+            UdpManager.send(data, sf::IpAddress(dest_iter++->second.getLocalIp()));
             //std::cout << "sent" << std::endl;
         }
     }
@@ -66,7 +66,7 @@ std::vector<Multiplayer::ObjectData> load_terrain(const std::string& path)
     std::vector<Multiplayer::ObjectData> object_data_pool_init;
     std::ifstream infile(path);
     if (!infile.is_open())
-        throw;
+        throw std::invalid_argument("invalid path");
     int x, y;
     int name_enum, pass_enum;
     while (infile >> x >> y >> name_enum >> pass_enum)

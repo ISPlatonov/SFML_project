@@ -134,7 +134,7 @@ void Controls::addEvent(const sf::Event& event)
 
 sf::Vector2f Controls::getDirection()
 {
-    return linalg::normalize(sf::Vector2f(right * 1.f - left * 1.f, down * 1.f - up * 1.f));
+    return linalg::normalize(sf::Vector2f((right ? 1.f : 0.f) - (left ? 1.f : 0.f), (down ? 1.f : 0.f) - (up ? 1.f : 0.f)));
 }
 
 
@@ -230,30 +230,32 @@ void Controls::handleFrameStep()
     // handling player_data_pool
     for (auto iter = udp_manager.getPlayerDataPool().begin(); iter != udp_manager.getPlayerDataPool().end();)
     {
-        auto time = (*iter).second.getTime();
+        auto time = iter->second.getTime();
         sf::Uint32 time_now = static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count());
         int ping = static_cast<int>(time_now) - static_cast<int>(time);
-        if (!player_pool.count((*iter).first))
+        if (!player_pool.count(iter->first))
         {
-            player_pool[(*iter).first] = Actor::Player((*iter).second);
+            player_pool[iter->first] = Actor::Player(iter->second);
             ++iter;
             continue;
         }
         else if (ping > Constants::getMAX_PING())
         {
-            player_pool.erase((*iter).first);
-            udp_manager.removePlayerById((*iter++).first);
+            player_pool.erase(iter->first);
+            udp_manager.removePlayerById(iter++->first);
             continue;
         }
         else
         {
-            player_pool[(*iter).first] << (*iter).second;
+            player_pool[iter->first] << iter->second;
             ++iter;
             continue;
         }
     }
-    for (auto iter = udp_manager.getObjectDataPool().begin(); iter != udp_manager.getObjectDataPool().end(); ++iter)
-        Controls::object_map.addObject((*iter).second);
+    for (auto& pair : udp_manager.getObjectDataPool())
+        for (auto& obj : pair.second)
+            object_map.addObject(obj);
+    Controls::udp_manager.clearObjectDataPool();
     for (auto object_data = udp_manager.getRemovedObjectData(); object_data.getTime() != 0; object_data = udp_manager.getRemovedObjectData())
         Controls::object_map.removeObject(object_data);
     for (auto object_data = udp_manager.getObjectToInventoryData(); object_data.getTime() != 0; object_data = udp_manager.getObjectToInventoryData())
@@ -270,15 +272,82 @@ void Controls::handleFrameStep()
     window.clear();
     // Draw the sprite
     //window.draw(WorldMap::WorldMap::map);
-    for (auto iter : object_map.getObjectMap(Object::Passability::background))
-        window.draw(iter.second);
-    for (auto iter : object_map.getObjectMap(Object::Passability::impassible))
-        Controls::window.draw(iter.second);
+    auto& bm = object_map.getObjectMap(Object::Passability::background);
+    for (auto iter = bm.begin(); iter != bm.end();) {
+        const auto& position = iter->second.getPosition();
+        const auto& it_size = iter->second.getSprite().getGlobalBounds().getSize();
+        const auto& center = window.getView().getCenter();
+        const auto& size = window.getView().getSize();
+        if (position.x + it_size.x < center.x - size.x / 2.f ||
+            position.x > center.x + size.x / 2.f ||
+            position.y + it_size.y < center.y - size.y / 2.f ||
+            position.y > center.y + size.y / 2.f) {
+                iter = bm.erase(iter);
+                continue;
+            }
+        /* auto text = sf::Text(std::to_string(static_cast<int>(position.x / Constants::getPIXEL_SIZE())) + " " + std::to_string(static_cast<int>(position.y / Constants::getPIXEL_SIZE())), font);
+        text.setFillColor(sf::Color::White);
+        text.setPosition(position + size / 2.f);
+        window.draw(text); */
+        
+        window.draw(iter->second);
+        ++iter;
+    }
+    auto& im = object_map.getObjectMap(Object::Passability::impassible);
+    for (auto iter = im.begin(); iter != im.end();) {
+        const auto& position = iter->second.getPosition();
+        const auto& it_size = iter->second.getSprite().getGlobalBounds().getSize();
+        const auto& center = window.getView().getCenter();
+        const auto& size = window.getView().getSize();
+        if (position.x + it_size.x < center.x - size.x / 2.f ||
+            position.x > center.x + size.x / 2.f ||
+            position.y + it_size.y < center.y - size.y / 2.f ||
+            position.y > center.y + size.y / 2.f) {
+                iter = im.erase(iter);
+                continue;
+            }
+        /* auto text = sf::Text(std::to_string(static_cast<int>(position.x / Constants::getPIXEL_SIZE())) + " " + std::to_string(static_cast<int>(position.y / Constants::getPIXEL_SIZE())), font);
+        text.setFillColor(sf::Color::White);
+        text.setPosition(position + size / 2.f);
+        window.draw(text); */
+        
+        window.draw(iter->second);
+        ++iter;
+    }
     for (const auto& player : player_pool)
         Controls::window.draw(player.second.getSprite());
     Controls::window.draw(user.getSprite());
-    for (auto iter : object_map.getObjectMap(Object::Passability::foreground))
-        window.draw(iter.second);
+    auto& fm = object_map.getObjectMap(Object::Passability::foreground);
+    for (auto iter = fm.begin(); iter != fm.end();) {
+        const auto& position = iter->second.getPosition();
+        const auto& it_size = iter->second.getSprite().getGlobalBounds().getSize();
+        const auto& center = window.getView().getCenter();
+        const auto& size = window.getView().getSize();
+        if (position.x + it_size.x < center.x - size.x / 2.f ||
+            position.x > center.x + size.x / 2.f ||
+            position.y + it_size.y < center.y - size.y / 2.f ||
+            position.y > center.y + size.y / 2.f) {
+                iter = fm.erase(iter);
+                continue;
+            }
+        /* auto text = sf::Text(std::to_string(static_cast<int>(position.x / Constants::getPIXEL_SIZE())) + " " + std::to_string(static_cast<int>(position.y / Constants::getPIXEL_SIZE())), font);
+        text.setFillColor(sf::Color::White);
+        text.setPosition(position + size / 2.f);
+        window.draw(text); */
+        
+        window.draw(iter->second);
+        ++iter;
+    }
+    {
+        const auto& bm = object_map.getObjectMap(Object::Passability::background);
+        const auto& im = object_map.getObjectMap(Object::Passability::impassible);
+        const auto& fm = object_map.getObjectMap(Object::Passability::foreground);
+        const auto& odp = udp_manager.getObjectDataPool();
+        auto text = sf::Text(std::to_string(bm.size()) + " " + std::to_string(im.size()) + " " + std::to_string(fm.size()) + " " + std::to_string(odp.size()), font);
+        text.setFillColor(sf::Color::White);
+        text.setPosition(window.getView().getCenter() - window.getView().getSize() / 2.f);
+        window.draw(text);
+    }
     // Draw the string
     //window.draw(text);
     window.setView(user.getView());

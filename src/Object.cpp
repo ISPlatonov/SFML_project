@@ -98,9 +98,7 @@ namespace Object
 
     bool Object::intersection(const sf::FloatRect& new_rect) const
     {
-        auto bounds = getSprite().getGlobalBounds();
-        bool f = bounds.intersects(new_rect);
-        return f;
+        return getSprite().getGlobalBounds().intersects(new_rect);
     }
 
 

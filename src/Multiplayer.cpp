@@ -278,12 +278,15 @@ namespace Multiplayer
                             // send foreground objects on map
                             for (auto iter : object_data_pool)
                             {
-                                if (iter.second.getPassability() != Object::Passability::foreground)
-                                    continue;
-                                data.clear();
-                                data << DataType::Object << iter.second;
-                                send(data, sf::IpAddress(player_data.getLocalIp()));
-                                sf::sleep(sf::milliseconds(1));
+                                for (auto obj_data : iter.second)
+                                {
+                                    if (obj_data.getPassability() != Object::Passability::foreground)
+                                        continue;
+                                    data.clear();
+                                    data << DataType::Object << obj_data;
+                                    send(data, sf::IpAddress(player_data.getLocalIp()));
+                                    sf::sleep(sf::milliseconds(1));
+                                }
                             }
                             if (player_data.getInventory().empty() && !player_data_pool[id].getInventory().empty())
                             {
@@ -334,12 +337,15 @@ namespace Multiplayer
                         // send foreground objects
                         for (auto iter : object_data_pool)
                         {
-                            if (iter.second.getPassability() != Object::Passability::foreground)
-                                continue;
-                            data.clear();
-                            data << DataType::Object << iter.second;
-                            send(data, sf::IpAddress(player_data_pool[id].getLocalIp()));
-                            sf::sleep(sf::milliseconds(1));
+                            for (auto object_data : iter.second)
+                            {
+                                if (object_data.getPassability() != Object::Passability::foreground)
+                                    continue;
+                                data.clear();
+                                data << DataType::Object << object_data;
+                                send(data, sf::IpAddress(player_data.getLocalIp()));
+                                sf::sleep(sf::milliseconds(1));
+                            }
                         }
                     }
                 break;
@@ -374,7 +380,7 @@ namespace Multiplayer
                                 player_data_pool[id].setPosition(player_data.getPosition());
                                 player_data_pool[id].setTime(player_data.getTime());
                                 player_data_pool[id].addObject(object_data.getName());
-                                removeObjectByPoint(object_data.getPosition());
+                                removeObjectByPoint(object_data);
                                 data.clear();
                                 data << DataType::Event << EventType::removeObject << object_data;
                                 for (auto iter = getPlayerDataPool().begin(); iter != getPlayerDataPool().end(); ++iter)
@@ -402,7 +408,7 @@ namespace Multiplayer
                         // receive object
                         ObjectData object_data;
                         data >> object_data;
-                        removeObjectByPoint(object_data.getPosition());
+                        removeObjectByPoint(object_data);
                         break;
                     }
                     default:
@@ -438,7 +444,7 @@ namespace Multiplayer
     }
 
 
-    const std::unordered_map<sf::Vector2f, ObjectData>& UdpManager::getObjectDataPool() const
+    const std::unordered_map<sf::Vector2f, std::vector<ObjectData>>& UdpManager::getObjectDataPool() const
     {
         return object_data_pool;
     }
@@ -446,35 +452,53 @@ namespace Multiplayer
 
     std::unordered_map<std::string, PlayerData>::iterator UdpManager::removePlayerById(const std::string& id)
     {
-        if (!player_data_pool.count(id))
+        auto iter = player_data_pool.find(id);
+        if (iter == player_data_pool.end())
             return std::unordered_map<std::string, PlayerData>::iterator();
         else
-            return player_data_pool.erase(player_data_pool.find(id));
+            return player_data_pool.erase(iter);
     }
 
 
-    std::unordered_map<sf::Vector2f, ObjectData>::iterator UdpManager::removeObjectByPoint(const sf::Vector2f& point)
+    std::unordered_map<sf::Vector2f, std::vector<ObjectData>>::iterator UdpManager::removeObjectByPoint(const ObjectData& obj_data)
     {
-        if (!object_data_pool.count(point))
-            return std::unordered_map<sf::Vector2f, ObjectData>::iterator();
+        auto iter = object_data_pool.find(obj_data.getPosition() - sf::Vector2f(std::fmod(obj_data.getPosition().x, 16.f), std::fmod(obj_data.getPosition().y, 16.f)));
+        auto oiter = std::find(iter->second.begin(), iter->second.end(), obj_data);
+        if (oiter == iter->second.end())
+            return std::unordered_map<sf::Vector2f, std::vector<ObjectData>>::iterator();
         else
         {
-            removed_object_data_list.push_back((*object_data_pool.find(point)).second);
-            return object_data_pool.erase(object_data_pool.find(point));
+            removed_object_data_list.push_back(*oiter);
+            iter->second.erase(oiter);
+            if (iter->second.empty())
+                return object_data_pool.erase(iter);
+            else
+                return iter;
         }
     }
 
 
     void UdpManager::addObject(const Object::Object& object)
     {
-        ObjectData object_data(object.getPosition() / static_cast<float>(Constants::getPIXEL_SIZE()), static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()), object.getName(), object.getPassability());
-        object_data_pool[object_data.getPosition()] = object_data;
+        ObjectData object_data( object.getPosition() / static_cast<float>(Constants::getPIXEL_SIZE()),
+                                static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()),
+                                object.getName(),
+                                object.getPassability());
+        addObject(object_data);
     }
 
 
     void UdpManager::addObject(const Multiplayer::ObjectData& object_data)
     {
-        object_data_pool[object_data.getPosition()] = object_data;
+        auto iter = object_data_pool.find(object_data.getPosition() - sf::Vector2f(std::fmod(object_data.getPosition().x, 16.f), std::fmod(object_data.getPosition().y, 16.f)));
+        if (iter == object_data_pool.end())
+        {
+            std::vector<ObjectData> objects;
+            objects.push_back(object_data);
+            object_data_pool[object_data.getPosition() - sf::Vector2f(std::fmod(object_data.getPosition().x, 16.f), std::fmod(object_data.getPosition().y, 16.f))] = objects;
+        }
+        else
+            iter->second.push_back(object_data);
     }
 
 
@@ -562,7 +586,9 @@ namespace Multiplayer
                 for (auto x = -Constants::getVIEW_RADIUS(); x < Constants::getVIEW_RADIUS(); ++x)
                 {
                     addObjectByNoise(point + sf::Vector2f(x * 16., y * 16.));
-                    data << object_data_pool.at(point + sf::Vector2f(x * 16., y * 16.));
+                    for (auto object_data : object_data_pool.at(point + sf::Vector2f(x * 16., y * 16.))) {
+                        data << object_data;
+                    }
                 }
             }
             return data;

@@ -102,7 +102,7 @@ namespace WorldMap
     }
 
 
-    const std::unordered_map<sf::Vector2f, Object::Object>& ObjectMap::getObjectMap(const Object::Passability& passability) const
+    std::unordered_map<sf::Vector2f, Object::Object>& ObjectMap::getObjectMap(const Object::Passability& passability)
     {
         switch (passability)
         {
@@ -119,7 +119,7 @@ namespace WorldMap
                 break;
 
             default:
-                throw;
+                throw std::invalid_argument("invalid passability");
                 break;
         }
     }

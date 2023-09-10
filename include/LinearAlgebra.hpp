@@ -6,7 +6,14 @@
 
 namespace linalg
 {
-    sf::Vector2f normalize(const sf::Vector2f& v);
+    inline float magnitude(const sf::Vector2f& v) {
+        return std::sqrt(v.x * v.x + v.y * v.y);
+    }
+
+
+    inline sf::Vector2f normalize(const sf::Vector2f& v) {
+        return v == sf::Vector2f(0.f, 0.f) ? v : v / magnitude(v);
+    }
 
     /*Vector2<T>& rotateBy(float degrees, const Vector2<T>& center=Vector2<T>())
     {
@@ -47,6 +54,4 @@ namespace linalg
             else
                 return 180.0+atan(-y/-x) * 180.f/3.14159f;
     }*/
-
-    float magnitude(const sf::Vector2f& v);
 }
