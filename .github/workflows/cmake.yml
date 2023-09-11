@@ -45,13 +45,6 @@ jobs:
 
     - name: SFML_project - Checkout Code
       uses: actions/checkout@v3
-
-    - name: SFML - Checkout Code
-      uses: actions/checkout@v3
-      with:
-        repository: SFML/SFML
-        path: SFML
-        ref: 2.6.x
     
     - name: Install Android Components
       if: matrix.platform.name == 'Android'
@@ -61,17 +54,9 @@ jobs:
         wget -nv https://dl.google.com/android/repository/android-ndk-r18b-linux-x86_64.zip -P $GITHUB_WORKSPACE
         unzip -qq -d $GITHUB_WORKSPACE android-ndk-r18b-linux-x86_64.zip
 
-    - name: SFML - Configure CMake
-      shell: bash
-      run: cmake -S $GITHUB_WORKSPACE/SFML -B $GITHUB_WORKSPACE/SFML/build -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/SFML/install -DCMAKE_VERBOSE_MAKEFILE=ON ${{matrix.platform.flags}} ${{matrix.config.flags}}
-
-    - name: SFML - Build
-      shell: bash
-      run: cmake --build $GITHUB_WORKSPACE/SFML/build --config Release --target install
-
     - name: SFML_project - Configure CMake
       shell: bash
-      run: cmake -S $GITHUB_WORKSPACE -B $GITHUB_WORKSPACE/build -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/install -DCMAKE_VERBOSE_MAKEFILE=ON -DSFML_DIR=$GITHUB_WORKSPACE/SFML/install/lib/cmake/SFML ${{matrix.platform.flags}} ${{matrix.config.flags}}
+      run: cmake -S $GITHUB_WORKSPACE -B $GITHUB_WORKSPACE/build -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/install ${{matrix.platform.flags}} ${{matrix.config.flags}}
 
     - name: SFML_project - Build
       shell: bash
