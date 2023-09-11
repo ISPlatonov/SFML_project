@@ -18,23 +18,15 @@ jobs:
         - { name: MacOS XCode,    os: macos-latest }
         config:
         - { name: Shared }
-        - { name: Static }
+        - { name: Static, flags: -DBUILD_SHARED_LIBS=FALSE }
 
         include:
         - platform: { name: Windows VS2022, os: windows-2022 }
           config: { name: Unity, flags: -DBUILD_SHARED_LIBS=TRUE -DCMAKE_UNITY_BUILD=ON }
         - platform: { name: Windows VS2019, os: windows-2019 }
           config: { name: Unity, flags: -DBUILD_SHARED_LIBS=TRUE -DCMAKE_UNITY_BUILD=ON }
-        #- platform: { name: MacOS XCode, os: macos-latest }
-        #  config: { name: Frameworks, flags: -DSFML_BUILD_FRAMEWORKS=TRUE }
-        #- platform: { name: MacOS XCode, os: macos-latest }
-        #  config: { name: iOS, flags: -DCMAKE_TOOLCHAIN_FILE=$GITHUB_WORKSPACE/cmake/toolchains/iOS.toolchain.cmake -DIOS_PLATFORM=SIMULATOR }
-        #- platform: { name: Android, os: ubuntu-latest }
-        #  config: { name: x86, flags: -DCMAKE_ANDROID_ARCH_ABI=x86 -DCMAKE_SYSTEM_NAME=Android -DSFML_BUILD_TEST_SUITE=FALSE -DCMAKE_ANDROID_NDK=$GITHUB_WORKSPACE/android-ndk-r18b -DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=clang -DCMAKE_ANDROID_STL_TYPE=c++_shared -DCMAKE_ANDROID_API=26 }
         - platform: { name: Android, os: ubuntu-latest }
           config: { name: armeabi-v7a, flags: -DCMAKE_ANDROID_ARCH_ABI=armeabi-v7a -DCMAKE_SYSTEM_NAME=Android -DSFML_BUILD_TEST_SUITE=FALSE -DCMAKE_ANDROID_NDK=$GITHUB_WORKSPACE/android-ndk-r18b -DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=clang -DCMAKE_ANDROID_STL_TYPE=c++_shared -DCMAKE_ANDROID_API=26 -DCMAKE_TOOLCHAIN_FILE=$GITHUB_WORKSPACE/android-ndk-r18b/build/cmake/android.toolchain.cmake -DSFML_DIR=$GITHUB_WORKSPACE/android-ndk-r18b/sources/third_party/sfml/lib/armeabi-v7a/cmake/SFML -DBUILD_SHARED_LIBS=TRUE }
-        #- platform: { name: Linux GCC, os: ubuntu-latest  }
-        #  config: { name: Static DRM, flags: -DBUILD_SHARED_LIBS=FALSE -DSFML_USE_DRM=TRUE }
         - platform: { name: Linux GCC, os: ubuntu-latest  }
           config: { name: Shared DRM, flags: -DBUILD_SHARED_LIBS=TRUE -DSFML_USE_DRM=TRUE }
 
