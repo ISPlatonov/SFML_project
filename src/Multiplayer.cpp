@@ -360,6 +360,7 @@ namespace Multiplayer
     */
     bool UdpManager::removeObject(const ObjectData& obj_data)
     {
+        removed_object_data_list.push_back(obj_data);
         auto iter = object_data_pool.find(obj_data.getPosition() - sf::Vector2f(std::fmod(obj_data.getPosition().x, 16.f), std::fmod(obj_data.getPosition().y, 16.f)));
         if (iter == object_data_pool.end())
             return false;
@@ -369,14 +370,12 @@ namespace Multiplayer
             return false;
         else
         {
-            removed_object_data_list.push_back(*oiter);
             iter->second.erase(oiter);
             if (iter->second.empty()) {
                 object_data_pool.erase(iter);
             }
             return true;
         }
-        removed_object_data_list.push_back(obj_data);
     }
 
 
