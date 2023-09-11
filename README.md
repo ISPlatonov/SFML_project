@@ -2,9 +2,8 @@
 
 Multiplatform minigame that demonstrates SFML library potential.
 
-![](https://img.shields.io/github/workflow/status/ISPlatonov/SFML_project/CI)
+![](https://img.shields.io/github/actions/workflow/status/ISPlatonov/SFML_project/cmake.yml?label=build&logo=github)
 ![](https://img.shields.io/tokei/lines/github/ISPlatonov/SFML_project)
-![](https://img.shields.io/github/languages/code-size/ISPlatonov/SFML_project)
 
 ## Configuring
 
@@ -17,31 +16,24 @@ In file `textures/constants.txt` you can set up the game settings: server ip, po
 - install dependencies:
 
 ```bash
-sudo apt-get update && sudo apt-get install libxrandr-dev libxcursor-dev libudev-dev libopenal-dev libflac-dev libvorbis-dev libgl1-mesa-dev libegl1-mesa-dev libdrm-dev libgbm-dev
+apt install libxrandr-dev libxcursor-dev libudev-dev libopenal-dev libflac-dev libvorbis-dev libgl1-mesa-dev libegl1-mesa-dev libdrm-dev libgbm-dev
 ```
 
-- intall SFML (if it's not yet):
+- build the game:
 
 ```bash
-git clone https://github.com/SFML/SFML.git && cd SFML && git checkout 2.6.x && cd ..
-cmake -S SFML -B SFML/build -DCMAKE_INSTALL_PREFIX=SFML/install -DBUILD_SHARED_LIBS=FALSE
-cmake --build SFML/build --config Release --target install
-```
-
-- install the game:
-
-```bash
-cmake -B build -DCMAKE_INSTALL_PREFIX=install -DSFML_DIR=SFML/install/lib/cmake/SFML
-cmake --build build --config Release --target install
+cmake -B build
+cmake --build build --target install
 ```
 
 ## Running
 
-`bin` directory will consist all binaries and textures:
+`build/bin` directory will consist all binaries and textures:
 
 - `SFML_project` - game client executable
 
-    You can use `w`, `a`, `s` and `d` buttons for moving across the map.
+    - `w`, `a`, `s` and `d` buttons for moving across the map,
+    - `Tab` button for opening inventory.
 
 - `server` - game server executable
 - `textures` - dir with all textures and configuration files
