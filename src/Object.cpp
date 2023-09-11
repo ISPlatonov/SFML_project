@@ -17,12 +17,6 @@ namespace Object
     };
 
 
-    Object::Object()
-    {
-
-    }
-
-
     Object::Object(const ObjectName& name, const sf::Vector2f& new_position, const Passability& new_passability)
     {
         this->name = name;

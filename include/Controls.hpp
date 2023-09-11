@@ -36,7 +36,6 @@ private:
 
     static Multiplayer::UdpManager udp_manager;
     static sf::Vector2f direction;
-    //sf::Vector2f key_to_direction(sf::Keyboard::Key key);
     static bool left, right, up, down;
     static inline sf::Uint32 last_action_timepoint;
     static bool draw_menu, draw_inventory;

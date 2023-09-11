@@ -36,7 +36,7 @@ namespace Object
     class Object : public sf::Drawable, public sf::Transformable
     {
     public:
-        Object();
+        Object() {}
         Object(const ObjectName& name, const sf::Vector2f& position, const Passability& passability);
         Object(ObjectName&& name, sf::Vector2f&& position, Passability&& passability);
         Object(const Object& object) : Object(object.getName(), object.getPosition(), object.getPassability()) {};

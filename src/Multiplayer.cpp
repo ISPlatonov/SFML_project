@@ -1,5 +1,4 @@
 #include "Multiplayer.hpp"
-#include <iostream>
 
 
 sf::Packet& operator <<(sf::Packet& packet, Multiplayer::ObjectData& object_data)
@@ -15,8 +14,8 @@ sf::Packet& operator <<(sf::Packet& packet, Multiplayer::ObjectData& object_data
 Object::Object& operator <<(Object::Object& object, const Multiplayer::ObjectData& object_data)
 {
     auto position = object_data.getPosition() * static_cast<float>(Constants::getPIXEL_SIZE());
-    auto name = object_data.getName();
-    auto passability = object_data.getPassability();
+    auto& name = object_data.getName();
+    auto& passability = object_data.getPassability();
     object = Object::Object(name, position, passability);
     return object;
 }
@@ -59,7 +58,7 @@ sf::Packet& operator >>(sf::Packet& packet, Multiplayer::PlayerData& player_data
     sf::Uint32 inventory_size_uint32;
     packet >> inventory_size_uint32;
     size_t inventory_size = static_cast<size_t>(inventory_size_uint32);
-    std::unordered_map<Object::ObjectName, size_t> inventory;
+    Multiplayer::Inventory inventory;
     for (size_t i = 0; i < inventory_size; ++i)
     {
         sf::Uint32 object_name_enum;
@@ -75,88 +74,15 @@ sf::Packet& operator >>(sf::Packet& packet, Multiplayer::PlayerData& player_data
 
 namespace Multiplayer
 {
-    Transportable::Transportable()
-    {
-        sent_time = 0;
-    }
-
-
-    PlayerData::PlayerData() : Transportable::Transportable()
-    {
-
-    }
-
-
-    Transportable::Transportable(sf::Vector2f position, sf::Uint32 sent_time)
-    {
-        this->position = position;
-        this->sent_time = sent_time;
-    }
-
-
-    PlayerData::PlayerData(const PlayerData& player) : Transportable::Transportable(player.getPosition(), player.getTime())
-    {
-        ip = player.getIp();
-        local_ip = player.getLocalIp();
-        inventory = player.getInventory();
-    }
-        
-        
-    PlayerData::PlayerData(const sf::Vector2f& position, const int& ip, const int& local_ip, const sf::Uint32& time, const std::unordered_map<Object::ObjectName, size_t>& new_inventory) : Transportable::Transportable(position, time)
-    {
-        this->ip = ip;
-        this->local_ip = local_ip;
-        inventory = new_inventory;
-    }
-
-
-    ObjectData::ObjectData() : Transportable::Transportable()
-    {
-
-    }
-
-
-    ObjectData::ObjectData(const ObjectData& object) : Transportable::Transportable(object.getPosition(), object.getTime())
-    {
-        object_name = object.getName();
-        passability = object.getPassability();
-    }
-
-
-    ObjectData::ObjectData(sf::Vector2f position, sf::Uint32 time, Object::ObjectName name, Object::Passability passability) : Transportable::Transportable(position, time)
-    {
-        this->object_name = name;
-        this->passability = passability;
-    }
-
-
     void Transportable::setPosition(const sf::Vector2f& new_position)
     {
         position = new_position;
     }
     
     
-    void Transportable::setTime(const sf::Uint32& new_time)
+    void Transportable::setTime(const Time& new_time)
     {
         sent_time = new_time;
-    }
-        
-        
-    const::sf::Vector2f& Transportable::getPosition() const
-    {
-        return position;
-    }
-    
-    
-    const int& PlayerData::getIp() const
-    {
-        return ip;
-    }
-    
-    
-    const int& PlayerData::getLocalIp() const
-    {
-        return local_ip;
     }
 
 
@@ -189,30 +115,6 @@ namespace Multiplayer
         if (!num)
             inventory.erase(inventory.find(name));
         return num;
-    }
-
-
-    const std::unordered_map<Object::ObjectName, size_t>& PlayerData::getInventory() const
-    {
-        return inventory;
-    }
-
-
-    const sf::Uint32& Transportable::getTime() const
-    {
-        return sent_time;
-    }
-
-
-    const Object::ObjectName& ObjectData::getName() const
-    {
-        return object_name;
-    }
-
-
-    const Object::Passability& ObjectData::getPassability() const
-    {
-        return passability;
     }
 
 
@@ -440,23 +342,11 @@ namespace Multiplayer
     }
 
 
-    const std::unordered_map<std::string, PlayerData>& UdpManager::getPlayerDataPool() const
-    {
-        return player_data_pool;
-    }
-
-
-    const std::unordered_map<sf::Vector2f, std::vector<ObjectData>>& UdpManager::getObjectDataPool() const
-    {
-        return object_data_pool;
-    }
-
-
-    std::unordered_map<std::string, PlayerData>::iterator UdpManager::removePlayerById(const std::string& id)
+    PlayerDataPool::iterator UdpManager::removePlayerById(const std::string& id)
     {
         auto iter = player_data_pool.find(id);
         if (iter == player_data_pool.end())
-            return std::unordered_map<std::string, PlayerData>::iterator();
+            return PlayerDataPool::iterator();
         else
             return player_data_pool.erase(iter);
     }
@@ -493,7 +383,7 @@ namespace Multiplayer
     void UdpManager::addObject(const Object::Object& object)
     {
         ObjectData object_data( object.getPosition() / static_cast<float>(Constants::getPIXEL_SIZE()),
-                                static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()),
+                                static_cast<Time>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()),
                                 object.getName(),
                                 object.getPassability());
         addObject(object_data);
@@ -563,7 +453,7 @@ namespace Multiplayer
                 auto noise = perlin.octave2D_01((point.x * 0.01), (point.y * 0.01), 4);
                 Object::ObjectName object_name;
                 Object::Passability passability = Object::Passability::background;
-                sf::Uint32 time_now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+                Time time_now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
                 if (noise > .8)
                 {
                     object_name = Object::ObjectName::stone;

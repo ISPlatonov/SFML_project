@@ -35,14 +35,6 @@ int main()
 
     Controls::setLastActionTimepoint();
 
-    /*sf::Font font;
-    if (!font.loadFromFile("textures/89speedaffair.ttf"))
-        return EXIT_FAILURE;
-    sf::Text text("hi", font, 30);
-    text.setPosition(100, 100);
-    text.setStyle(sf::Text::Bold);
-    text.setFillColor(sf::Color::White);*/
-
     while (Controls::window.isOpen())
         Controls::handleFrameStep();
     return EXIT_SUCCESS;

@@ -2,7 +2,6 @@
 
 #include <SFML/System.hpp>
 #include <SFML/Network.hpp>
-//#include "Actor.hpp"
 #include "Constants.hpp"
 #include "Object.hpp"
 #include "Hash.hpp"
@@ -11,7 +10,6 @@
 #include <chrono>
 #include <unordered_map>
 #include <vector>
-#include <cmath>
 
 
 namespace Multiplayer
@@ -34,24 +32,28 @@ namespace Multiplayer
     };
 
 
+    typedef sf::Uint32 Time;
+
     /**
      * @brief Class for trasferral data between server and client
     */
     class Transportable
     {
     public:
-        Transportable();
-        Transportable(sf::Vector2f position, sf::Uint32 sent_time);
+        Transportable() {}
+        Transportable(sf::Vector2f pos, Time sent) : position(pos), sent_time(sent) {}
         void setPosition(const sf::Vector2f& new_position);
-        void setTime(const sf::Uint32& new_time);
-        const sf::Vector2f& getPosition() const;
-        const sf::Uint32& getTime() const;
+        void setTime(const Time& new_time);
+        inline const sf::Vector2f& getPosition() const { return position; }
+        inline const Time& getTime() const { return sent_time; }
 
     private:
         sf::Vector2f position;
-        sf::Uint32 sent_time;
+        Time sent_time = 0;
     };
 
+
+    typedef std::unordered_map<Object::ObjectName, size_t> Inventory;
 
     /**
      * @brief Class for trasferral player data
@@ -60,20 +62,22 @@ namespace Multiplayer
     class PlayerData : virtual public Transportable
     {
     public:
-        PlayerData();
-        PlayerData(const PlayerData& player);
-        PlayerData(const sf::Vector2f& position, const int& ip, const int& local_ip, const sf::Uint32& time, const std::unordered_map<Object::ObjectName, size_t>& inventory);
-        const int& getIp() const;
-        const int& getLocalIp() const;
+        PlayerData() : Transportable::Transportable() {}
+        PlayerData(const sf::Vector2f& p, const int& ip, const int& lip, const Time& t, const Inventory& ni)
+            : Transportable::Transportable(p, t), ip(ip), local_ip(lip), inventory(ni) {}
+        PlayerData(const PlayerData& player)
+            : PlayerData(player.getPosition(), player.getIp(), player.getLocalIp(), player.getTime(), player.getInventory()) {}
+        inline int getIp() const { return ip; }
+        int getLocalIp() const { return local_ip; }
         const size_t objectNumber(Object::ObjectName) const;
         const size_t addObject(Object::ObjectName);
         const size_t removeObject(Object::ObjectName);
-        const std::unordered_map<Object::ObjectName, size_t>& getInventory() const;
+        const Inventory& getInventory() const { return inventory; }
 
     private:
         // data >> new_position.x >> new_position.y >> msg_ip >> msg_local_ip >> sent_time;
         int ip, local_ip;
-        std::unordered_map<Object::ObjectName, size_t> inventory;
+        Inventory inventory;
     };
 
 
@@ -84,11 +88,12 @@ namespace Multiplayer
     class ObjectData : virtual public Transportable
     {
     public:
-        ObjectData();
-        ObjectData(const ObjectData& object);
-        ObjectData(sf::Vector2f position, sf::Uint32 time, Object::ObjectName object_name, Object::Passability passability);
-        const Object::ObjectName& getName() const;
-        const Object::Passability& getPassability() const;
+        ObjectData() : Transportable::Transportable() {}
+        ObjectData(sf::Vector2f pos, Time t, Object::ObjectName name, Object::Passability pass)
+            : Transportable::Transportable(pos, t), object_name(name), passability(pass) {}
+        ObjectData(const ObjectData& object) : ObjectData(object.getPosition(), object.getTime(), object.getName(), object.getPassability()) {}
+        const Object::ObjectName& getName() const { return object_name; }
+        const Object::Passability& getPassability() const { return passability; }
         inline bool operator ==(const ObjectData& object_data) const { return object_name == object_data.getName() && passability == object_data.getPassability(); }
 
     private:
@@ -96,6 +101,9 @@ namespace Multiplayer
         Object::Passability passability;
     };
 
+
+    typedef std::unordered_map<std::string, PlayerData> PlayerDataPool;
+    typedef std::unordered_map<sf::Vector2f, std::vector<ObjectData>> ObjectDataPool;
 
     /**
      * @brief Class for managing multiplayer
@@ -106,10 +114,10 @@ namespace Multiplayer
         UdpManager(const sf::IpAddress& address_receive, const sf::IpAddress& address_send);
         sf::Socket::Status receive();
         sf::Socket::Status send(sf::Packet& packet, const sf::IpAddress& dest_ip = sf::IpAddress());
-        const std::unordered_map<std::string, PlayerData>& getPlayerDataPool() const;
-        const std::unordered_map<sf::Vector2f, std::vector<ObjectData>>& getObjectDataPool() const;
-        inline void clearObjectDataPool() { object_data_pool.clear();}
-        std::unordered_map<std::string, PlayerData>::iterator removePlayerById(const std::string& id);
+        inline const PlayerDataPool& getPlayerDataPool() const { return player_data_pool; }
+        inline const ObjectDataPool& getObjectDataPool() const { return object_data_pool; }
+        inline void clearObjectDataPool() { object_data_pool.clear(); }
+        PlayerDataPool::iterator removePlayerById(const std::string& id);
         bool removeObject(const ObjectData&);
         void addObject(const Object::Object& object);
         void addObject(const Multiplayer::ObjectData& object_data);
@@ -125,8 +133,8 @@ namespace Multiplayer
         /*static*/ sf::IpAddress ip, local_ip;
         /*static*/ unsigned short port;
         /*static*/ unsigned short port_send;
-        /*static*/ std::unordered_map<std::string, PlayerData> player_data_pool;
-        /*static*/ std::unordered_map<sf::Vector2f, std::vector<ObjectData>> object_data_pool;
+        /*static*/ PlayerDataPool player_data_pool;
+        /*static*/ ObjectDataPool object_data_pool;
         /*static*/ /* std::unordered_map<sf::Vector2f, ObjectData> terrain_data_pool; */
         /*static*/ std::vector<ObjectData> removed_object_data_list;
         /*static*/ std::vector<ObjectData> objects_to_inventory_list;

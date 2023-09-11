@@ -3,12 +3,6 @@
 
 namespace Actor
 {
-    Actor::Actor()
-    {
-
-    }
-
-
     Actor::Actor(const sf::Vector2f& position, const std::unordered_map<Object::ObjectName, size_t>& new_inventory)
     {
         if (!Actor::textures.size())
@@ -30,12 +24,6 @@ namespace Actor
         sprite.setTexture(Actor::textures.at(direction_x));
         sprite.setScale(Constants::getPIXEL_SIZE(), Constants::getPIXEL_SIZE());
         inventory = new_inventory;
-    }
-
-
-    const sf::Sprite& Actor::getSprite() const
-    {
-        return sprite;
     }
 
 
@@ -65,41 +53,22 @@ namespace Actor
     }
 
 
-    const size_t Actor::objectNumber(Object::ObjectName name) const
-    {
-        if (!inventory.count(name))
-            return 0;
-        else
-            return inventory.at(name);
-    }
-
-
     const size_t Actor::addObject(Object::ObjectName name)
     {
-        if (!inventory.count(name))
-            inventory[name] = 1;
-        else
-            inventory[name] += 1;
-        return objectNumber(name);
+        inventory.count(name) ? ++inventory[name] : inventory[name] = 1;
+        return inventory.count(name);
     }
 
 
-    const size_t Actor::removeObject(Object::ObjectName name)
+    size_t Actor::removeObject(Object::ObjectName name)
     {
         if (!inventory.count(name))
             return 0;
-        else
-            inventory[name] -= 1;
-        auto num = objectNumber(name);
-        if (!num)
+        --inventory[name];
+        auto n = inventory.count(name);
+        if (!n)
             inventory.erase(inventory.find(name));
-        return num;
-    }
-
-
-    const std::unordered_map<Object::ObjectName, size_t>& Actor::getInventory() const
-    {
-        return inventory;
+        return n;
     }
 
 
@@ -135,54 +104,10 @@ namespace Actor
     }
 
 
-    const sf::View& User::getView() const
-    {
-        return view;
-    }
-
-
     void Bot::make_step(const sf::Uint32& dt, WorldMap::ObjectMap& ObjectMap)
     {
         prev_move_direction = linalg::normalize(linalg::normalize(sf::Vector2f(std::rand() % 11 - 11 / 2, std::rand() % 11 - 11 / 2)) * .2f + prev_move_direction * .8f);
         move_dt(prev_move_direction, dt, ObjectMap);
-    }
-
-
-    Player::Player(const sf::Vector2f& position, const int& int_ip, const int& int_local_ip, const sf::Uint32& creation_time, const std::unordered_map<Object::ObjectName, size_t>& new_inventory) : Actor(position, new_inventory)
-    {
-        this->int_ip = int_ip;
-        this->int_local_ip = int_local_ip;
-        last_update_time = creation_time;
-    }
-
-
-    const int& Player::getIp() const
-    {
-        return int_ip;
-    }
-
-
-    const int& Player::getLocalIp() const
-    {
-        return int_local_ip;
-    }
-
-
-    const sf::Uint32& Player::getLastUpdateTime() const
-    {
-        return last_update_time;
-    }
-
-
-    const int& User::getIp() const
-    {
-        return int_ip;
-    }
-
-
-    const int& User::getLocalIp() const
-    {
-        return int_local_ip;
     }
 
 
@@ -191,33 +116,6 @@ namespace Actor
         auto prev_position = getPosition();
         auto move_vector = position - prev_position;
         move(move_vector);
-    }
-
-
-    Player::Player(const Player& player) : Actor(player)
-    {
-        // Player(std::map<std::string, sf::Texture> textures, sf::Vector2f position, int int_ip, sf::Uint32 creation_time);
-        int_ip = player.getIp();
-        int_local_ip = player.getLocalIp();
-        last_update_time = player.getLastUpdateTime();
-    }
-
-
-    Actor::Actor(const Actor& actor) : Actor(actor.getPosition(), actor.getInventory())
-    {
-        
-    }
-
-
-    const sf::Vector2f& Actor::getPosition() const
-    {
-        return getSprite().getPosition();
-    }
-
-
-    Player::Player() : Actor()
-    {
-
     }
 
 
@@ -273,12 +171,5 @@ namespace Actor
         player.setTime(player_data.getTime());
         player.setInventory(player_data.getInventory());
         return player;
-    }
-
-
-    // !!! rewrite PlayerData!!!
-    Player::Player(const Multiplayer::PlayerData& player_data) : Player(player_data.getPosition() * static_cast<float>(Constants::getPIXEL_SIZE()), player_data.getIp(), player_data.getLocalIp(), player_data.getTime(), player_data.getInventory())
-    {
-
     }
 }
