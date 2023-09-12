@@ -39,17 +39,17 @@ namespace Actor
     }
 
 
-    sf::Vector2f&& Actor::move_dt(const sf::Vector2f& direction, const sf::Uint32& dt, WorldMap::ObjectMap& ObjectMap)
+    sf::Vector2f Actor::move_dt(const sf::Vector2f& direction, const sf::Uint32& dt, WorldMap::ObjectMap& ObjectMap)
     {
         check_direction(direction); 
-        auto v = new sf::Vector2f(linalg::normalize(direction) * static_cast<float>(dt) * Constants::getSTEP_SIZE_MULTIPLIER() * static_cast<float>(Constants::getPIXEL_SIZE()));
+        auto v = sf::Vector2f(linalg::normalize(direction) * static_cast<float>(dt) * Constants::getSTEP_SIZE_MULTIPLIER() * static_cast<float>(Constants::getPIXEL_SIZE()));
         const auto& im = ObjectMap.getObjectMap(Object::Passability::impassible);
         for (const auto& object : im)
         {
-            object.second.check_collision(*v, this->getSprite().getGlobalBounds());
+            object.second.check_collision(v, this->getSprite().getGlobalBounds());
         }
-        sprite.move(*v);
-        return std::move(*v);
+        sprite.move(v);
+        return v;
     }
 
 
@@ -79,11 +79,11 @@ namespace Actor
     }
 
 
-    sf::Vector2f&& User::move_dt(const sf::Vector2f& direction, const sf::Uint32& dt, WorldMap::ObjectMap& ObjectMap)
+    sf::Vector2f User::move_dt(const sf::Vector2f& direction, const sf::Uint32& dt, WorldMap::ObjectMap& ObjectMap)
     {
-        auto v = new sf::Vector2f(Actor::move_dt(direction, dt, ObjectMap));
-        view.move(*v);
-        return std::move(*v);
+        auto v = sf::Vector2f(Actor::move_dt(direction, dt, ObjectMap));
+        view.move(v);
+        return v;
     }
 
 

@@ -223,10 +223,9 @@ void Controls::handleFrameStep()
 {
     // needs another thread
     // receiving
-    for (size_t i = 0; i < Controls::player_pool.size() + Constants::getUDP_PACKETS_GAP(); ++i)
-    {
-        udp_manager.receive();
-    }
+    size_t rest = Constants::getUDP_PACKETS_GAP() + udp_manager.getPlayerDataPool().size() << 1 + 1;
+    while (udp_manager.receive() == sf::Socket::Done && rest--)
+        continue;
     // handling player_data_pool
     for (auto iter = udp_manager.getPlayerDataPool().begin(); iter != udp_manager.getPlayerDataPool().end();)
     {
@@ -285,11 +284,7 @@ void Controls::handleFrameStep()
                 iter = bm.erase(iter);
                 continue;
             }
-        /* auto text = sf::Text(std::to_string(static_cast<int>(position.x / Constants::getPIXEL_SIZE())) + " " + std::to_string(static_cast<int>(position.y / Constants::getPIXEL_SIZE())), font);
-        text.setFillColor(sf::Color::White);
-        text.setPosition(position + size / 2.f);
-        window.draw(text); */
-        
+            
         window.draw(iter->second);
         ++iter;
     }
@@ -306,11 +301,7 @@ void Controls::handleFrameStep()
                 iter = im.erase(iter);
                 continue;
             }
-        /* auto text = sf::Text(std::to_string(static_cast<int>(position.x / Constants::getPIXEL_SIZE())) + " " + std::to_string(static_cast<int>(position.y / Constants::getPIXEL_SIZE())), font);
-        text.setFillColor(sf::Color::White);
-        text.setPosition(position + size / 2.f);
-        window.draw(text); */
-        
+            
         window.draw(iter->second);
         ++iter;
     }
@@ -330,11 +321,7 @@ void Controls::handleFrameStep()
                 iter = fm.erase(iter);
                 continue;
             }
-        /* auto text = sf::Text(std::to_string(static_cast<int>(position.x / Constants::getPIXEL_SIZE())) + " " + std::to_string(static_cast<int>(position.y / Constants::getPIXEL_SIZE())), font);
-        text.setFillColor(sf::Color::White);
-        text.setPosition(position + size / 2.f);
-        window.draw(text); */
-        
+            
         window.draw(iter->second);
         ++iter;
     }

@@ -23,7 +23,7 @@ namespace Actor
         Actor(const Actor& actor) : Actor(actor.getPosition(), actor.getInventory()) {}
         Actor(const sf::Vector2f& position, const Multiplayer::Inventory& inventory);
         Actor(sf::Vector2f&& position, Multiplayer::Inventory&& inventory);
-        sf::Vector2f&& move_dt(const sf::Vector2f& direction, const sf::Uint32& dt, WorldMap::ObjectMap& ObjectMap);
+        sf::Vector2f move_dt(const sf::Vector2f& direction, const sf::Uint32& dt, WorldMap::ObjectMap& ObjectMap);
         void check_direction(const sf::Vector2f&);
         inline const sf::Vector2f& getPosition() const { return getSprite().getPosition(); }
         inline const sf::Sprite& getSprite() const { return sprite; }
@@ -69,7 +69,7 @@ namespace Actor
     public:
         User(const sf::Vector2f& position, const Multiplayer::Inventory& inventory = {});
         User(sf::Vector2f&& position, Multiplayer::Inventory&& inventory = {});
-        sf::Vector2f&& move_dt(const sf::Vector2f& direction, const sf::Uint32& dt, WorldMap::ObjectMap& ObjectMap);
+        sf::Vector2f move_dt(const sf::Vector2f& direction, const sf::Uint32& dt, WorldMap::ObjectMap& ObjectMap);
         inline const sf::View& getView() const { return view; }
         inline int getIp() const { return int_ip; }
         inline int getLocalIp() const { return int_local_ip; }

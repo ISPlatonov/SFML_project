@@ -11,3 +11,5 @@ Makefile
 build
 bin
 install_manifest.txt
+out
+CMakeSettings.json
