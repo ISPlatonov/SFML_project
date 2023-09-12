@@ -141,7 +141,7 @@ namespace Multiplayer
 
     sf::Socket::Status UdpManager::receive()
     {
-        sf::Packet data;
+        data.clear();
         auto status = socket.receive(data, address_receive, port_send);
         if (status != sf::Socket::Status::Done)
             return status;

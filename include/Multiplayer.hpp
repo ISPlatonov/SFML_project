@@ -138,6 +138,7 @@ namespace Multiplayer
         /*static*/ /* std::unordered_map<sf::Vector2f, ObjectData> terrain_data_pool; */
         /*static*/ std::vector<ObjectData> removed_object_data_list;
         /*static*/ std::vector<ObjectData> objects_to_inventory_list;
+        /*static*/ sf::Packet data;
         #ifndef CLIENT
             static inline const siv::PerlinNoise perlin{ 8u };
             void addObjectByNoise(const sf::Vector2f&);

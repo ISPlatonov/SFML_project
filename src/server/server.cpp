@@ -4,6 +4,7 @@
 #include "Multiplayer.hpp"
 #include <Constants.hpp>
 #include <chrono>
+#include <thread>
 #include <vector>
 //#include <iostream>
 #include <fstream>
@@ -88,20 +89,18 @@ int main()
 {
     //std::cout << std::flush << std::endl;
     Multiplayer::UdpManager UdpManager(sf::IpAddress::getLocalAddress(), sf::IpAddress::Any);
+    auto last_timepoint = std::chrono::steady_clock::now();
     {
         auto init_terrain = load_terrain("textures/terrain/terrain.txt");
-        for (auto object : init_terrain)
+        for (const auto& object : init_terrain)
             UdpManager.addObject(object);
     }
     while (true)
     {
         // needs another thread
-        auto last_timepoint = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-        
+        last_timepoint += std::chrono::milliseconds(1000 / Constants::getFRAMERATE_LIMIT());
         UdpWorker(UdpManager);
- 
-        auto dt = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count() - last_timepoint;
-        sf::sleep(((1000 / Constants::getFRAMERATE_LIMIT()) >= dt ? sf::milliseconds((1000 / Constants::getFRAMERATE_LIMIT()) - dt) : sf::Time()));
+        std::this_thread::sleep_until(last_timepoint);
     }
     return EXIT_SUCCESS;
 }
