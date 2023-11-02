@@ -39,7 +39,7 @@ sf::Packet& operator >>(sf::Packet& data, Multiplayer::ObjectData& object_data)
 
 sf::Packet& operator <<(sf::Packet& packet, const Multiplayer::PlayerData& player_data)
 {
-    packet << player_data.getPosition().x << player_data.getPosition().y << player_data.getIp() << player_data.getLocalIp() << player_data.getTime();
+    packet << player_data.getPosition().x << player_data.getPosition().y << player_data.getIp() << player_data.getPort() << player_data.getTime();
     packet << static_cast<sf::Uint32>(player_data.getInventory().size());
     for (auto pair : player_data.getInventory())
     {
@@ -51,10 +51,11 @@ sf::Packet& operator <<(sf::Packet& packet, const Multiplayer::PlayerData& playe
 
 sf::Packet& operator >>(sf::Packet& packet, Multiplayer::PlayerData& player_data)
 {
-    int msg_local_ip, msg_ip;
+    int msg_ip;
     sf::Vector2f position;
     sf::Uint32 sent_time;
-    packet >> position.x >> position.y >> msg_ip >> msg_local_ip >> sent_time;
+    unsigned int msg_port;
+    packet >> position.x >> position.y >> msg_ip >> msg_port >> sent_time;
     sf::Uint32 inventory_size_uint32;
     packet >> inventory_size_uint32;
     size_t inventory_size = static_cast<size_t>(inventory_size_uint32);
@@ -67,7 +68,7 @@ sf::Packet& operator >>(sf::Packet& packet, Multiplayer::PlayerData& player_data
         size_t object_num = static_cast<size_t>(object_num_uint32);
         inventory[static_cast<Object::ObjectName>(object_name_enum)] = std::move(object_num);
     }
-    player_data = Multiplayer::PlayerData(std::move(position), std::move(msg_ip), std::move(msg_local_ip), std::move(sent_time), std::move(inventory)); // no inventory needed!
+    player_data = Multiplayer::PlayerData(std::move(position), std::move(msg_ip), std::move(msg_port), std::move(sent_time), std::move(inventory)); // no inventory needed!
     return packet;
 }
 
@@ -120,21 +121,14 @@ namespace Multiplayer
 
     UdpManager::UdpManager(const sf::IpAddress& address_receive, const sf::IpAddress& address_send)
     {
-        this->address_receive = sf::IpAddress(address_receive);
-        this->address_send = sf::IpAddress(address_send);
         port = Constants::getPORT_LISTEN();
-        port_send = Constants::getPORT_SEND();
 
         unsigned short port = Constants::getPORT_LISTEN();
-        unsigned short port_send = Constants::getPORT_SEND();
         auto broadcast_ip = Constants::getSERVER_IP();
         ip = sf::IpAddress::getPublicAddress(sf::seconds(Constants::getMAX_PING()));
-        local_ip = sf::IpAddress::getLocalAddress();
         socket.setBlocking(false);
         // bind the socket to a port
         if (socket.bind(port) != sf::Socket::Done)
-            delete this;
-        if (socket_send.bind(port_send) != sf::Socket::Done)
             delete this;
     }
 
@@ -142,7 +136,9 @@ namespace Multiplayer
     sf::Socket::Status UdpManager::receive()
     {
         data.clear();
-        auto status = socket.receive(data, address_receive, port_send);
+        sf::IpAddress address_temp;
+        unsigned short port_temp;
+        auto status = socket.receive(data, address_temp, port_temp);
         if (status != sf::Socket::Status::Done)
             return status;
         DataType data_type;
@@ -168,7 +164,7 @@ namespace Multiplayer
                 //{
                 //    std::cout << "its me" << std::endl;
                 //}
-                auto id = sf::IpAddress(player_data.getIp()).toString() + sf::IpAddress(player_data.getLocalIp()).toString();
+                auto id = sf::IpAddress(player_data.getIp()).toString() + sf::IpAddress(player_data.getPort()).toString();
                 sf::Uint32 time_now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
                 int ping = static_cast<int>(time_now) - static_cast<int>(player_data.getTime());
                 if (player_data_pool.count(id))
@@ -187,7 +183,7 @@ namespace Multiplayer
                                         continue;
                                     data.clear();
                                     data << DataType::Object << obj_data;
-                                    send(data, sf::IpAddress(player_data.getLocalIp()));
+                                    send(data, sf::IpAddress(player_data.getIp()), player_data.getPort());
                                     sf::sleep(sf::milliseconds(1));
                                 }
                             }
@@ -201,7 +197,7 @@ namespace Multiplayer
                                         data.clear();
                                         auto object_data = ObjectData(sf::Vector2f(0, 0), old_time, iter.first, Object::Passability::foreground);
                                         data << DataType::Event << EventType::addObjectToInvectory << object_data;
-                                        send(data, sf::IpAddress(player_data.getLocalIp()));
+                                        send(data, sf::IpAddress(player_data.getIp()), player_data.getPort());
                                     }
                                 }
                             }
@@ -270,7 +266,7 @@ namespace Multiplayer
                         // receive user
                         PlayerData player_data;
                         data >> player_data;
-                        auto id = sf::IpAddress(player_data.getIp()).toString() + sf::IpAddress(player_data.getLocalIp()).toString();
+                        auto id = sf::IpAddress(player_data.getIp()).toString() + sf::IpAddress(player_data.getPort()).toString();
                         sf::Uint32 time_now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
                         int ping = static_cast<int>(time_now) - static_cast<int>(player_data.getTime());
                         if (player_data_pool.count(id))
@@ -290,10 +286,10 @@ namespace Multiplayer
                                 }
                                 data << DataType::Event << EventType::removeObject << object_data;
                                 for (auto iter = getPlayerDataPool().begin(); iter != getPlayerDataPool().end(); ++iter)
-                                    send(data, sf::IpAddress(iter->second.getLocalIp()));
+                                    send(data, sf::IpAddress(iter->second.getIp()), iter->second.getPort());
                                 data.clear();
                                 data << DataType::Event << EventType::addObjectToInvectory << object_data;
-                                send(data, sf::IpAddress(player_data.getLocalIp()));
+                                send(data, sf::IpAddress(player_data.getIp()), player_data.getPort());
                             }
                         break;
                     }
@@ -433,12 +429,12 @@ namespace Multiplayer
     }
 
 
-    sf::Socket::Status UdpManager::send(sf::Packet& packet, const sf::IpAddress& dest_ip)
+    sf::Socket::Status UdpManager::send(sf::Packet& packet, const sf::IpAddress& dest_ip, const unsigned short& dest_port)
     {
         if (dest_ip == sf::IpAddress())
-            return socket_send.send(packet, address_send, port);
+            return socket.send(packet, Constants::getSERVER_IP(), Constants::getPORT_LISTEN());
         else
-            return socket_send.send(packet, dest_ip, port); // ?
+            return socket.send(packet, dest_ip, port); // ?
     }
 
 

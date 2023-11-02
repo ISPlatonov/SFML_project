@@ -63,12 +63,12 @@ namespace Multiplayer
     {
     public:
         PlayerData() : Transportable::Transportable() {}
-        PlayerData(const sf::Vector2f& p, const int& ip, const int& lip, const Time& t, const Inventory& ni)
-            : Transportable::Transportable(p, t), ip(ip), local_ip(lip), inventory(ni) {}
+        PlayerData(const sf::Vector2f& p, const int& ip, const unsigned int& port, const Time& t, const Inventory& ni)
+            : Transportable::Transportable(p, t), ip(ip), port(port), inventory(ni) {}
         PlayerData(const PlayerData& player)
-            : PlayerData(player.getPosition(), player.getIp(), player.getLocalIp(), player.getTime(), player.getInventory()) {}
+            : PlayerData(player.getPosition(), player.getIp(), player.getPort(), player.getTime(), player.getInventory()) {}
         inline int getIp() const { return ip; }
-        int getLocalIp() const { return local_ip; }
+        inline unsigned int getPort() const { return port; }
         const size_t objectNumber(Object::ObjectName) const;
         const size_t addObject(Object::ObjectName);
         const size_t removeObject(Object::ObjectName);
@@ -76,7 +76,8 @@ namespace Multiplayer
 
     private:
         // data >> new_position.x >> new_position.y >> msg_ip >> msg_local_ip >> sent_time;
-        int ip, local_ip;
+        int ip;
+        unsigned int port;
         Inventory inventory;
     };
 
@@ -113,7 +114,7 @@ namespace Multiplayer
     public:
         UdpManager(const sf::IpAddress& address_receive, const sf::IpAddress& address_send);
         sf::Socket::Status receive();
-        sf::Socket::Status send(sf::Packet& packet, const sf::IpAddress& dest_ip = sf::IpAddress());
+        sf::Socket::Status send(sf::Packet& packet, const sf::IpAddress& dest_ip = sf::IpAddress(), const unsigned short& dest_port = 0);
         inline const PlayerDataPool& getPlayerDataPool() const { return player_data_pool; }
         inline const ObjectDataPool& getObjectDataPool() const { return object_data_pool; }
         inline void clearObjectDataPool() { object_data_pool.clear(); }
@@ -127,12 +128,8 @@ namespace Multiplayer
 
     private:
         sf::UdpSocket socket;
-        sf::UdpSocket socket_send;
-        /*static*/ sf::IpAddress address_send;
-        /*static*/ sf::IpAddress address_receive;
-        /*static*/ sf::IpAddress ip, local_ip;
+        /*static*/ sf::IpAddress ip;
         /*static*/ unsigned short port;
-        /*static*/ unsigned short port_send;
         /*static*/ PlayerDataPool player_data_pool;
         /*static*/ ObjectDataPool object_data_pool;
         /*static*/ /* std::unordered_map<sf::Vector2f, ObjectData> terrain_data_pool; */

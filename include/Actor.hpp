@@ -92,7 +92,7 @@ namespace Actor
             : Actor(pos, inv), int_ip(ip), int_local_ip(lip), last_update_time(ct) {}
         Player(const Player& p) : Player(p.getPosition(), p.getIp(), p.getLocalIp(), p.getLastUpdateTime(), p.getInventory()) {}
         Player(const Multiplayer::PlayerData& pd)
-            : Player(pd.getPosition() * static_cast<float>(Constants::getPIXEL_SIZE()), pd.getIp(), pd.getLocalIp(), pd.getTime(), pd.getInventory()) {}
+            : Player(pd.getPosition() * static_cast<float>(Constants::getPIXEL_SIZE()), pd.getIp(), pd.getPort(), pd.getTime(), pd.getInventory()) {}
         inline int getIp() const { return int_ip; }
         inline int getLocalIp() const { return int_local_ip; }
         inline Multiplayer::Time getLastUpdateTime() const { return last_update_time; }
