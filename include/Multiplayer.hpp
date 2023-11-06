@@ -75,7 +75,7 @@ namespace Multiplayer
         const Inventory& getInventory() const { return inventory; }
 
     private:
-        // data >> new_position.x >> new_position.y >> msg_ip >> msg_local_ip >> sent_time;
+        // data >> new_position.x >> new_position.y >> msg_ip >> port >> sent_time;
         int ip;
         unsigned int port;
         Inventory inventory;
@@ -125,6 +125,7 @@ namespace Multiplayer
         ObjectData getRemovedObjectData();
         ObjectData getObjectToInventoryData();
         sf::Packet checkSector(const sf::Vector2f&);
+        inline const unsigned int getLocalPort() const { return port; };
 
     private:
         sf::UdpSocket socket;

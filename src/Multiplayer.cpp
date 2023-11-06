@@ -121,15 +121,18 @@ namespace Multiplayer
 
     UdpManager::UdpManager(const sf::IpAddress& address_receive, const sf::IpAddress& address_send)
     {
-        port = Constants::getPORT_LISTEN();
+        #ifdef CLIENT
+            port = sf::Socket::AnyPort;
+        #else
+            port = Constants::getPORT_LISTEN();
+        #endif
 
-        unsigned short port = Constants::getPORT_LISTEN();
         auto broadcast_ip = Constants::getSERVER_IP();
         ip = sf::IpAddress::getPublicAddress(sf::seconds(Constants::getMAX_PING()));
         socket.setBlocking(false);
         // bind the socket to a port
-        if (socket.bind(port) != sf::Socket::Done)
-            delete this;
+        while (socket.bind(port) != sf::Socket::Status::Done);
+        port = socket.getLocalPort();
     }
 
 
@@ -138,7 +141,8 @@ namespace Multiplayer
         data.clear();
         sf::IpAddress address_temp;
         unsigned short port_temp;
-        auto status = socket.receive(data, address_temp, port_temp);
+        auto status = sf::Socket::Status::NotReady;
+        status = socket.receive(data, address_temp, port_temp);
         if (status != sf::Socket::Status::Done)
             return status;
         DataType data_type;
@@ -160,11 +164,12 @@ namespace Multiplayer
             {
                 PlayerData player_data;
                 data >> player_data;
+                player_data = PlayerData(player_data.getPosition(), address_temp.toInteger(), port_temp, player_data.getTime(), player_data.getInventory());
                 //if (msg_local_ip == local_ip.toInteger())
                 //{
                 //    std::cout << "its me" << std::endl;
                 //}
-                auto id = sf::IpAddress(player_data.getIp()).toString() + sf::IpAddress(player_data.getPort()).toString();
+                auto id = sf::IpAddress(player_data.getIp()).toString() + std::to_string(player_data.getPort());
                 sf::Uint32 time_now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
                 int ping = static_cast<int>(time_now) - static_cast<int>(player_data.getTime());
                 if (player_data_pool.count(id))
@@ -434,7 +439,7 @@ namespace Multiplayer
         if (dest_ip == sf::IpAddress())
             return socket.send(packet, Constants::getSERVER_IP(), Constants::getPORT_LISTEN());
         else
-            return socket.send(packet, dest_ip, port); // ?
+            return socket.send(packet, dest_ip, dest_port); // ?
     }
 
 

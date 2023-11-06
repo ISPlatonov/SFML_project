@@ -9,11 +9,11 @@ bool Controls::left = 0,
      Controls::draw_menu = 0,
      Controls::draw_inventory = 0;
 sf::RenderWindow Controls::window(sf::VideoMode().getFullscreenModes().at(0), "SFML window", sf::Style::Fullscreen);
-Actor::User Controls::user(sf::Vector2f(0, 0));
 sf::RectangleShape Controls::menu = sf::RectangleShape(sf::Vector2f(Controls::window.getSize()) * .1f);
 sf::RectangleShape Controls::inventory_rect = sf::RectangleShape(sf::Vector2f(Controls::window.getSize()) * .5f);
 WorldMap::ObjectMap Controls::object_map{};
 Multiplayer::UdpManager Controls::udp_manager(sf::IpAddress::getLocalAddress(), sf::IpAddress(Constants::getSERVER_IP()));
+Actor::User Controls::user(sf::Vector2f(0, 0), Controls::udp_manager.getLocalPort());
 std::map<std::string, Actor::Player> Controls::player_pool{};
 
 

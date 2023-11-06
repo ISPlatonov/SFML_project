@@ -87,20 +87,20 @@ namespace Actor
     }
 
 
-    User::User(const sf::Vector2f& position, const std::unordered_map<Object::ObjectName, size_t>& new_inventory) : Actor(position, new_inventory)
+    User::User(const sf::Vector2f& position, const unsigned int& port, const std::unordered_map<Object::ObjectName, size_t>& new_inventory) : Actor(position, new_inventory)
     {
         // make it static...
         view = sf::View(position + (getSprite().getLocalBounds().getSize() / 2.f * static_cast<float>(Constants::getPIXEL_SIZE())), static_cast<sf::Vector2f>(Constants::getWINDOW_SIZE() * static_cast<float>(Constants::getPIXEL_SIZE())));
         int_ip = sf::IpAddress::getPublicAddress(sf::seconds(5.f)).toInteger();
-        int_local_ip = sf::IpAddress::getLocalAddress().toInteger();
+        int_port = port;
     }
 
 
-    User::User(sf::Vector2f&& position, std::unordered_map<Object::ObjectName, size_t>&& new_inventory) : Actor(position, new_inventory)
+    User::User(sf::Vector2f&& position, unsigned int&& port, std::unordered_map<Object::ObjectName, size_t>&& new_inventory) : Actor(position, new_inventory)
     {
         view = std::move(sf::View(position + (getSprite().getLocalBounds().getSize() / 2.f * static_cast<float>(Constants::getPIXEL_SIZE())), static_cast<sf::Vector2f>(Constants::getWINDOW_SIZE() * static_cast<float>(Constants::getPIXEL_SIZE()))));
         int_ip = std::move(sf::IpAddress::getPublicAddress(sf::seconds(5.f)).toInteger());
-        int_local_ip = std::move(sf::IpAddress::getLocalAddress().toInteger());
+        int_port = std::move(port);
     }
 
 
@@ -130,7 +130,7 @@ namespace Actor
     {
         auto position = user.getPosition() / static_cast<float>(Constants::getPIXEL_SIZE());
         sf::Uint32 time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-        packet << position.x << position.y << user.getIp() << user.getLocalIp() << time;
+        packet << position.x << position.y << user.getIp() << user.getPort() << time;
         packet << static_cast<sf::Uint32>(user.getInventory().size());
         for (auto iter : user.getInventory())
         {

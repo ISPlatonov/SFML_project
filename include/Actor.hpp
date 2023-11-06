@@ -67,16 +67,17 @@ namespace Actor
     class User : public virtual Actor
     {
     public:
-        User(const sf::Vector2f& position, const Multiplayer::Inventory& inventory = {});
-        User(sf::Vector2f&& position, Multiplayer::Inventory&& inventory = {});
+        User(const sf::Vector2f& position, const unsigned int& port, const Multiplayer::Inventory& inventory = {});
+        User(sf::Vector2f&& position, unsigned int&& port, Multiplayer::Inventory&& inventory = {});
         sf::Vector2f move_dt(const sf::Vector2f& direction, const sf::Uint32& dt, WorldMap::ObjectMap& ObjectMap);
         inline const sf::View& getView() const { return view; }
         inline int getIp() const { return int_ip; }
-        inline int getLocalIp() const { return int_local_ip; }
+        inline int getPort() const { return int_port; }
 
     private:
         sf::View view;
-        int int_ip, int_local_ip;
+        int int_ip;
+        unsigned int int_port;
     };
 
 
