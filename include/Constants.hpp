@@ -3,8 +3,42 @@
 #ifdef CLIENT
     #include <SFML/Window.hpp>
 #endif
+#include <SFML/Network.hpp>
 #include <string>
 #include <fstream>
+#include <random>
+#include <chrono>
+
+
+/**
+ * @brief This class is used to store player unique id
+*/
+class PlayerId {
+public:
+    PlayerId(size_t ip, size_t port, size_t timestamp, size_t key) : ip(ip), port(port), timestamp(timestamp), key(key) {}
+    
+    inline size_t getIp() const { return ip; }
+    inline size_t getPort() const { return port; }
+    inline size_t getTimestamp() const { return timestamp; }
+    inline size_t getKey() const { return key; }
+
+    inline bool operator==(const PlayerId& other) const {
+        return ip == other.ip && port == other.port && timestamp == other.timestamp && key == other.key;
+    }
+
+private:
+    size_t ip;
+    size_t port;
+    size_t timestamp;
+    size_t key;
+};
+
+
+inline sf::Packet& operator <<(sf::Packet& packet, const PlayerId& id)
+{
+    packet << id.getIp() << id.getPort() << id.getTimestamp() << id.getKey();
+    return packet;
+}
 
 
 /**
@@ -34,6 +68,26 @@ public:
         infile >> SERVER_IP;
         infile >> MAX_PING;
         infile >> UDP_PACKETS_GAP;
+        infile.close();
+        std::ifstream infile_id("textures/id.txt");
+        if (!infile_id.is_open()) {
+            std::ofstream outfile("textures/id.txt");
+            sf::IpAddress ip_global = sf::IpAddress::getPublicAddress();
+            auto socket = sf::UdpSocket();
+            while (socket.bind(sf::Socket::AnyPort) != sf::Socket::Done);
+            auto timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+            size_t random_key = std::random_device()();
+            outfile << ip_global.toInteger() << std::endl
+                    << socket.getLocalPort() << std::endl
+                    << timestamp << std::endl
+                    << random_key << std::endl;
+            outfile.close();
+            infile_id.open("textures/id.txt");
+        }
+        size_t id_ip, id_port, id_timestamp, id_key;
+        infile_id >> id_ip >> id_port >> id_timestamp >> id_key;
+        id = {id_ip, id_port, id_timestamp, id_key};
+        infile_id.close();
         loaded = true;
     }
     static inline const size_t& getPIXEL_SIZE()
@@ -134,6 +188,12 @@ public:
             load_constants();
         return UDP_PACKETS_GAP;
     }
+    static inline const PlayerId& getID() {
+        while (!loaded)
+            load_constants();
+        return id;
+    }
+    
 
 private:
     Constants();
@@ -158,4 +218,5 @@ private:
     static inline std::string SERVER_IP = "77.73.71.158";
     static inline int MAX_PING = 5000;
     static inline size_t UDP_PACKETS_GAP = 1000;
+    static inline PlayerId id = {0, 0, 0, 0};
 };

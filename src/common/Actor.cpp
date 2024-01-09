@@ -7,7 +7,7 @@ namespace Actor
     {
         if (!Actor::textures.size())
             load_textures("textures/actors/Guy_16x32");
-        direction_x = "right";
+        direction_x = Direction::right;
         sprite.setPosition(position);
         sprite.setTexture(Actor::textures.at(direction_x));
         sprite.setScale(Constants::getPIXEL_SIZE(), Constants::getPIXEL_SIZE());
@@ -19,7 +19,7 @@ namespace Actor
     {
         if (!Actor::textures.size())
             load_textures("textures/actors/Guy_16x32");
-        direction_x = "right";
+        direction_x = Direction::right;
         sprite.setPosition(position);
         sprite.setTexture(Actor::textures.at(direction_x));
         sprite.setScale(Constants::getPIXEL_SIZE(), Constants::getPIXEL_SIZE());
@@ -29,10 +29,10 @@ namespace Actor
 
     void Actor::check_direction(const sf::Vector2f& direction)
     {
-        if (direction.x > 0 && direction_x != "right")
-            direction_x = "right";
-        else if (direction.x < 0 && direction_x != "left")
-            direction_x = "left";
+        if (direction.x > 0 && direction_x != Direction::right)
+            direction_x = Direction::right;
+        else if (direction.x < 0 && direction_x != Direction::left)
+            direction_x = Direction::left;
         else
             return;
         sprite.setTexture(Actor::textures.at(direction_x));
@@ -130,7 +130,7 @@ namespace Actor
     {
         auto position = user.getPosition() / static_cast<float>(Constants::getPIXEL_SIZE());
         sf::Uint32 time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-        packet << position.x << position.y << user.getIp() << user.getPort() << time;
+        packet << position.x << position.y << Constants::getID() << time;
         packet << static_cast<sf::Uint32>(user.getInventory().size());
         for (auto iter : user.getInventory())
         {
@@ -159,8 +159,8 @@ namespace Actor
         left_texture.loadFromFile(texture_dir_path + "/left.png");
         auto right_texture = sf::Texture();
         right_texture.loadFromFile(texture_dir_path + "/right.png");
-        Actor::textures["left"] = std::move(left_texture);
-        Actor::textures["right"] = std::move(right_texture);
+        Actor::textures[Direction::left] = std::move(left_texture);
+        Actor::textures[Direction::right] = std::move(right_texture);
     }
 
 

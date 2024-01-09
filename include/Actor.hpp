@@ -13,6 +13,12 @@
 
 namespace Actor
 {
+    enum class Direction {
+        left,
+        right
+    };
+
+
     /**
      * @brief Base class for all actors
     */
@@ -34,8 +40,8 @@ namespace Actor
 
     protected:    
         sf::Sprite sprite;
-        static inline std::unordered_map<std::string, sf::Texture> textures{};
-        std::string direction_x;
+        static inline std::unordered_map<Direction, sf::Texture> textures{};
+        Direction direction_x;
         Multiplayer::Inventory inventory;
 
         virtual void draw(sf::RenderTarget& target, sf::RenderStates states=sf::RenderStates()) const;

@@ -42,8 +42,8 @@ namespace Multiplayer
     public:
         Transportable() {}
         Transportable(sf::Vector2f pos, Time sent) : position(pos), sent_time(sent) {}
-        void setPosition(const sf::Vector2f& new_position);
-        void setTime(const Time& new_time);
+        inline void setPosition(const sf::Vector2f& new_position) { position = new_position; };
+        inline void setTime(const Time& new_time) { sent_time = new_time; }
         inline const sf::Vector2f& getPosition() const { return position; }
         inline const Time& getTime() const { return sent_time; }
 

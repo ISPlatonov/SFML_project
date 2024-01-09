@@ -94,6 +94,7 @@ int main()
         for (const auto& object : init_terrain)
             UdpManager.addObject(object);
     }
+    std::cout << "server started" << std::endl;
     while (true)
     {
         // needs another thread
