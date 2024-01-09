@@ -36,7 +36,7 @@ private:
 
 inline sf::Packet& operator <<(sf::Packet& packet, const PlayerId& id)
 {
-    packet << id.getIp() << id.getPort() << id.getTimestamp() << id.getKey();
+    packet << static_cast<sf::Uint64>(id.getIp()) << static_cast<sf::Uint64>(id.getPort()) << static_cast<sf::Uint64>(id.getTimestamp()) << static_cast<sf::Uint64>(id.getKey());
     return packet;
 }
 
