@@ -15,6 +15,7 @@
 */
 class PlayerId {
 public:
+    PlayerId() {}
     PlayerId(size_t ip, size_t port, size_t timestamp, size_t key) : ip(ip), port(port), timestamp(timestamp), key(key) {}
     
     inline size_t getIp() const { return ip; }
@@ -27,10 +28,10 @@ public:
     }
 
 private:
-    size_t ip;
-    size_t port;
-    size_t timestamp;
-    size_t key;
+    size_t ip = 0;
+    size_t port = 0;
+    size_t timestamp = 0;
+    size_t key = 0;
 };
 
 
@@ -39,6 +40,9 @@ inline sf::Packet& operator <<(sf::Packet& packet, const PlayerId& id)
     packet << static_cast<sf::Uint64>(id.getIp()) << static_cast<sf::Uint64>(id.getPort()) << static_cast<sf::Uint64>(id.getTimestamp()) << static_cast<sf::Uint64>(id.getKey());
     return packet;
 }
+
+
+typedef std::pair<sf::IpAddress, unsigned short> SocketInfo;
 
 
 /**

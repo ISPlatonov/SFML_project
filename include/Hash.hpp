@@ -1,6 +1,24 @@
 #pragma once
 
 #include <SFML/System.hpp>
+#include "Constants.hpp"
+
+
+template <>
+struct std::hash<SocketInfo>
+{
+    /**
+     * @brief Hash function for SocketInfo
+    */
+    inline size_t operator()(const SocketInfo& s) const
+    {
+        size_t tmp0 = std::hash<int>()(s.first.toInteger());
+        size_t tmp1 = std::hash<unsigned short>()(s.second);
+
+        tmp0 ^= tmp1 + 0x9e3779b9 + (tmp0 << 6) + (tmp0 >> 2);
+        return tmp0;
+    }
+};
 
 
 template <class T>

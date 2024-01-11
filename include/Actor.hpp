@@ -95,13 +95,12 @@ namespace Actor
     {
     public:
         Player() : Actor() {}
-        Player(const sf::Vector2f& pos, const int& ip, const int& lip, const sf::Uint32& ct, const Multiplayer::Inventory& inv)
-            : Actor(pos, inv), int_ip(ip), int_local_ip(lip), last_update_time(ct) {}
-        Player(const Player& p) : Player(p.getPosition(), p.getIp(), p.getLocalIp(), p.getLastUpdateTime(), p.getInventory()) {}
+        Player(const sf::Vector2f& pos, const PlayerId p_id, const sf::Uint32& ct, const Multiplayer::Inventory& inv)
+            : Actor(pos, inv), player_id(p_id), last_update_time(ct) {}
+        Player(const Player& p) : Player(p.getPosition(), p.getId(), p.getLastUpdateTime(), p.getInventory()) {}
         Player(const Multiplayer::PlayerData& pd)
-            : Player(pd.getPosition() * static_cast<float>(Constants::getPIXEL_SIZE()), pd.getIp(), pd.getPort(), pd.getTime(), pd.getInventory()) {}
-        inline int getIp() const { return int_ip; }
-        inline int getLocalIp() const { return int_local_ip; }
+            : Player(pd.getPosition() * static_cast<float>(Constants::getPIXEL_SIZE()), pd.getId(), pd.getTime(), pd.getInventory()) {}
+        inline PlayerId getId() const { return player_id; }
         inline Multiplayer::Time getLastUpdateTime() const { return last_update_time; }
         void setPosition(const sf::Vector2f& position);
         void setTime(const sf::Uint32& new_time);
@@ -109,7 +108,7 @@ namespace Actor
 
     private:
         sf::Uint32 last_update_time;
-        int int_ip, int_local_ip;
+        PlayerId player_id;
     };
 
 

@@ -83,12 +83,12 @@ namespace Multiplayer
             {
                 PlayerData player_data;
                 data >> player_data;
-                player_data = PlayerData(player_data.getPosition(), address_temp.toInteger(), port_temp, player_data.getTime(), player_data.getInventory());
+                //player_data = PlayerData(player_data.getPosition(), address_temp.toInteger(), port_temp, player_data.getTime(), player_data.getInventory());
                 //if (msg_local_ip == local_ip.toInteger())
                 //{
                 //    std::cout << "its me" << std::endl;
                 //}
-                auto id = sf::IpAddress(address_temp).toString() + std::to_string(port_temp);
+                auto id = SocketInfo(address_temp, port_temp);
                 sf::Uint32 time_now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
                 int ping = static_cast<int>(time_now) - static_cast<int>(player_data.getTime());
                 if (player_data_pool.count(id))
@@ -190,7 +190,7 @@ namespace Multiplayer
                         // receive user
                         PlayerData player_data;
                         data >> player_data;
-                        auto id = sf::IpAddress(address_temp).toString() + std::to_string(port_temp);
+                        auto id = SocketInfo(address_temp, port_temp);
                         sf::Uint32 time_now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
                         int ping = static_cast<int>(time_now) - static_cast<int>(player_data.getTime());
                         if (player_data_pool.count(id))
@@ -210,7 +210,7 @@ namespace Multiplayer
                                 }
                                 data << DataType::Event << EventType::removeObject << object_data;
                                 for (auto iter = getPlayerDataPool().begin(); iter != getPlayerDataPool().end(); ++iter)
-                                    send(data, sf::IpAddress(iter->second.getIp()), iter->second.getPort());
+                                    send(data, id.first, id.second);
                                 data.clear();
                                 data << DataType::Event << EventType::addObjectToInvectory << object_data;
                                 send(data, address_temp, port_temp);
@@ -262,7 +262,7 @@ namespace Multiplayer
     }
 
 
-    PlayerDataPool::iterator UdpManager::removePlayerById(const std::string& id)
+    PlayerDataPool::iterator UdpManager::removePlayerBySocketInfo(const SocketInfo& id)
     {
         auto iter = player_data_pool.find(id);
         if (iter == player_data_pool.end())

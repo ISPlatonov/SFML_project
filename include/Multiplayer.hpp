@@ -34,6 +34,7 @@ namespace Multiplayer
 
     typedef sf::Uint32 Time;
 
+
     /**
      * @brief Class for trasferral data between server and client
     */
@@ -63,12 +64,11 @@ namespace Multiplayer
     {
     public:
         PlayerData() : Transportable::Transportable() {}
-        PlayerData(const sf::Vector2f& p, const int& ip, const unsigned int& port, const Time& t, const Inventory& ni)
-            : Transportable::Transportable(p, t), ip(ip), port(port), inventory(ni) {}
+        PlayerData(const sf::Vector2f& p, const PlayerId& p_id, const Time& t, const Inventory& ni)
+            : Transportable::Transportable(p, t), player_id(p_id), inventory(ni) {}
         PlayerData(const PlayerData& player)
-            : PlayerData(player.getPosition(), player.getIp(), player.getPort(), player.getTime(), player.getInventory()) {}
-        inline int getIp() const { return ip; }
-        inline unsigned int getPort() const { return port; }
+            : PlayerData(player.getPosition(), player.getId(), player.getTime(), player.getInventory()) {}
+        inline PlayerId getId() const { return player_id; }
         const size_t objectNumber(Object::ObjectName) const;
         const size_t addObject(Object::ObjectName);
         const size_t removeObject(Object::ObjectName);
@@ -76,8 +76,7 @@ namespace Multiplayer
 
     private:
         // data >> new_position.x >> new_position.y >> msg_ip >> port >> sent_time;
-        int ip;
-        unsigned int port;
+        PlayerId player_id;
         Inventory inventory;
     };
 
@@ -103,7 +102,7 @@ namespace Multiplayer
     };
 
 
-    typedef std::unordered_map<std::string, PlayerData> PlayerDataPool;
+    typedef std::unordered_map<SocketInfo, PlayerData> PlayerDataPool;
     typedef std::unordered_map<sf::Vector2f, std::vector<ObjectData>> ObjectDataPool;
 
     /**
@@ -118,7 +117,7 @@ namespace Multiplayer
         inline const PlayerDataPool& getPlayerDataPool() const { return player_data_pool; }
         inline const ObjectDataPool& getObjectDataPool() const { return object_data_pool; }
         inline void clearObjectDataPool() { object_data_pool.clear(); }
-        PlayerDataPool::iterator removePlayerById(const std::string& id);
+        PlayerDataPool::iterator removePlayerBySocketInfo(const SocketInfo& id);
         bool removeObject(const ObjectData&);
         void addObject(const Object::Object& object);
         void addObject(const Multiplayer::ObjectData& object_data);

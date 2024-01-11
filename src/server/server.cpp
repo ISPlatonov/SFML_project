@@ -26,16 +26,16 @@ void UdpWorker(Multiplayer::UdpManager& UdpManager)
         auto time_now = static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count());
         iter.second.setTime(time_now);
         int ping = static_cast<int>(time_now) - static_cast<int>(iter.second.getTime());
-	std::cout << sf::IpAddress(iter.second.getIp()) << ":" << iter.second.getPort() << std::endl;
+	    std::cout << iter.first.first << ":" << iter.first.second << std::endl;
         //std::cout << "id: " << (*iter).first << ", last timepoint: " << std::to_string(time) << std::endl;
         if (ping > Constants::getMAX_PING())
         {
             //std::cout << "reached MAX_PING" << std::endl;
-            //UdpManager.removePlayerById((*iter++).first);
+            //UdpManager.removePlayerBySocketInfo((*iter++).first);
             continue;
         }
         auto sector_data = UdpManager.checkSector(iter.second.getPosition());
-        UdpManager.send(sector_data, sf::IpAddress(iter.second.getIp()), iter.second.getPort());
+        UdpManager.send(sector_data, iter.first.first, iter.first.second);
         for (auto dest_iter = UdpManager.getPlayerDataPool().begin(); dest_iter != UdpManager.getPlayerDataPool().end();)
         {
 	    //std::cout << "sending " << iter->first << " data to " << dest_iter->first << std::endl;
@@ -48,7 +48,7 @@ void UdpWorker(Multiplayer::UdpManager& UdpManager)
             }
             sf::Packet data;
             data << Multiplayer::DataType::Player << iter.second;
-            UdpManager.send(data, sf::IpAddress(dest_iter++->second.getIp()), dest_iter->second.getPort());
+            UdpManager.send(data, dest_iter->first.first, dest_iter->first.second);
             //std::cout << "sent" << std::endl;
         }
     }

@@ -37,12 +37,21 @@ sf::Packet& operator >>(sf::Packet& data, Multiplayer::ObjectData& object_data)
 
 sf::Packet& operator <<(sf::Packet& packet, const Multiplayer::PlayerData& player_data)
 {
-    packet << player_data.getPosition().x << player_data.getPosition().y << player_data.getIp() << player_data.getPort() << player_data.getTime();
+    packet << player_data.getPosition().x << player_data.getPosition().y << player_data.getId() << player_data.getTime();
     packet << static_cast<sf::Uint32>(player_data.getInventory().size());
     for (auto pair : player_data.getInventory())
     {
         packet << pair.first << static_cast<sf::Uint32>(pair.second);
     }
+    return packet;
+}
+
+
+sf::Packet& operator >>(sf::Packet& packet, PlayerId& player_id)
+{
+    sf::Uint64 ip, port, timestamp, key;
+    packet >> ip >> port >> timestamp >> key;
+    player_id = PlayerId(ip, port, timestamp, key);
     return packet;
 }
 
@@ -53,7 +62,8 @@ sf::Packet& operator >>(sf::Packet& packet, Multiplayer::PlayerData& player_data
     sf::Vector2f position;
     sf::Uint32 sent_time;
     unsigned int msg_port;
-    packet >> position.x >> position.y >> msg_ip >> msg_port >> sent_time;
+    PlayerId player_id;
+    packet >> position.x >> position.y >> player_id >> sent_time;
     sf::Uint32 inventory_size_uint32;
     packet >> inventory_size_uint32;
     size_t inventory_size = static_cast<size_t>(inventory_size_uint32);
@@ -66,6 +76,6 @@ sf::Packet& operator >>(sf::Packet& packet, Multiplayer::PlayerData& player_data
         size_t object_num = static_cast<size_t>(object_num_uint32);
         inventory[static_cast<Object::ObjectName>(object_name_enum)] = std::move(object_num);
     }
-    player_data = Multiplayer::PlayerData(std::move(position), std::move(msg_ip), std::move(msg_port), std::move(sent_time), std::move(inventory)); // no inventory needed!
+    player_data = Multiplayer::PlayerData(std::move(position), std::move(player_id), std::move(sent_time), std::move(inventory)); // no inventory needed!
     return packet;
 }
