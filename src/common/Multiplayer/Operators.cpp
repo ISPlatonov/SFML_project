@@ -64,6 +64,7 @@ sf::Packet& operator >>(sf::Packet& packet, Multiplayer::PlayerData& player_data
     unsigned int msg_port;
     PlayerId player_id;
     packet >> position.x >> position.y >> player_id >> sent_time;
+    sent_time = static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count());
     sf::Uint32 inventory_size_uint32;
     packet >> inventory_size_uint32;
     size_t inventory_size = static_cast<size_t>(inventory_size_uint32);
