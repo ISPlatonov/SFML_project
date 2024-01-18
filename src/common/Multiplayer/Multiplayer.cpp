@@ -39,7 +39,7 @@ namespace Multiplayer
     UdpManager::UdpManager(const sf::IpAddress& address_receive, const sf::IpAddress& address_send)
     {
         #ifdef CLIENT
-            port = Constants::getPORT_SEND(); // sf::Socket::AnyPort;
+            port = sf::Socket::AnyPort; // sf::Socket::AnyPort;
         #else
             port = Constants::getPORT_LISTEN();
         #endif
@@ -97,6 +97,7 @@ namespace Multiplayer
                         if (old_ping > Constants::getMAX_PING())
                         {
                             // send foreground objects on map
+                            player_data_pool[id].setSocketInfo(socket_info);
                             for (auto iter : object_data_pool)
                             {
                                 for (auto obj_data : iter.second)
