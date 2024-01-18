@@ -4,6 +4,21 @@
 #include "Constants.hpp"
 
 
+template<>
+struct std::hash<PlayerId>
+{
+    inline size_t operator()(const PlayerId& id) const
+    {
+        size_t tmp = id.getIp();
+        tmp ^= id.getPort() + 0x9e3779b9 + (tmp << 6) + (tmp >> 2);
+        tmp ^= id.getTimestamp() + 0x9e3779b9 + (tmp << 6) + (tmp >> 2);
+        tmp ^= id.getKey() + 0x9e3779b9 + (tmp << 6) + (tmp >> 2);
+
+        return tmp;
+    }
+};
+
+
 template <>
 struct std::hash<SocketInfo>
 {

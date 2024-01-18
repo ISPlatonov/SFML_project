@@ -4,7 +4,7 @@
 sf::Packet& operator <<(sf::Packet& packet, Multiplayer::ObjectData& object_data)
 {
     object_data.setTime(Time::getTimeNow());
-    packet << object_data.getPosition().x << object_data.getPosition().y << static_cast<sf::Uint32>(object_data.getTime()) << object_data.getName() << object_data.getPassability();
+    packet << object_data.getPosition().x << object_data.getPosition().y << object_data.getTime() << object_data.getName() << object_data.getPassability();
     return packet;
 }
 
@@ -30,7 +30,7 @@ sf::Packet& operator >>(sf::Packet& data, Multiplayer::ObjectData& object_data)
     data >> position.x >> position.y >> sent_time >> object_name_enum >> passability_enum;
     object_name = static_cast<Object::ObjectName>(object_name_enum);
     passability = static_cast<Object::Passability>(passability_enum);
-    object_data = Multiplayer::ObjectData(std::move(position), std::move(sent_time), std::move(object_name), std::move(passability));
+    object_data = Multiplayer::ObjectData(std::move(position), std::move(sent_time), SocketInfo(0, 0), std::move(object_name), std::move(passability));
     return data;
 }
 
@@ -58,10 +58,8 @@ sf::Packet& operator >>(sf::Packet& packet, PlayerId& player_id)
 
 sf::Packet& operator >>(sf::Packet& packet, Multiplayer::PlayerData& player_data)
 {
-    int msg_ip;
     sf::Vector2f position;
     sf::Uint32 sent_time;
-    unsigned int msg_port;
     PlayerId player_id;
     packet >> position.x >> position.y >> player_id >> sent_time;
     sent_time = Time::getTimeNow();
@@ -77,6 +75,6 @@ sf::Packet& operator >>(sf::Packet& packet, Multiplayer::PlayerData& player_data
         size_t object_num = static_cast<size_t>(object_num_uint32);
         inventory[static_cast<Object::ObjectName>(object_name_enum)] = std::move(object_num);
     }
-    player_data = Multiplayer::PlayerData(std::move(position), std::move(player_id), std::move(sent_time), std::move(inventory)); // no inventory needed!
+    player_data = Multiplayer::PlayerData(std::move(position), std::move(player_id), std::move(sent_time), SocketInfo(0, 0), std::move(inventory)); // no inventory needed!
     return packet;
 }

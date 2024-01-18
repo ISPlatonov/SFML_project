@@ -58,16 +58,17 @@ namespace Multiplayer
     sf::Socket::Status UdpManager::receive()
     {
         data.clear();
-        sf::IpAddress address_temp;
-        unsigned short port_temp;
+        SocketInfo socket_info;
         auto status = sf::Socket::Status::NotReady;
-        status = socket.receive(data, address_temp, port_temp);
+        status = socket.receive(data, socket_info.first, socket_info.second);
         if (status != sf::Socket::Status::Done)
             return status;
         DataType data_type;
-        sf::Uint32 data_type_enum;
-        data >> data_type_enum;
-        data_type = static_cast<DataType>(data_type_enum);
+        {
+            sf::Uint32 data_type_enum;
+            data >> data_type_enum;
+            data_type = static_cast<DataType>(data_type_enum);
+        }
 
         switch (data_type)
         {
@@ -76,6 +77,7 @@ namespace Multiplayer
                 // receive object
                 Multiplayer::ObjectData object_data;
                 data >> object_data;
+                object_data.setSocketInfo(socket_info);
                 addObject(object_data);
                 break;
             }
@@ -83,12 +85,8 @@ namespace Multiplayer
             {
                 PlayerData player_data;
                 data >> player_data;
-                //player_data = PlayerData(player_data.getPosition(), address_temp.toInteger(), port_temp, player_data.getTime(), player_data.getInventory());
-                //if (msg_local_ip == local_ip.toInteger())
-                //{
-                //    std::cout << "its me" << std::endl;
-                //}
-                auto id = SocketInfo(address_temp, port_temp);
+                player_data.setSocketInfo(socket_info);
+                auto id = player_data.getId();
                 Time::Time time_now = Time::getTimeNow();
                 int ping = static_cast<int>(time_now) - static_cast<int>(player_data.getTime());
                 if (player_data_pool.count(id))
@@ -107,7 +105,7 @@ namespace Multiplayer
                                         continue;
                                     data.clear();
                                     data << DataType::Object << obj_data;
-                                    send(data, address_temp, port_temp);
+                                    send(data, socket_info.first, socket_info.second);
                                     sf::sleep(sf::milliseconds(1));
                                 }
                             }
@@ -119,9 +117,9 @@ namespace Multiplayer
                                     for (size_t i = 0; i < iter.second; ++i)
                                     {
                                         data.clear();
-                                        auto object_data = ObjectData(sf::Vector2f(0, 0), old_time, iter.first, Object::Passability::foreground);
+                                        auto object_data = ObjectData(sf::Vector2f(0, 0), old_time, socket_info, iter.first, Object::Passability::foreground);
                                         data << DataType::Event << EventType::addObjectToInvectory << object_data;
-                                        send(data, address_temp, port_temp);
+                                        send(data, socket_info.first, socket_info.second);
                                     }
                                 }
                             }
@@ -190,7 +188,7 @@ namespace Multiplayer
                         // receive user
                         PlayerData player_data;
                         data >> player_data;
-                        auto id = SocketInfo(address_temp, port_temp);
+                        auto id = player_data.getId();
                         Time::Time time_now = Time::getTimeNow();
                         int ping = static_cast<int>(time_now) - static_cast<int>(player_data.getTime());
                         if (player_data_pool.count(id))
@@ -210,10 +208,10 @@ namespace Multiplayer
                                 }
                                 data << DataType::Event << EventType::removeObject << object_data;
                                 for (auto iter = getPlayerDataPool().begin(); iter != getPlayerDataPool().end(); ++iter)
-                                    send(data, id.first, id.second);
+                                    send(data, socket_info.first, socket_info.second);
                                 data.clear();
                                 data << DataType::Event << EventType::addObjectToInvectory << object_data;
-                                send(data, address_temp, port_temp);
+                                send(data, socket_info.first, socket_info.second);
                             }
                         break;
                     }
@@ -262,7 +260,7 @@ namespace Multiplayer
     }
 
 
-    PlayerDataPool::iterator UdpManager::removePlayerBySocketInfo(const SocketInfo& id)
+    PlayerDataPool::iterator UdpManager::removePlayerByPlayerId(const PlayerId& id)
     {
         auto iter = player_data_pool.find(id);
         if (iter == player_data_pool.end())
@@ -303,6 +301,7 @@ namespace Multiplayer
     {
         ObjectData object_data( object.getPosition() / static_cast<float>(Constants::getPIXEL_SIZE()),
                                 Time::getTimeNow(),
+                                SocketInfo(0, 0), // ?
                                 object.getName(),
                                 object.getPassability());
         addObject(object_data);
@@ -386,7 +385,7 @@ namespace Multiplayer
                 {
                     object_name = Object::ObjectName::dirt;
                 }
-                addObject(Multiplayer::ObjectData(point, time_now, object_name, passability));
+                addObject(Multiplayer::ObjectData(point, time_now, SocketInfo(0, 0), object_name, passability));
                 //for (auto iter : player_data_pool)
                 //{
                 //    sf::Packet data;

@@ -4,17 +4,10 @@
     #include <SFML/Window.hpp>
 #endif
 #include <SFML/Network.hpp>
+#include "Time.hpp"
 #include <string>
 #include <fstream>
 #include <random>
-#include <chrono>
-
-
-namespace Time {
-    typedef sf::Uint32 Time;
-    
-    inline Time getTimeNow() { return static_cast<Time>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()); }
-}
 
 
 /**
@@ -226,8 +219,8 @@ private:
     // Network
     static inline size_t PORT_LISTEN = 55000;
     static inline size_t PORT_SEND = 55001;
-    static inline std::string SERVER_IP = "77.73.71.158";
-    static inline int MAX_PING = 5000;
+    static inline std::string SERVER_IP = "77.73.69.78";
+    static inline int MAX_PING = 1000;
     static inline size_t UDP_PACKETS_GAP = 1000;
     static inline PlayerId id = {0, 0, 0, 0};
 };

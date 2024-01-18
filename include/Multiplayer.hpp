@@ -39,15 +39,18 @@ namespace Multiplayer
     {
     public:
         Transportable() {}
-        Transportable(sf::Vector2f pos, Time::Time sent) : position(pos), sent_time(sent) {}
+        Transportable(sf::Vector2f pos, Time::Time sent, SocketInfo socket) : position(pos), sent_time(sent), socket_info(socket) {}
         inline void setPosition(const sf::Vector2f& new_position) { position = new_position; };
         inline void setTime(const Time::Time& new_time) { sent_time = new_time; }
+        inline void setSocketInfo(const SocketInfo& new_socket_info) { socket_info = new_socket_info; }
         inline const sf::Vector2f& getPosition() const { return position; }
         inline const Time::Time& getTime() const { return sent_time; }
+        inline const SocketInfo& getSocketInfo() const { return socket_info; }
 
     private:
         sf::Vector2f position;
         Time::Time sent_time = 0;
+        SocketInfo socket_info;
     };
 
 
@@ -61,10 +64,10 @@ namespace Multiplayer
     {
     public:
         PlayerData() : Transportable::Transportable() {}
-        PlayerData(const sf::Vector2f& p, const PlayerId& p_id, const Time::Time& t, const Inventory& ni)
-            : Transportable::Transportable(p, t), player_id(p_id), inventory(ni) {}
+        PlayerData(const sf::Vector2f& p, const PlayerId& p_id, const Time::Time& t, const SocketInfo& s, const Inventory& ni)
+            : Transportable::Transportable(p, t, s), player_id(p_id), inventory(ni) {}
         PlayerData(const PlayerData& player)
-            : PlayerData(player.getPosition(), player.getId(), player.getTime(), player.getInventory()) {}
+            : PlayerData(player.getPosition(), player.getId(), player.getTime(), player.getSocketInfo(), player.getInventory()) {}
         inline PlayerId getId() const { return player_id; }
         const size_t objectNumber(Object::ObjectName) const;
         const size_t addObject(Object::ObjectName);
@@ -86,9 +89,9 @@ namespace Multiplayer
     {
     public:
         ObjectData() : Transportable::Transportable() {}
-        ObjectData(sf::Vector2f pos, Time::Time t, Object::ObjectName name, Object::Passability pass)
-            : Transportable::Transportable(pos, t), object_name(name), passability(pass) {}
-        ObjectData(const ObjectData& object) : ObjectData(object.getPosition(), object.getTime(), object.getName(), object.getPassability()) {}
+        ObjectData(sf::Vector2f pos, Time::Time t, SocketInfo s, Object::ObjectName name, Object::Passability pass)
+            : Transportable::Transportable(pos, t, s), object_name(name), passability(pass) {}
+        ObjectData(const ObjectData& object) : ObjectData(object.getPosition(), object.getTime(), object.getSocketInfo(), object.getName(), object.getPassability()) {}
         const Object::ObjectName& getName() const { return object_name; }
         const Object::Passability& getPassability() const { return passability; }
         inline bool operator ==(const ObjectData& object_data) const { return object_name == object_data.getName() && passability == object_data.getPassability(); }
@@ -99,7 +102,7 @@ namespace Multiplayer
     };
 
 
-    typedef std::unordered_map<SocketInfo, PlayerData> PlayerDataPool;
+    typedef std::unordered_map<PlayerId, PlayerData> PlayerDataPool;
     typedef std::unordered_map<sf::Vector2f, std::vector<ObjectData>> ObjectDataPool;
 
     /**
@@ -114,7 +117,7 @@ namespace Multiplayer
         inline const PlayerDataPool& getPlayerDataPool() const { return player_data_pool; }
         inline const ObjectDataPool& getObjectDataPool() const { return object_data_pool; }
         inline void clearObjectDataPool() { object_data_pool.clear(); }
-        PlayerDataPool::iterator removePlayerBySocketInfo(const SocketInfo& id);
+        PlayerDataPool::iterator removePlayerByPlayerId(const PlayerId& id);
         bool removeObject(const ObjectData&);
         void addObject(const Object::Object& object);
         void addObject(const Multiplayer::ObjectData& object_data);

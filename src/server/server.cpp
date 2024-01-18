@@ -26,7 +26,7 @@ void UdpWorker(Multiplayer::UdpManager& UdpManager)
         auto time_now = Time::getTimeNow();
         iter.second.setTime(time_now);
         int ping = static_cast<int>(time_now) - static_cast<int>(iter.second.getTime());
-	    std::cout << iter.first.first << ":" << iter.first.second << std::endl;
+	    std::cout << iter.second.getSocketInfo().first << ":" << iter.second.getSocketInfo().second << std::endl;
         //std::cout << "id: " << (*iter).first << ", last timepoint: " << std::to_string(time) << std::endl;
         if (ping > Constants::getMAX_PING())
         {
@@ -35,7 +35,7 @@ void UdpWorker(Multiplayer::UdpManager& UdpManager)
             continue;
         }
         auto sector_data = UdpManager.checkSector(iter.second.getPosition());
-        UdpManager.send(sector_data, iter.first.first, iter.first.second);
+        UdpManager.send(sector_data, iter.second.getSocketInfo().first, iter.second.getSocketInfo().second);
         for (auto dest_iter = UdpManager.getPlayerDataPool().begin(); dest_iter != UdpManager.getPlayerDataPool().end(); ++dest_iter)
         {
 	    //std::cout << "sending " << iter->first << " data to " << dest_iter->first << std::endl;
@@ -46,8 +46,8 @@ void UdpWorker(Multiplayer::UdpManager& UdpManager)
                 continue;
             }
             sf::Packet data;
-            data << Multiplayer::DataType::Player << iter.second;
-            UdpManager.send(data, dest_iter->first.first, dest_iter->first.second);
+            data << Multiplayer::DataType::Player << iter.first;
+            UdpManager.send(data, iter.second.getSocketInfo().first, iter.second.getSocketInfo().second);
             //std::cout << "sent" << std::endl;
         }
     }
@@ -75,6 +75,7 @@ std::vector<Multiplayer::ObjectData> load_terrain(const std::string& path)
         object_data_pool_init.push_back(Multiplayer::ObjectData(
             sf::Vector2f(x, y),
             Time::getTimeNow(),
+            SocketInfo(0, 0), // ?
             name,
             pass
         ));

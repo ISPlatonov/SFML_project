@@ -117,7 +117,7 @@ void Controls::addEvent(const sf::Event& event)
                                 data << Multiplayer::DataType::Event;
                                 data << Multiplayer::EventType::takeObjectToInventory;
                                 sf::Vector2f object_position(iter.second.getPosition().x / Constants::getPIXEL_SIZE(), iter.second.getPosition().y / Constants::getPIXEL_SIZE());
-                                auto object_data = Multiplayer::ObjectData(object_position, Time::getTimeNow(), iter.second.getName(), iter.second.getPassability());
+                                auto object_data = Multiplayer::ObjectData(object_position, Time::getTimeNow(), SocketInfo(0, 0) /* ??? */, iter.second.getName(), iter.second.getPassability());
                                 data << object_data;
                                 data << user;
                                 udp_manager.send(data);
@@ -232,21 +232,21 @@ void Controls::handleFrameStep()
         auto time = iter->second.getTime();
         Time::Time time_now = Time::getTimeNow();
         int ping = static_cast<int>(time_now) - static_cast<int>(time);
-        if (!player_pool.count(iter->first))
+        if (!player_pool.count(iter->second.getSocketInfo()))
         {
-            player_pool[iter->first] = Actor::Player(iter->second);
+            player_pool[iter->second.getSocketInfo()] = Actor::Player(iter->second);
             ++iter;
             continue;
         }
         else if (ping > Constants::getMAX_PING())
         {
-            player_pool.erase(iter->first);
-            udp_manager.removePlayerBySocketInfo(iter++->first);
+            player_pool.erase(iter->second.getSocketInfo());
+            udp_manager.removePlayerByPlayerId(iter++->second.getId());
             continue;
         }
         else
         {
-            player_pool[iter->first] << iter->second;
+            player_pool[iter->second.getSocketInfo()] << iter->second;
             ++iter;
             continue;
         }
