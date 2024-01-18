@@ -20,7 +20,7 @@ class Controls
 public:
     static void applyWindowSettings();
     static void drawInterfaces();
-    static void setLastActionTimepoint(const sf::Uint32& t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count());
+    static void setLastActionTimepoint(const Time::Time& t = Time::getTimeNow());
     static sf::Uint32 getDeltaTime();
     static void handleEvents();
     static sf::Vector2f getDirection();

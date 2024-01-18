@@ -10,6 +10,13 @@
 #include <chrono>
 
 
+namespace Time {
+    typedef sf::Uint32 Time;
+    
+    inline Time getTimeNow() { return static_cast<Time>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()); }
+}
+
+
 /**
  * @brief This class is used to store player unique id
 */
@@ -79,7 +86,7 @@ public:
             sf::IpAddress ip_global = sf::IpAddress::getPublicAddress();
             auto socket = sf::UdpSocket();
             while (socket.bind(sf::Socket::AnyPort) != sf::Socket::Done);
-            auto timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+            auto timestamp = Time::getTimeNow();
             size_t random_key = std::random_device()();
             outfile << ip_global.toInteger() << std::endl
                     << socket.getLocalPort() << std::endl

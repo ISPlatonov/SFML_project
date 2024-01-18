@@ -117,7 +117,7 @@ void Controls::addEvent(const sf::Event& event)
                                 data << Multiplayer::DataType::Event;
                                 data << Multiplayer::EventType::takeObjectToInventory;
                                 sf::Vector2f object_position(iter.second.getPosition().x / Constants::getPIXEL_SIZE(), iter.second.getPosition().y / Constants::getPIXEL_SIZE());
-                                auto object_data = Multiplayer::ObjectData(object_position, std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count(), iter.second.getName(), iter.second.getPassability());
+                                auto object_data = Multiplayer::ObjectData(object_position, Time::getTimeNow(), iter.second.getName(), iter.second.getPassability());
                                 data << object_data;
                                 data << user;
                                 udp_manager.send(data);
@@ -146,7 +146,7 @@ void Controls::setLastActionTimepoint(const sf::Uint32& t)
 
 sf::Uint32 Controls::getDeltaTime()
 {
-    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count() - last_action_timepoint;
+    return Time::getTimeNow() - last_action_timepoint;
 }
 
 
@@ -230,7 +230,7 @@ void Controls::handleFrameStep()
     for (auto iter = udp_manager.getPlayerDataPool().begin(); iter != udp_manager.getPlayerDataPool().end();)
     {
         auto time = iter->second.getTime();
-        sf::Uint32 time_now = static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count());
+        Time::Time time_now = Time::getTimeNow();
         int ping = static_cast<int>(time_now) - static_cast<int>(time);
         if (!player_pool.count(iter->first))
         {

@@ -89,7 +89,7 @@ namespace Multiplayer
                 //    std::cout << "its me" << std::endl;
                 //}
                 auto id = SocketInfo(address_temp, port_temp);
-                sf::Uint32 time_now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+                Time::Time time_now = Time::getTimeNow();
                 int ping = static_cast<int>(time_now) - static_cast<int>(player_data.getTime());
                 if (player_data_pool.count(id))
                 {
@@ -191,7 +191,7 @@ namespace Multiplayer
                         PlayerData player_data;
                         data >> player_data;
                         auto id = SocketInfo(address_temp, port_temp);
-                        sf::Uint32 time_now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+                        Time::Time time_now = Time::getTimeNow();
                         int ping = static_cast<int>(time_now) - static_cast<int>(player_data.getTime());
                         if (player_data_pool.count(id))
                             if (ping > Constants::getMAX_PING())
@@ -302,7 +302,7 @@ namespace Multiplayer
     void UdpManager::addObject(const Object::Object& object)
     {
         ObjectData object_data( object.getPosition() / static_cast<float>(Constants::getPIXEL_SIZE()),
-                                static_cast<Time>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()),
+                                Time::getTimeNow(),
                                 object.getName(),
                                 object.getPassability());
         addObject(object_data);
@@ -372,7 +372,7 @@ namespace Multiplayer
                 auto noise = perlin.octave2D_01((point.x * 0.01), (point.y * 0.01), 4);
                 Object::ObjectName object_name;
                 Object::Passability passability = Object::Passability::background;
-                Time time_now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+                Time::Time time_now = Time::getTimeNow();
                 if (noise > .8)
                 {
                     object_name = Object::ObjectName::stone;

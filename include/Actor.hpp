@@ -101,7 +101,7 @@ namespace Actor
         Player(const Multiplayer::PlayerData& pd)
             : Player(pd.getPosition() * static_cast<float>(Constants::getPIXEL_SIZE()), pd.getId(), pd.getTime(), pd.getInventory()) {}
         inline PlayerId getId() const { return player_id; }
-        inline Multiplayer::Time getLastUpdateTime() const { return last_update_time; }
+        inline Time::Time getLastUpdateTime() const { return last_update_time; }
         void setPosition(const sf::Vector2f& position);
         void setTime(const sf::Uint32& new_time);
         void move(const sf::Vector2f& vector);

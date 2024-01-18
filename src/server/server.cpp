@@ -23,7 +23,7 @@ void UdpWorker(Multiplayer::UdpManager& UdpManager)
     for (auto iter : UdpManager.getPlayerDataPool())
     {
         //std::cout << "unpacking player from pool: " << (*iter).first << std::endl;
-        auto time_now = static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count());
+        auto time_now = Time::getTimeNow();
         iter.second.setTime(time_now);
         int ping = static_cast<int>(time_now) - static_cast<int>(iter.second.getTime());
 	    std::cout << iter.first.first << ":" << iter.first.second << std::endl;
@@ -36,13 +36,12 @@ void UdpWorker(Multiplayer::UdpManager& UdpManager)
         }
         auto sector_data = UdpManager.checkSector(iter.second.getPosition());
         UdpManager.send(sector_data, iter.first.first, iter.first.second);
-        for (auto dest_iter = UdpManager.getPlayerDataPool().begin(); dest_iter != UdpManager.getPlayerDataPool().end();)
+        for (auto dest_iter = UdpManager.getPlayerDataPool().begin(); dest_iter != UdpManager.getPlayerDataPool().end(); ++dest_iter)
         {
 	    //std::cout << "sending " << iter->first << " data to " << dest_iter->first << std::endl;
             if (dest_iter->first == iter.first)
             {
                 //std::cout << "*dest_iter == *iter" << std::endl;
-                ++dest_iter;
                 //std::cout << "made ++dest_iter" << std::endl;
                 continue;
             }
@@ -75,7 +74,7 @@ std::vector<Multiplayer::ObjectData> load_terrain(const std::string& path)
         Object::Passability pass = static_cast<Object::Passability>(pass_enum);
         object_data_pool_init.push_back(Multiplayer::ObjectData(
             sf::Vector2f(x, y),
-            static_cast<sf::Uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()),
+            Time::getTimeNow(),
             name,
             pass
         ));

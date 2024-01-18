@@ -129,7 +129,7 @@ namespace Actor
     sf::Packet& operator <<(sf::Packet& packet, const User& user)
     {
         auto position = user.getPosition() / static_cast<float>(Constants::getPIXEL_SIZE());
-        sf::Uint32 time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+        Time::Time time = Time::getTimeNow();
         packet << position.x << position.y << Constants::getID() << time;
         packet << static_cast<sf::Uint32>(user.getInventory().size());
         for (auto iter : user.getInventory())

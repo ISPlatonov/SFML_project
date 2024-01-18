@@ -32,9 +32,6 @@ namespace Multiplayer
     };
 
 
-    typedef sf::Uint32 Time;
-
-
     /**
      * @brief Class for trasferral data between server and client
     */
@@ -42,15 +39,15 @@ namespace Multiplayer
     {
     public:
         Transportable() {}
-        Transportable(sf::Vector2f pos, Time sent) : position(pos), sent_time(sent) {}
+        Transportable(sf::Vector2f pos, Time::Time sent) : position(pos), sent_time(sent) {}
         inline void setPosition(const sf::Vector2f& new_position) { position = new_position; };
-        inline void setTime(const Time& new_time) { sent_time = new_time; }
+        inline void setTime(const Time::Time& new_time) { sent_time = new_time; }
         inline const sf::Vector2f& getPosition() const { return position; }
-        inline const Time& getTime() const { return sent_time; }
+        inline const Time::Time& getTime() const { return sent_time; }
 
     private:
         sf::Vector2f position;
-        Time sent_time = 0;
+        Time::Time sent_time = 0;
     };
 
 
@@ -64,7 +61,7 @@ namespace Multiplayer
     {
     public:
         PlayerData() : Transportable::Transportable() {}
-        PlayerData(const sf::Vector2f& p, const PlayerId& p_id, const Time& t, const Inventory& ni)
+        PlayerData(const sf::Vector2f& p, const PlayerId& p_id, const Time::Time& t, const Inventory& ni)
             : Transportable::Transportable(p, t), player_id(p_id), inventory(ni) {}
         PlayerData(const PlayerData& player)
             : PlayerData(player.getPosition(), player.getId(), player.getTime(), player.getInventory()) {}
@@ -89,7 +86,7 @@ namespace Multiplayer
     {
     public:
         ObjectData() : Transportable::Transportable() {}
-        ObjectData(sf::Vector2f pos, Time t, Object::ObjectName name, Object::Passability pass)
+        ObjectData(sf::Vector2f pos, Time::Time t, Object::ObjectName name, Object::Passability pass)
             : Transportable::Transportable(pos, t), object_name(name), passability(pass) {}
         ObjectData(const ObjectData& object) : ObjectData(object.getPosition(), object.getTime(), object.getName(), object.getPassability()) {}
         const Object::ObjectName& getName() const { return object_name; }
