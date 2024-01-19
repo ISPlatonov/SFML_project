@@ -43,6 +43,6 @@ private:
     static sf::RectangleShape inventory_rect;
     static inline std::unordered_map<sf::FloatRect, Object::ObjectName> inventory;
     static inline Object::Object selected_object;
-    static std::map<SocketInfo, Actor::Player> player_pool;
+    static std::unordered_map<PlayerId, Actor::Player> player_pool;
     static inline sf::Font font;
 };

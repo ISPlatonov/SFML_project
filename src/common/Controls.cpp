@@ -14,7 +14,7 @@ sf::RectangleShape Controls::inventory_rect = sf::RectangleShape(sf::Vector2f(Co
 WorldMap::ObjectMap Controls::object_map{};
 Multiplayer::UdpManager Controls::udp_manager(sf::IpAddress::getLocalAddress(), sf::IpAddress(Constants::getSERVER_IP()));
 Actor::User Controls::user(sf::Vector2f(0, 0), Controls::udp_manager.getLocalPort());
-std::map<SocketInfo, Actor::Player> Controls::player_pool{};
+std::unordered_map<PlayerId, Actor::Player> Controls::player_pool{};
 
 
 void Controls::applyWindowSettings()
@@ -232,21 +232,21 @@ void Controls::handleFrameStep()
         auto time = iter->second.getTime();
         Time::Time time_now = Time::getTimeNow();
         int ping = static_cast<int>(time_now) - static_cast<int>(time);
-        if (!player_pool.count(iter->second.getSocketInfo()))
+        if (!player_pool.count(iter->first))
         {
-            player_pool[iter->second.getSocketInfo()] = Actor::Player(iter->second);
+            player_pool[iter->first] = Actor::Player(iter->second);
             ++iter;
             continue;
         }
         else if (ping > Constants::getMAX_PING())
         {
-            player_pool.erase(iter->second.getSocketInfo());
+            player_pool.erase(iter->first);
             udp_manager.removePlayerByPlayerId(iter++->second.getId());
             continue;
         }
         else
         {
-            player_pool[iter->second.getSocketInfo()] << iter->second;
+            player_pool[iter->first] << iter->second;
             ++iter;
             continue;
         }
