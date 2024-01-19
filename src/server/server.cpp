@@ -24,7 +24,7 @@ void UdpWorker(Multiplayer::UdpManager& UdpManager)
     {
         //std::cout << "unpacking player from pool: " << (*iter).first << std::endl;
         auto time_now = Time::getTimeNow();
-        iter.second.setTime(time_now);
+        //iter.second.setTime(time_now);
         int ping = static_cast<int>(time_now) - static_cast<int>(iter.second.getTime());
 	    std::cout << iter.second.getSocketInfo().first << ":" << iter.second.getSocketInfo().second << std::endl;
         //std::cout << "id: " << (*iter).first << ", last timepoint: " << std::to_string(time) << std::endl;
@@ -47,7 +47,7 @@ void UdpWorker(Multiplayer::UdpManager& UdpManager)
             }
             sf::Packet data;
             data << Multiplayer::DataType::Player << iter.second;
-            UdpManager.send(data, iter.second.getSocketInfo().first, iter.second.getSocketInfo().second);
+            UdpManager.send(data, dest_iter->second.getSocketInfo().first, dest_iter->second.getSocketInfo().second);
             //std::cout << "sent" << std::endl;
         }
     }

@@ -95,7 +95,7 @@ namespace Actor
     {
     public:
         Player() : Actor() {}
-        Player(const sf::Vector2f& pos, const PlayerId p_id, const sf::Uint32& ct, const Multiplayer::Inventory& inv)
+        Player(const sf::Vector2f& pos, const PlayerId& p_id, const sf::Uint32& ct, const Multiplayer::Inventory& inv)
             : Actor(pos, inv), player_id(p_id), last_update_time(ct) {}
         Player(const Player& p) : Player(p.getPosition(), p.getId(), p.getLastUpdateTime(), p.getInventory()) {}
         Player(const Multiplayer::PlayerData& pd)

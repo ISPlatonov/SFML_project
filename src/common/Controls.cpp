@@ -227,27 +227,27 @@ void Controls::handleFrameStep()
     while (udp_manager.receive() == sf::Socket::Done && rest--)
         continue;
     // handling player_data_pool
-    for (auto iter = udp_manager.getPlayerDataPool().begin(); iter != udp_manager.getPlayerDataPool().end();)
+    for (const auto& iter : udp_manager.getPlayerDataPool())
     {
-        auto time = iter->second.getTime();
+        if (iter.first == Constants::getID())
+            continue;
+        auto time = iter.second.getTime();
         Time::Time time_now = Time::getTimeNow();
         int ping = static_cast<int>(time_now) - static_cast<int>(time);
-        if (!player_pool.count(iter->first))
+        if (!player_pool.count(iter.first))
         {
-            player_pool[iter->first] = Actor::Player(iter->second);
-            ++iter;
+            player_pool[iter.first] = Actor::Player(iter.second);
             continue;
         }
         else if (ping > Constants::getMAX_PING())
         {
-            player_pool.erase(iter->first);
-            udp_manager.removePlayerByPlayerId(iter++->second.getId());
+            player_pool.erase(iter.first);
+            //udp_manager.removePlayerByPlayerId(iter.second.getId());
             continue;
         }
         else
         {
-            player_pool[iter->first] << iter->second;
-            ++iter;
+            player_pool[iter.first] << iter.second;
             continue;
         }
     }
@@ -306,7 +306,8 @@ void Controls::handleFrameStep()
         ++iter;
     }
     for (const auto& player : player_pool)
-        Controls::window.draw(player.second.getSprite());
+        if (player.second.getLastUpdateTime() + Constants::getMAX_PING() >= Time::getTimeNow())
+            Controls::window.draw(player.second.getSprite());
     Controls::window.draw(user.getSprite());
     auto& fm = object_map.getObjectMap(Object::Passability::foreground);
     for (auto iter = fm.begin(); iter != fm.end();) {
