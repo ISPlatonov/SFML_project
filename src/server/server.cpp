@@ -46,7 +46,7 @@ void UdpWorker(Multiplayer::UdpManager& UdpManager)
                 continue;
             }
             sf::Packet data;
-            data << Multiplayer::DataType::Player << iter.first;
+            data << Multiplayer::DataType::Player << iter.second;
             UdpManager.send(data, iter.second.getSocketInfo().first, iter.second.getSocketInfo().second);
             //std::cout << "sent" << std::endl;
         }
