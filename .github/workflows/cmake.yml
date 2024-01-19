@@ -26,7 +26,7 @@ jobs:
         - platform: { name: Windows VS2019, os: windows-2019 }
           config: { name: Unity, flags: -DBUILD_SHARED_LIBS=TRUE -DCMAKE_UNITY_BUILD=ON }
         - platform: { name: Android, os: ubuntu-latest }
-          config: { name: armeabi-v7a, flags: -DCMAKE_ANDROID_ARCH_ABI=armeabi-v7a -DCMAKE_SYSTEM_NAME=Android -DSFML_BUILD_TEST_SUITE=FALSE -DCMAKE_ANDROID_NDK=$GITHUB_WORKSPACE/android-ndk-r18b -DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=clang -DCMAKE_ANDROID_STL_TYPE=c++_shared -DCMAKE_ANDROID_API=26 -DCMAKE_TOOLCHAIN_FILE=$GITHUB_WORKSPACE/android-ndk-r18b/build/cmake/android.toolchain.cmake -DSFML_DIR=$GITHUB_WORKSPACE/android-ndk-r18b/sources/third_party/sfml/lib/armeabi-v7a/cmake/SFML -DBUILD_SHARED_LIBS=TRUE }
+          config: { name: armeabi-v7a (API 29), flags: -GNinja -DCMAKE_ANDROID_ARCH_ABI=armeabi-v7a -DCMAKE_SYSTEM_NAME=Android -DCMAKE_SYSTEM_VERSION=29 -DSFML_BUILD_TEST_SUITE=FALSE -DCMAKE_ANDROID_NDK=$ANDROID_SDK_ROOT/ndk/26.1.10909125 -DBUILD_SHARED_LIBS=TRUE -DCMAKE_ANDROID_STL_TYPE=c++_shared, arch: armeabi-v7a, api: 29 }
         - platform: { name: Linux GCC, os: ubuntu-latest  }
           config: { name: Shared DRM, flags: -DBUILD_SHARED_LIBS=TRUE -DSFML_USE_DRM=TRUE }
 
