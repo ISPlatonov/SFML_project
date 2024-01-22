@@ -30,7 +30,7 @@ namespace WorldMap
     {
         Object::Object object;
         object << object_data;
-        auto point = object.getPosition();
+        const auto& point = object.getPosition();
         switch (object.getPassability())
         {
             case Object::Passability::background:

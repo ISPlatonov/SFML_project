@@ -39,7 +39,7 @@ sf::Packet& operator <<(sf::Packet& packet, const Multiplayer::PlayerData& playe
 {
     packet << player_data.getPosition().x << player_data.getPosition().y << player_data.getId() << player_data.getTime();
     packet << static_cast<sf::Uint32>(player_data.getInventory().size());
-    for (auto pair : player_data.getInventory())
+    for (const auto& pair : player_data.getInventory())
     {
         packet << pair.first << static_cast<sf::Uint32>(pair.second);
     }

@@ -69,7 +69,7 @@ namespace Multiplayer
         PlayerData(const PlayerData& player)
             : PlayerData(player.getPosition(), player.getId(), player.getTime(), player.getSocketInfo(), player.getInventory()) {}
         inline PlayerId getId() const { return player_id; }
-        const size_t objectNumber(Object::ObjectName) const;
+        inline const size_t objectNumber(Object::ObjectName name) const { return inventory.count(name) ? inventory.at(name) : 0; }
         const size_t addObject(Object::ObjectName);
         const size_t removeObject(Object::ObjectName);
         const Inventory& getInventory() const { return inventory; }

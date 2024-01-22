@@ -20,35 +20,22 @@ void UdpWorker(Multiplayer::UdpManager& UdpManager)
         UdpManager.receive();
     }
 
-    for (auto iter : UdpManager.getPlayerDataPool())
+    for (const auto& iter : UdpManager.getPlayerDataPool())
     {
-        //std::cout << "unpacking player from pool: " << (*iter).first << std::endl;
         auto time_now = Time::getTimeNow();
-        //iter.second.setTime(time_now);
         int ping = static_cast<int>(time_now) - static_cast<int>(iter.second.getTime());
 	    std::cout << iter.second.getSocketInfo().first << ":" << iter.second.getSocketInfo().second << std::endl;
-        //std::cout << "id: " << (*iter).first << ", last timepoint: " << std::to_string(time) << std::endl;
         if (ping > Constants::getMAX_PING())
-        {
-            //std::cout << "reached MAX_PING" << std::endl;
-            //UdpManager.removePlayerBySocketInfo((*iter++).first);
             continue;
-        }
         auto sector_data = UdpManager.checkSector(iter.second.getPosition());
         UdpManager.send(sector_data, iter.second.getSocketInfo().first, iter.second.getSocketInfo().second);
-        for (auto dest_iter = UdpManager.getPlayerDataPool().begin(); dest_iter != UdpManager.getPlayerDataPool().end(); ++dest_iter)
+        for (const auto& dest_iter : UdpManager.getPlayerDataPool())
         {
-	    //std::cout << "sending " << iter->first << " data to " << dest_iter->first << std::endl;
-            if (dest_iter->first == iter.first)
-            {
-                //std::cout << "*dest_iter == *iter" << std::endl;
-                //std::cout << "made ++dest_iter" << std::endl;
+            if (dest_iter.first == iter.first)
                 continue;
-            }
             sf::Packet data;
             data << Multiplayer::DataType::Player << iter.second;
-            UdpManager.send(data, dest_iter->second.getSocketInfo().first, dest_iter->second.getSocketInfo().second);
-            //std::cout << "sent" << std::endl;
+            UdpManager.send(data, dest_iter.second.getSocketInfo().first, dest_iter.second.getSocketInfo().second);
         }
     }
 }
@@ -60,7 +47,7 @@ void UdpWorker(Multiplayer::UdpManager& UdpManager)
  * @param path: path to file
  * @return vector of ObjectData
 */
-std::vector<Multiplayer::ObjectData> load_terrain(const std::string& path)
+static std::vector<Multiplayer::ObjectData> load_terrain(const std::string& path)
 {
     std::vector<Multiplayer::ObjectData> object_data_pool_init;
     std::ifstream infile(path);
@@ -86,7 +73,6 @@ std::vector<Multiplayer::ObjectData> load_terrain(const std::string& path)
 
 int main()
 {
-    //std::cout << std::flush << std::endl;
     Multiplayer::UdpManager UdpManager(sf::IpAddress::getLocalAddress(), sf::IpAddress::Any);
     auto last_timepoint = std::chrono::steady_clock::now();
     {
@@ -97,7 +83,6 @@ int main()
     std::cout << "server started" << std::endl;
     while (true)
     {
-        // needs another thread
         last_timepoint += std::chrono::milliseconds(1000 / Constants::getFRAMERATE_LIMIT());
         UdpWorker(UdpManager);
         std::this_thread::sleep_until(last_timepoint);

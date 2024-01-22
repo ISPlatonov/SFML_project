@@ -109,7 +109,7 @@ void Controls::addEvent(const sf::Event& event)
                     else
                     {
                         // handle object selection
-                        for (auto iter : object_map.getObjectMap(Object::Passability::foreground))
+                        for (const auto& iter : object_map.getObjectMap(Object::Passability::foreground))
                         {
                             if (iter.second.getSprite().getGlobalBounds().contains(window.mapPixelToCoords(sf::Mouse::getPosition())))
                             {
@@ -155,7 +155,7 @@ void Controls::drawInterfaces()
     if (draw_inventory)
     {
         inventory.clear();
-        auto center = user.getView().getCenter();
+        const auto& center = user.getView().getCenter();
         auto text = sf::Text("Inventory", font);
         text.setFillColor(sf::Color::White);
         inventory_rect.setPosition(center - inventory_rect.getSize() / 2.f);

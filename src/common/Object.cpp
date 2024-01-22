@@ -66,36 +66,6 @@ namespace Object
     }
 
 
-    const Passability& Object::getPassability() const
-    {
-        return passability;
-    }
-    
-    
-    const sf::Vector2f& Object::getPosition() const
-    {
-        return position;
-    }
-
-
-    const sf::Sprite& Object::getSprite() const
-    {
-        return sprite;
-    }
-
-
-    const ObjectName& Object::getName() const
-    {
-        return name;
-    }
-
-
-    bool Object::intersection(const sf::FloatRect& new_rect) const
-    {
-        return getSprite().getGlobalBounds().intersects(new_rect);
-    }
-
-
     void Object::check_collision(sf::Vector2f& vector, const sf::FloatRect& rect, size_t& depth) const
     {
         if (this->intersection(sf::FloatRect(rect.getPosition() + vector, rect.getSize())))

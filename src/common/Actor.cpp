@@ -113,7 +113,7 @@ namespace Actor
 
     void Player::setPosition(const sf::Vector2f& position)
     {
-        auto prev_position = getPosition();
+        const auto& prev_position = getPosition();
         auto move_vector = position - prev_position;
         move(move_vector);
     }
@@ -132,23 +132,11 @@ namespace Actor
         Time::Time time = Time::getTimeNow();
         packet << position.x << position.y << Constants::getID() << time;
         packet << static_cast<sf::Uint32>(user.getInventory().size());
-        for (auto iter : user.getInventory())
+        for (const auto& iter : user.getInventory())
         {
             packet << iter.first << static_cast<sf::Uint32>(iter.second);
         }
         return packet;
-    }
-
-
-    void Player::setTime(const sf::Uint32& new_time)
-    {
-        last_update_time = new_time;
-    }
-
-
-    void Actor::setInventory(const std::unordered_map<Object::ObjectName, size_t>& new_inventory)
-    {
-        inventory = new_inventory;
     }
 
 

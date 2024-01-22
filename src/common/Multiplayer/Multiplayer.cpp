@@ -4,21 +4,9 @@
 
 namespace Multiplayer
 {
-    const size_t PlayerData::objectNumber(Object::ObjectName name) const
-    {
-        if (!inventory.count(name))
-            return 0;
-        else
-            return inventory.at(name);
-    }
-
-
     const size_t PlayerData::addObject(Object::ObjectName name)
     {
-        if (!inventory.count(name))
-            inventory[name] = 1;
-        else
-            inventory[name] += 1;
+        inventory.count(name) ? inventory[name] += 1 : inventory[name] = 1;
         return objectNumber(name);
     }
 
@@ -44,7 +32,6 @@ namespace Multiplayer
             port = Constants::getPORT_LISTEN();
         #endif
 
-        auto broadcast_ip = Constants::getSERVER_IP();
         ip = sf::IpAddress::getPublicAddress(sf::seconds(Constants::getMAX_PING()));
         socket.setBlocking(false);
         // bind the socket to a port
@@ -113,7 +100,7 @@ namespace Multiplayer
                             if (player_data.getInventory().empty() && !player_data_pool[id].getInventory().empty())
                             {
                                 // send all inventory
-                                for (auto iter : player_data_pool[id].getInventory())
+                                for (const auto& iter : player_data_pool[id].getInventory())
                                 {
                                     for (size_t i = 0; i < iter.second; ++i)
                                     {
@@ -125,7 +112,7 @@ namespace Multiplayer
                                 }
                             }
                             else
-                                for (auto iter : player_data_pool[id].getInventory())
+                                for (const auto& iter : player_data_pool[id].getInventory())
                                 {
                                     size_t msg_number;
                                     if (player_data.getInventory().count(iter.first) && player_data.getInventory().at(iter.first) >= iter.second)
@@ -174,10 +161,13 @@ namespace Multiplayer
             }
             case DataType::Event:
             {
+                EventType event_type;
                 // event handling
-                sf::Uint32 event_type_enum;
-                data >> event_type_enum;
-                EventType event_type = static_cast<EventType>(event_type_enum);
+                {
+                    sf::Uint32 event_type_enum;
+                    data >> event_type_enum;
+                    event_type = static_cast<EventType>(event_type_enum);
+                }
                 switch (event_type)
                 {
                     case EventType::takeObjectToInventory:
@@ -199,9 +189,10 @@ namespace Multiplayer
                             }
                             else
                             {
-                                player_data_pool[id].setPosition(player_data.getPosition());
-                                player_data_pool[id].setTime(player_data.getTime());
-                                player_data_pool[id].addObject(object_data.getName());
+                                auto& player = player_data_pool[id];
+                                player.setPosition(player_data.getPosition());
+                                player.setTime(player_data.getTime());
+                                player.addObject(object_data.getName());
                                 data.clear();
                                 if (!removeObject(object_data)) {
                                     // no such object in the world :|

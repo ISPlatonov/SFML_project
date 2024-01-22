@@ -36,7 +36,7 @@ namespace Actor
         inline const Multiplayer::Inventory& getInventory() const { return inventory; }
         const size_t addObject(Object::ObjectName);
         size_t removeObject(Object::ObjectName);
-        void setInventory(const Multiplayer::Inventory&);
+        inline void setInventory(const Multiplayer::Inventory& new_inventory) { inventory = new_inventory; }
 
     protected:    
         sf::Sprite sprite;
@@ -103,7 +103,7 @@ namespace Actor
         inline PlayerId getId() const { return player_id; }
         inline Time::Time getLastUpdateTime() const { return last_update_time; }
         void setPosition(const sf::Vector2f& position);
-        void setTime(const sf::Uint32& new_time);
+        inline void setTime(const sf::Uint32& new_time) { last_update_time = new_time; }
         void move(const sf::Vector2f& vector);
 
     private:

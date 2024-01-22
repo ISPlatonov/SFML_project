@@ -42,10 +42,10 @@ namespace Object
         Object(const Object& object) : Object(object.getName(), object.getPosition(), object.getPassability()) {};
         //Object(std::string&& texture_address, sf::Vector2f&& position, Passability&& passability);
         //Object(Object&& object) : Object(std::move(object.texture), std::move(object.position), std::move(object.passability)) {};
-        const Passability& getPassability() const;
-        const sf::Vector2f& getPosition() const;
-        const sf::Sprite& getSprite() const;
-        const ObjectName& getName() const;
+        inline const Passability& getPassability() const { return passability; }
+        inline const sf::Vector2f& getPosition() const { return position; }
+        inline const sf::Sprite& getSprite() const { return sprite; }
+        inline const ObjectName& getName() const { return name; }
         // think about it
         void check_collision(sf::Vector2f& vector, const sf::FloatRect& rect) const;
         static std::unordered_map<ObjectName, sf::Texture> NameToTextureMap;
@@ -58,7 +58,7 @@ namespace Object
         ObjectName name;
 
         virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
-        bool intersection(const sf::FloatRect& rect) const;
+        inline bool intersection(const sf::FloatRect& rect) const { return getSprite().getGlobalBounds().intersects(rect); }
         void check_collision(sf::Vector2f& vector, const sf::FloatRect& rect, size_t& depth) const;
     };
 } // namespace Object
