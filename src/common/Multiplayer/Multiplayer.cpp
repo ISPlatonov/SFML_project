@@ -199,8 +199,8 @@ namespace Multiplayer
                                     break;
                                 }
                                 data << DataType::Event << EventType::removeObject << object_data;
-                                for (auto iter = getPlayerDataPool().begin(); iter != getPlayerDataPool().end(); ++iter)
-                                    send(data, socket_info.first, socket_info.second);
+                                for (const auto& iter : getPlayerDataPool())
+                                    send(data, iter.second.getSocketInfo().first, iter.second.getSocketInfo().second);
                                 data.clear();
                                 data << DataType::Event << EventType::addObjectToInvectory << object_data;
                                 send(data, socket_info.first, socket_info.second);
