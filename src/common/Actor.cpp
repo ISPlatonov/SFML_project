@@ -6,10 +6,10 @@ namespace Actor
     Actor::Actor(const sf::Vector2f& position, const std::unordered_map<Object::ObjectName, size_t>& new_inventory)
     {
         if (!Actor::textures.size())
-            load_textures("textures/actors/Guy_16x32");
-        direction_x = Direction::right;
+            load_textures("textures/actors/Ted_16x32");
+        direction = Direction::right;
         sprite.setPosition(position);
-        sprite.setTexture(Actor::textures.at(direction_x));
+        sprite.setTexture(Actor::textures[direction]);
         sprite.setScale(Constants::getPIXEL_SIZE(), Constants::getPIXEL_SIZE());
         setInventory(new_inventory);
     }
@@ -18,24 +18,35 @@ namespace Actor
     Actor::Actor(sf::Vector2f&& position, std::unordered_map<Object::ObjectName, size_t>&& new_inventory)
     {
         if (!Actor::textures.size())
-            load_textures("textures/actors/Guy_16x32");
-        direction_x = Direction::right;
+            load_textures("textures/actors/Ted_16x32");
+        direction = Direction::right;
         sprite.setPosition(position);
-        sprite.setTexture(Actor::textures.at(direction_x));
+        sprite.setTexture(Actor::textures[direction]);
         sprite.setScale(Constants::getPIXEL_SIZE(), Constants::getPIXEL_SIZE());
         inventory = new_inventory;
     }
 
 
-    void Actor::check_direction(const sf::Vector2f& direction)
+    void Actor::check_direction(const sf::Vector2f& direction_vector)
     {
-        if (direction.x > 0 && direction_x != Direction::right)
-            direction_x = Direction::right;
-        else if (direction.x < 0 && direction_x != Direction::left)
-            direction_x = Direction::left;
-        else
+        auto direction_vector_normalized = linalg::normalize(direction_vector);
+        if (direction_vector_normalized == sf::Vector2f(0.f, 0.f))
             return;
-        sprite.setTexture(Actor::textures.at(direction_x));
+        if (abs(direction_vector_normalized.x) > .7071f)
+        {
+            if (direction_vector_normalized.x > 0)
+                direction = Direction::right;
+            else
+                direction = Direction::left;
+        }
+        else
+        {
+            if (direction_vector_normalized.y > 0)
+                direction = Direction::up;
+            else
+                direction = Direction::down;
+        }
+        sprite.setTexture(Actor::textures[direction]);
     }
 
 
@@ -147,8 +158,14 @@ namespace Actor
         left_texture.loadFromFile(texture_dir_path + "/left.png");
         auto right_texture = sf::Texture();
         right_texture.loadFromFile(texture_dir_path + "/right.png");
+        auto up_texture = sf::Texture();
+        up_texture.loadFromFile(texture_dir_path + "/front.png");
+        auto down_texture = sf::Texture();
+        down_texture.loadFromFile(texture_dir_path + "/back.png");
         Actor::textures[Direction::left] = std::move(left_texture);
         Actor::textures[Direction::right] = std::move(right_texture);
+        Actor::textures[Direction::up] = std::move(up_texture);
+        Actor::textures[Direction::down] = std::move(down_texture);
     }
 
 

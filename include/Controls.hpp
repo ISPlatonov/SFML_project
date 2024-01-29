@@ -20,8 +20,8 @@ class Controls
 public:
     static void applyWindowSettings();
     static void drawInterfaces();
-    static void setLastActionTimepoint(const Time::Time& t = Time::getTimeNow());
-    static sf::Uint32 getDeltaTime();
+    static inline void setLastActionTimepoint(const Time::Time& t = Time::getTimeNow()) { last_action_timepoint = t; }
+    static inline sf::Uint32 getDeltaTime() { return Time::getTimeNow() - last_action_timepoint; }
     static void handleEvents();
     static sf::Vector2f getDirection();
     static void handleFrameStep();
@@ -33,10 +33,12 @@ public:
 private:
     Controls();
     static void addEvent(const sf::Event&);
+    static void handleLeftClick();
+    static void handleMouseDirection();
 
     static Multiplayer::UdpManager udp_manager;
     static sf::Vector2f direction;
-    static bool left, right, up, down;
+    static bool left, right, up, down, mouse_direction_control;
     static inline sf::Uint32 last_action_timepoint;
     static bool draw_menu, draw_inventory;
     static sf::RectangleShape menu;

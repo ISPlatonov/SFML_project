@@ -115,7 +115,7 @@ namespace Multiplayer
                                 for (const auto& iter : player_data_pool[id].getInventory())
                                 {
                                     size_t msg_number;
-                                    if (player_data.getInventory().count(iter.first) && player_data.getInventory().at(iter.first) >= iter.second)
+                                    if (player_data.getInventory().count(iter.first) && player_data.getInventory()[iter.first] >= iter.second)
                                     {
                                         // now it does nothing,
                                         // but it has to send
@@ -170,6 +170,7 @@ namespace Multiplayer
                 }
                 switch (event_type)
                 {
+                    #ifndef CLIENT // SERVER
                     case EventType::takeObjectToInventory:
                     {
                         // data >> object_data >> user
@@ -207,6 +208,9 @@ namespace Multiplayer
                             }
                         break;
                     }
+                    #endif
+
+                    #ifdef CLIENT // CLIENT
                     case EventType::ejectObjectFromInventory:
                         //
                         break;
@@ -227,8 +231,9 @@ namespace Multiplayer
                         removeObject(object_data);
                         break;
                     }
+                    #endif
+
                     default:
-                        throw; // ???
                         break;
                 }
                 break;
@@ -399,7 +404,7 @@ namespace Multiplayer
                 for (auto x = -Constants::getVIEW_RADIUS(); x < Constants::getVIEW_RADIUS(); ++x)
                 {
                     addObjectByNoise(point + sf::Vector2f(x * 16., y * 16.));
-                    auto& vec = object_data_pool.at(point + sf::Vector2f(x * 16., y * 16.));
+                    auto& vec = object_data_pool[point + sf::Vector2f(x * 16., y * 16.)];
                     for (auto object_data : vec) {
                         data << object_data;
                     }
