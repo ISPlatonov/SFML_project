@@ -115,7 +115,7 @@ namespace Multiplayer
                                 for (const auto& iter : player_data_pool[id].getInventory())
                                 {
                                     size_t msg_number;
-                                    if (player_data.getInventory().count(iter.first) && player_data.getInventory()[iter.first] >= iter.second)
+                                    if (player_data.getInventory().count(iter.first) && player_data.getInventory().at(iter.first) >= iter.second)
                                     {
                                         // now it does nothing,
                                         // but it has to send
