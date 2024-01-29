@@ -357,7 +357,7 @@ void Controls::handleFrameStep()
     }
     {
         // draw border around object that curson is on
-        auto& mouse_pos = window.mapPixelToCoords(sf::Mouse::getPosition());
+        auto mouse_pos = window.mapPixelToCoords(sf::Mouse::getPosition());
         for (const auto& iter : object_map.getObjectMap(Object::Passability::foreground))
 		{
 			if (iter.second.getSprite().getGlobalBounds().contains(mouse_pos))
